@@ -1,13 +1,45 @@
 @import "tailwindcss";
 
+/* Direction artistique validée le 07/09/2026 : « Précision » + fiche de constat.
+   Typographies : Instrument Serif (titres, chiffres) · Archivo (texte, UI) · IBM Plex Mono (références, labels).
+   Les anciens alias --anm-navy / --anm-blue sont conservés pour ne rien casser et pointent vers la palette validée. */
 :root {
-  --anm-navy: #0f2a44;
-  --anm-blue: #1f5fa8;
-  --anm-gold: #c9a227;
+  --anm-bg: #f6f7f5;        /* fond */
+  --anm-paper: #fbfbf9;     /* papier / cartes */
+  --anm-ink: #0e1f1c;       /* encre */
+  --anm-green: #0f3d35;     /* vert profond (accent unique) */
+  --anm-mint: #dcefe5;      /* menthe */
+  --anm-hairline: #d3dad6;  /* filets */
+  --anm-muted: #5f6b67;     /* gris texte */
+
+  /* Sémantique de criticité (01 Bible §2) */
+  --anm-critique: #8a1f1b;
+  --anm-majeur: #8a5a12;
+  --anm-modere: #6b6a15;
+  --anm-mineur: #1f5a3a;
+
+  /* Alias hérités du scaffold */
+  --anm-navy: var(--anm-ink);
+  --anm-blue: var(--anm-green);
+  --anm-gold: var(--anm-majeur);
+
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 body {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  color: #111827;
-  background: #ffffff;
+  font-family: var(--font-ui);
+  color: var(--anm-ink);
+  background: var(--anm-bg);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
 }

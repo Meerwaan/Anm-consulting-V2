@@ -1,7 +1,10 @@
-# ANM Consulting — site & plateforme de formation
+# ANM Consulting — vitrine & portail de suivi d'audit
 
 Next.js 15 (App Router) · TypeScript · Tailwind v4 · Supabase · Vercel.
-Pilotage du projet : Notion « ANM Consulting — Pilotage du projet ».
+Un seul projet, deux applications : la **vitrine** (acquisition) et le **portail** (suivi d'audit 360° pour les clients, admin de saisie pour la consultante, formation).
+
+Pilotage : Notion « ANM Consulting — Pilotage du projet ». Maquettes : Figma (`design/figma/`).
+Matière première : le **Pack complet Consultant Sécurité Privée 2026** (fichiers 00 → 21) — voir [`docs/PACK_V2_MAPPING.md`](docs/PACK_V2_MAPPING.md) pour savoir où chaque fichier du pack est repris.
 
 ## Démarrer
 ```bash
@@ -10,15 +13,30 @@ cp .env.example .env.local   # puis remplir les clés Supabase
 npm run dev                  # http://localhost:3000
 ```
 
-## Structure
-- `src/app/(marketing)/` — site vitrine public (accueil, audit, formation, abonnement, à propos, contact, ressources)
-- `src/app/(auth)/` — connexion / inscription (phase 4)
-- `src/app/app/` — espace apprenant protégé (phase 4)
-- `src/app/admin/` — back-office (phase 4)
-- `src/app/api/` — routes API (leads, webhook Stripe)
-- `content/` — leçons et articles en MDX
-- `supabase/migrations/` — schéma SQL versionné
+## Base de données (Supabase)
+```bash
+# dans l'ordre, via le SQL editor Supabase ou `supabase db push`
+supabase/migrations/0001_leads.sql            # phase 2 : leads
+supabase/migrations/0002_portail_mission.sql  # phase 4 : portail (dérivé du 09_Dossier_Mission_Client.xlsx)
+supabase/seed/0001_control_points.sql         # 208 points de contrôle (02, 03, 04, 05)
+supabase/seed/0002_document_templates.sql     # 33 pièces standard (09 + fiscal)
+```
+Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
-## Règle
-Chaque contenu publié cite ses sources officielles datées :
-FAIT → PREUVE → RISQUE → RECOMMANDATION → RÉFÉRENCE.
+## Structure
+- `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact, ressources)
+- `src/app/(auth)/` — connexion (phase 4)
+- `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
+- `src/app/admin/` — back-office consultante : missions, saisie des constats, rapport (phase 4)
+- `src/app/api/` — routes API (leads, webhook Stripe, alertes d'échéances)
+- `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 7 phases de mission, structure du rapport), `sources.ts` (sources officielles)
+- `content/` — leçons et articles en MDX (phase 5)
+- `supabase/` — migrations et seeds versionnés
+- `design/figma/` — scripts de génération des maquettes
+- `docs/` — cartographie pack ↔ Notion ↔ repo ↔ Figma
+
+## Règles
+- Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client.
+- Les tarifs de `src/content/offres.ts` sont indicatifs tant que `statut !== "valide"`.
+- Jamais de promesse de garantie contre un contrôle ou un redressement ; les questions juridiques / fiscales réglementées sont renvoyées à l'avocat ou à l'expert-comptable.
+- RLS sur toutes les tables client (`org_id`) ; le rôle `consultant` voit tout.
