@@ -12,3 +12,6 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 Claude outputs/
+
+# Verrous git que la session Claude ne peut pas supprimer (à vider à la main)
+_to_delete/
