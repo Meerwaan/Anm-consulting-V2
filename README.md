@@ -20,6 +20,7 @@ supabase/migrations/0001_leads.sql            # phase 2 : leads
 supabase/migrations/0002_portail_mission.sql  # phase 4 : portail (dérivé du 09_Dossier_Mission_Client.xlsx)
 supabase/seed/0001_control_points.sql         # 208 points de contrôle (02, 03, 04, 05)
 supabase/seed/0002_document_templates.sql     # 33 pièces standard (09 + fiscal)
+supabase/migrations/0003_espace_travail_echanges.sql  # espace de travail par module, 15 étapes, notes, échanges, demandes de pièces, notifications, rapport 2 axes
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
@@ -29,11 +30,11 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
 - `src/app/admin/` — back-office consultante : missions, saisie des constats, rapport (phase 4)
 - `src/app/api/` — routes API (leads, webhook Stripe, alertes d'échéances)
-- `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 7 phases de mission, structure du rapport), `sources.ts` (sources officielles)
+- `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 15 étapes + 7 phases, structure du rapport), `vision.ts` (5 objectifs, ligne de crête, portail consultante / client), `sources.ts` (sources officielles)
 - `content/` — leçons et articles en MDX (phase 5)
 - `supabase/` — migrations et seeds versionnés
 - `design/figma/` — scripts de génération des maquettes
-- `docs/` — cartographie pack ↔ Notion ↔ repo ↔ Figma
+- `docs/` — `VISION_PRODUIT.md` (ce qu'elle veut, 5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma)
 
 ## Règles
 - Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client.

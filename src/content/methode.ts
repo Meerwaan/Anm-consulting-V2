@@ -25,9 +25,9 @@ export interface PhaseMission {
 }
 
 /**
- * Déroulé standard d'une mission (06 §2). 7 phases J-10 → J+7.
- * ⚠ Les maquettes Figma et la page Architecture Notion parlent de « 15 étapes » :
- *   à réconcilier avec ce déroulé (les 15 étapes n'existent dans aucun document du pack).
+ * Déroulé standard d'une mission (06 §2). 7 phases calendaires J-10 → J+7.
+ * Elles coexistent avec les 15 ÉTAPES de la méthode (note de cadrage de Maman) : les étapes disent
+ * ce qu'on fait (checklist de travail, table `method_steps`), les phases disent quand (table `mission_phases`).
  */
 export const PHASES_MISSION: PhaseMission[] = [
   {
@@ -77,6 +77,25 @@ export const PHASES_MISSION: PhaseMission[] = [
     nom: "Rapport",
     travail: "Synthèse dirigeant, constats, plan d'actions et restitution.",
   },
+];
+
+/** Les 15 étapes de la méthode (note de cadrage d'origine). Rattachées à une phase calendaire habituelle. */
+export const ETAPES_METHODE: { ordre: number; nom: string; phase: number }[] = [
+  { ordre: 1, nom: "Entretien avec le dirigeant", phase: 1 },
+  { ordre: 2, nom: "Définition du périmètre de l'audit", phase: 1 },
+  { ordre: 3, nom: "Collecte des documents", phase: 2 },
+  { ordre: 4, nom: "Analyse documentaire", phase: 3 },
+  { ordre: 5, nom: "Sélection d'un échantillon de salariés, sites et sous-traitants", phase: 2 },
+  { ordre: 6, nom: "Contrôle CNAPS", phase: 5 },
+  { ordre: 7, nom: "Contrôle social et URSSAF", phase: 5 },
+  { ordre: 8, nom: "Contrôle du temps de travail", phase: 5 },
+  { ordre: 9, nom: "Analyse Inspection du travail / santé-sécurité", phase: 5 },
+  { ordre: 10, nom: "Rapprochement planning → pointage → paie → facturation", phase: 6 },
+  { ordre: 11, nom: "Qualification des constats", phase: 6 },
+  { ordre: 12, nom: "Classement des risques : Critique / Majeur / Modéré / Mineur", phase: 6 },
+  { ordre: 13, nom: "Plan d'actions : P1 immédiat / P2 30 j / P3 90 j / P4 amélioration", phase: 7 },
+  { ordre: 14, nom: "Rapport final", phase: 7 },
+  { ordre: 15, nom: "Réunion de restitution avec le dirigeant", phase: 7 },
 ];
 
 /** Méthode « en 4 temps » du site web V2 (21) — version vitrine simplifiée des 7 phases. */
