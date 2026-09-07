@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --anm-navy: #0f2a44;
+  --anm-blue: #1f5fa8;
+  --anm-gold: #c9a227;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #111827;
+  background: #ffffff;
+}
