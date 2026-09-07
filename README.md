@@ -21,6 +21,8 @@ supabase/migrations/0002_portail_mission.sql  # phase 4 : portail (dérivé du 0
 supabase/seed/0001_control_points.sql         # 208 points de contrôle (02, 03, 04, 05)
 supabase/seed/0002_document_templates.sql     # 33 pièces standard (09 + fiscal)
 supabase/migrations/0003_espace_travail_echanges.sql  # espace de travail par module, 15 étapes, notes, échanges, demandes de pièces, notifications, rapport 2 axes
+supabase/migrations/0004_durcissement_rls.sql         # vues en security_invoker, fonctions hors API REST
+supabase/migrations/0005_revoke_execute_public.sql    # revoke EXECUTE à PUBLIC (le grant par défaut de Postgres)
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
@@ -41,3 +43,7 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - Les tarifs de `src/content/offres.ts` sont indicatifs tant que `statut !== "valide"`.
 - Jamais de promesse de garantie contre un contrôle ou un redressement ; les questions juridiques / fiscales réglementées sont renvoyées à l'avocat ou à l'expert-comptable.
 - RLS sur toutes les tables client (`org_id`) ; le rôle `consultant` voit tout.
+- Après toute migration, relancer le linter Supabase (`get_advisors`) : les vues doivent être en `security_invoker`, et toute nouvelle fonction `security definer` doit être révoquée à `PUBLIC`.
+
+## Projet Supabase
+`anm-consulting` (région eu-west-3, Paris). Migrations 0001 → 0005 appliquées et référentiel chargé : 208 points de contrôle, 33 pièces modèles, 4 modules, 15 étapes, 7 phases.
