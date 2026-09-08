@@ -32,6 +32,8 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
 - `src/app/admin/` — back-office consultante : missions, saisie des constats, rapport (phase 4)
 - `src/app/api/` — routes API (leads, webhook Stripe, alertes d'échéances)
+- `src/lib/supabase/` — accès Supabase : `client.ts` (composants client), `server.ts` (Server Components / actions / routes),
+  `middleware.ts` (rafraîchissement de session, câblé dans `src/middleware.ts` sur `/app`, `/admin`, `/connexion`), `env.ts` (variables)
 - `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 15 étapes + 7 phases, structure du rapport), `vision.ts` (5 objectifs, ligne de crête, portail consultante / client), `sources.ts` (sources officielles)
 - `content/` — leçons et articles en MDX (phase 5)
 - `supabase/` — migrations et seeds versionnés
