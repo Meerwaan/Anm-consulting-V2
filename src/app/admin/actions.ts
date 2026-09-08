@@ -212,3 +212,61 @@ export const demanderPiecesManquantes = async (formData: FormData): Promise<void
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
 };
+
+/**
+ * Date portée par la pièce (ou son échéance quand elle en porte une).
+ * C'est cette date qui déclenche le calcul de péremption et l'échéance client.
+ */
+export const definirDateDocument = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const documentId = String(formData.get("documentId"));
+  const ordre = String(formData.get("ordre") ?? "3");
+  const champ = String(formData.get("champ")) === "expire_le" ? "expire_le" : "document_date";
+  const valeur = String(formData.get("valeur") ?? "").trim() || null;
+
+  await supabase
+    .from("mission_documents")
+    .update({ [champ]: valeur, received: valeur ? "oui" : "non", received_on: valeur ? new Date().toISOString().slice(0, 10) : null })
+    .eq("id", documentId)
+    .eq("mission_id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+};
+
+/**
+ * Contrôle croisé : deux valeurs qui devraient dire la même chose.
+ * Le système calcule l'écart, il ne le qualifie pas — un écart n'est pas un constat.
+ */
+export const enregistrerRapprochement = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const kind = String(formData.get("kind"));
+  const ordre = String(formData.get("ordre") ?? "10");
+  const nombre = (n: FormDataEntryValue | null): number | null => {
+    const v = String(n ?? "").replace(",", ".").trim();
+    return v === "" || Number.isNaN(Number(v)) ? null : Number(v);
+  };
+
+  const { data: utilisateur } = await supabase.auth.getUser();
+  await supabase.from("mission_reconciliations").upsert(
+    {
+      mission_id: missionId,
+      kind,
+      periode: String(formData.get("periode") ?? "").trim() || null,
+      valeur_a: nombre(formData.get("valeurA")),
+      valeur_b: nombre(formData.get("valeurB")),
+      tolerance_pct: nombre(formData.get("tolerance")) ?? 0,
+      note: String(formData.get("note") ?? "").trim() || null,
+      updated_at: new Date().toISOString(),
+      updated_by: utilisateur.user?.id ?? null,
+    },
+    { onConflict: "mission_id,kind" },
+  );
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+};

@@ -27,6 +27,10 @@ supabase/migrations/0006_decisions_maman.sql          # décisions du 08/09 : é
 supabase/migrations/0007_revoke_actions_client_guard.sql  # revoke EXECUTE (public, anon, authenticated) sur la fonction de trigger
 supabase/migrations/0008_auth_invitations.sql         # profils créés avec le compte, invitations, portée des points par mission
 supabase/migrations/0009_notes_par_etape.sql          # mission_notes.step_id
+supabase/migrations/0010_textes_applicables.sql       # référentiel des codes et textes par domaine (généré)
+supabase/migrations/0011_categorie_sous_traitance.sql  # catégorie de pièces manquante
+supabase/migrations/0012_validite_pieces_et_rapprochements.sql  # durée de validité des pièces, échéances, contrôles croisés
+supabase/migrations/0013_echeances_correctifs.sql     # statut à la création + seuil d'effectif dans le déclencheur
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
@@ -39,14 +43,14 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - `src/app/api/` — routes API (leads, webhook Stripe, alertes d'échéances)
 - `src/lib/supabase/` — accès Supabase : `client.ts` (composants client), `server.ts` (Server Components / actions / routes),
   `middleware.ts` (rafraîchissement de session, câblé dans `src/middleware.ts` sur `/app`, `/admin`, `/connexion`), `env.ts` (variables)
-- `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 15 étapes + 7 phases, structure du rapport), `vision.ts` (5 objectifs, ligne de crête, portail consultante / client), `sources.ts` (sources officielles)
+- `src/content/` — **contenu structuré issu du pack** : `piliers.ts` (positionnement, 5 piliers, criticité), `offres.ts` (offres, abonnements, calculateur de devis), `methode.ts` (règle d'or, 15 étapes + 7 phases, structure du rapport), `vision.ts` (5 objectifs, ligne de crête, portail consultante / client), `textes.ts` (**les codes et textes qui fondent chaque contrôle**), `sources.ts` (sources officielles)
 - `content/` — leçons et articles en MDX (phase 5)
 - `supabase/` — migrations et seeds versionnés
 - `design/figma/` — scripts de génération des maquettes
-- `docs/` — `AUTHENTIFICATION.md` (lien magique, invitations, mise en service) · `ECRAN_DE_TRAVAIL.md` · `DECISIONS_MAMAN.md` (**les 9 arbitrages du 08/09, ils priment**) · `VISION_PRODUIT.md` (5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma) · `RGPD.md`
+- `docs/` — `TEXTES_APPLICABLES.md` (quel code s'applique à quel contrôle) · `AUTHENTIFICATION.md` (lien magique, invitations, mise en service) · `ECRAN_DE_TRAVAIL.md` · `DECISIONS_MAMAN.md` (**les 9 arbitrages du 08/09, ils priment**) · `VISION_PRODUIT.md` (5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma) · `RGPD.md`
 
 ## Règles
-- Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client.
+- Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client. Le texte applicable par domaine est dans `src/content/textes.ts` — il dit où chercher, pas ce que l'article prescrit.
 - Les tarifs de `src/content/offres.ts` sont indicatifs tant que `statut !== "valide"`.
 - Jamais de promesse de garantie contre un contrôle ou un redressement ; les questions juridiques / fiscales réglementées sont renvoyées à l'avocat ou à l'expert-comptable.
 - RLS sur toutes les tables client (`org_id`) ; le rôle `consultant` voit tout.

@@ -6,10 +6,12 @@ import TableauPoints from "@/components/portail/TableauPoints";
 import ListePieces from "@/components/portail/ListePieces";
 import BlocNotes from "@/components/portail/BlocNotes";
 import BarreEtape from "@/components/portail/BarreEtape";
+import TextesApplicables from "@/components/portail/TextesApplicables";
+import Rapprochements from "@/components/portail/Rapprochements";
 import { OFFRES } from "@/content/offres";
 import {
   lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission, lireNotes,
-  lireObjectifEtape, lirePieces, lirePointsDEtape,
+  lireObjectifEtape, lireRapprochements, lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -21,11 +23,12 @@ interface Params {
 export default async function EtapePage({ params }: Params) {
   const { id, ordre } = await params;
 
-  const [mission, etapes, horsEtape, pieces] = await Promise.all([
+  const [mission, etapes, horsEtape, pieces, rapprochements] = await Promise.all([
     lireMission(id),
     lireEtapes(id),
     lireHorsEtape(id),
-    lirePieces(id),
+    lireValiditePieces(id),
+    lireRapprochements(id),
   ]);
   if (!mission || etapes.length === 0) notFound();
 
@@ -33,10 +36,8 @@ export default async function EtapePage({ params }: Params) {
   const etape = estHorsEtape ? null : etapes.find((e) => String(e.sort_order) === ordre);
   if (!estHorsEtape && !etape) notFound();
 
-  const piecesClient = pieces.filter((p) => p.kind === "piece_client");
-  const manquantes = piecesClient.filter(
-    (p) => p.required && p.received !== "oui" && p.received !== "na",
-  ).length;
+  const manquantes = pieces.filter((p) => p.required && p.etat === "non_recue").length;
+  const perimees = pieces.filter((p) => p.etat === "perimee" || p.etat === "bientot_perimee").length;
   const pointsTotal =
     etapes.reduce((n, e) => n + e.points_total, 0) + horsEtape.reduce((n, h) => n + h.points_total, 0);
   const pointsTraites =
@@ -81,6 +82,12 @@ export default async function EtapePage({ params }: Params) {
                 {manquantes}
               </dd>
             </div>
+            <div className="flex justify-between gap-2">
+              <dt className="text-[var(--anm-muted)]">Pièces périmées</dt>
+              <dd className="font-mono tabular-nums" style={{ color: perimees > 0 ? "var(--anm-majeur)" : "var(--anm-mineur)" }}>
+                {perimees}
+              </dd>
+            </div>
           </dl>
         </div>
 
@@ -109,13 +116,19 @@ export default async function EtapePage({ params }: Params) {
           </header>
         )}
 
+        {domaines.length > 0 ? <TextesApplicables domaines={domaines} /> : null}
+
         {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} /> : null}
 
         {etape?.kind === "collecte" ? (
           <ListePieces missionId={id} ordre={ordre} pieces={pieces} />
         ) : null}
 
-        {etape && points.length === 0 && etape.kind !== "collecte" ? (
+        {etape?.kind === "rapprochement" ? (
+          <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
+        ) : null}
+
+        {etape && points.length === 0 && etape.kind !== "collecte" && etape.kind !== "rapprochement" ? (
           <section className="rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
             Cette étape n&apos;a pas de point de contrôle : elle se travaille en notes, en entretien ou
             en document. Les pièces déposées par le client restent accessibles depuis l&apos;étape 03.

@@ -77,9 +77,19 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                     {p.evidence ? (
                       <span className="mt-1 block text-xs text-[var(--anm-muted)]">Preuve : {p.evidence}</span>
                     ) : null}
-                    {p.reference ? (
+                    {p.reference_kind === "source" && p.reference ? (
                       <span className="mt-0.5 block font-mono text-[0.68rem] text-[var(--anm-muted)]">
-                        {p.reference}
+                        Source du pack : {p.reference}
+                      </span>
+                    ) : null}
+                    {p.reference_kind === "interne" ? (
+                      <span className="mt-0.5 block font-mono text-[0.68rem] text-[var(--anm-muted)]">
+                        Point interne — pas de texte opposable
+                      </span>
+                    ) : null}
+                    {p.reference_kind === "a_qualifier" ? (
+                      <span className="mt-0.5 block font-mono text-[0.68rem] text-[var(--anm-majeur)]">
+                        Référence à établir avant publication
                       </span>
                     ) : null}
                   </td>
