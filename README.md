@@ -23,6 +23,8 @@ supabase/seed/0002_document_templates.sql     # 33 pièces standard (09 + fiscal
 supabase/migrations/0003_espace_travail_echanges.sql  # espace de travail par module, 15 étapes, notes, échanges, demandes de pièces, notifications, rapport 2 axes
 supabase/migrations/0004_durcissement_rls.sql         # vues en security_invoker, fonctions hors API REST
 supabase/migrations/0005_revoke_execute_public.sql    # revoke EXECUTE à PUBLIC (le grant par défaut de Postgres)
+supabase/migrations/0006_decisions_maman.sql          # décisions du 08/09 : étapes porteuses de périmètre, relances, actions client
+supabase/migrations/0007_revoke_actions_client_guard.sql  # revoke EXECUTE (public, anon, authenticated) sur la fonction de trigger
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
@@ -38,7 +40,7 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - `content/` — leçons et articles en MDX (phase 5)
 - `supabase/` — migrations et seeds versionnés
 - `design/figma/` — scripts de génération des maquettes
-- `docs/` — `VISION_PRODUIT.md` (ce qu'elle veut, 5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma)
+- `docs/` — `DECISIONS_MAMAN.md` (**les 9 arbitrages du 08/09, ils priment**) · `VISION_PRODUIT.md` (5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma) · `RGPD.md`
 
 ## Règles
 - Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client.

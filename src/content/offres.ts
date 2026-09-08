@@ -3,9 +3,10 @@
  * Sources : 10_Pack_Commercial_Contractuel.docx §2 (offre) · 11_Pilotage_Commercial_Tarifs.xlsx
  * (TARIFS, CHIFFRAGE, ABONNEMENTS). Pack complet V2, septembre 2026.
  *
- * ⚠ Les montants sont une grille indicative à valider par Maman avant affichage.
- * ⚠ L'offre « Préparation contrôle fiscal DGFiP » n'existe pas encore dans 10/11 :
- *   elle est ajoutée ici (tarif à décider) pour refléter le 5ᵉ pilier (01 Bible bloc G, 05 Module fiscal).
+ * Décisions de la consultante du 08/09/2026 :
+ *   02. La grille complète est affichée sur la vitrine — chaque offre avec sa fourchette.
+ *   01. L'offre fiscale est lancée, mais SUR DEVIS uniquement : aucun montant affiché.
+ * ⚠ Le format de la mission fiscale (nombre de jours) reste à confirmer.
  */
 
 export type MissionType =
@@ -46,7 +47,7 @@ export const OFFRES: Offre[] = [
     fourchette: "À partir de 590 € HT",
     supplementHT: 150,
     cible: "TPE / premier contact",
-    statut: "brouillon",
+    statut: "valide",
   },
   {
     id: "cnaps",
@@ -59,7 +60,7 @@ export const OFFRES: Offre[] = [
     supplementHT: 650,
     cible: "TPE / PME",
     commentaire: "Ajouter selon sites / effectif",
-    statut: "brouillon",
+    statut: "valide",
   },
   {
     id: "social_urssaf",
@@ -72,7 +73,7 @@ export const OFFRES: Offre[] = [
     supplementHT: 750,
     cible: "TPE / PME",
     commentaire: "Volume paie déterminant",
-    statut: "brouillon",
+    statut: "valide",
   },
   {
     id: "inspection",
@@ -85,7 +86,7 @@ export const OFFRES: Offre[] = [
     supplementHT: 650,
     cible: "TPE / PME",
     commentaire: "Ajouter si multi-sites",
-    statut: "brouillon",
+    statut: "valide",
   },
   {
     id: "fiscal",
@@ -98,8 +99,8 @@ export const OFFRES: Offre[] = [
     supplementHT: null,
     cible: "TPE / PME",
     commentaire:
-      "5ᵉ pilier ajouté dans la Bible V2 (fiches 37-44) et le module 05 ; tarif absent de 10/11 — à décider.",
-    statut: "a_valider",
+      "Décision 01 du 08/09/2026 : offre lancée, sans montant affiché — la charge dépend trop de la comptabilité du client. Format encore à confirmer.",
+    statut: "valide",
   },
   {
     id: "audit_360",
@@ -112,7 +113,7 @@ export const OFFRES: Offre[] = [
     supplementHT: 900,
     cible: "PME",
     commentaire: "Produit phare",
-    statut: "brouillon",
+    statut: "valide",
     produitPhare: true,
   },
   {
@@ -125,7 +126,7 @@ export const OFFRES: Offre[] = [
     fourchette: "390 à 990 € HT / mois",
     supplementHT: null,
     cible: "Tous clients",
-    statut: "brouillon",
+    statut: "valide",
   },
 ];
 

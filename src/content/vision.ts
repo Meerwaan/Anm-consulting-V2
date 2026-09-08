@@ -49,9 +49,14 @@ export const LIGNE_DE_CRETE = {
   regle: "Toute note ou constat partagé au client reste factuel (fait, preuve, écart) ; la qualification juridique est renvoyée au professionnel compétent.",
 } as const;
 
-/** Le portail vu par la consultante : un dossier par client, rangé par module, où rien ne manque. */
+/**
+ * Le portail vu par la consultante.
+ * Décision 03 du 08/09/2026 : l'écran s'organise par ÉTAPE de la méthode, pas par module.
+ * Les 15 étapes sont la colonne vertébrale (on suit le déroulé d'une mission, du premier
+ * entretien à la restitution) ; les modules restent le classement des pièces et des constats.
+ */
 export const PORTAIL_CONSULTANTE = {
-  principe: "Un dossier / espace de travail par client, rangé par module, avec les feuilles remplies et les pièces fournies. Rien ne doit manquer.",
+  principe: "Un dossier par client, déroulé selon les 15 étapes de la méthode. À chaque étape, ses points de contrôle, ses pièces et ses notes. Rien ne doit manquer.",
   modules: ["Mallette Audit 360°", "Module CNAPS", "Module URSSAF / Inspection", "Module Contrôle fiscal DGFiP"],
   parModule: [
     "Points de contrôle du module (statut, gravité, note) — la feuille AUDIT_* remplie",
@@ -60,20 +65,31 @@ export const PORTAIL_CONSULTANTE = {
     "Notes de travail, publiables au client",
     "Constats qualifiés, rattachés au module",
   ],
-  suivi: ["15 étapes de la méthode (checklist)", "7 phases calendaires (J-10 → J+7)", "Indicateur « rien ne manque » par module"],
+  suivi: [
+    "Les 15 étapes en colonne vertébrale : chacune porte sa nature (entretien, contrôle, rapprochement, rapport…) et son périmètre de points de contrôle",
+    "7 phases calendaires (J-10 → J+7) en repère de temps",
+    "Indicateur « rien ne manque » par étape, plus le compteur des points qu'aucune étape ne couvre",
+  ],
 } as const;
 
 /** Le portail vu par le client. */
+/**
+ * Le portail vu par le client.
+ * Décision 04 du 08/09/2026 : AUCUNE note de travail n'est partagée avant le rapport.
+ * Le client voit l'avancement, ce qu'on lui réclame et le fil d'échange — rien du contenu
+ * de l'audit tant qu'il n'est pas qualifié. `mission_notes.visible_to_client` reste en base
+ * mais n'est pas utilisé côté client.
+ */
 export const PORTAIL_CLIENT = {
   pendantAudit: [
-    "Avancement (étapes, phases, modules) et notes que la consultante choisit de partager",
-    "Pièces demandées, avec dépôt direct et relances",
+    "Avancement : les 15 étapes et leur statut, la phase en cours",
+    "Pièces demandées, avec dépôt direct et relance automatique tous les 3 jours",
     "Fil d'échange avec la consultante",
-    "Notification email à chaque demande, message, note ou constat publié",
+    "Notification email à chaque demande, relance et message",
   ],
   finAudit: [
-    "Compte rendu adapté à l'audit, en deux axes : risques réels en cas de contrôle / axes d'amélioration",
-    "Plan d'actions P1 → P4 avec responsable et échéance, statut modifiable par le client",
+    "Compte rendu en deux axes (risques réels en cas de contrôle / axes d'amélioration) pour le dirigeant, suivi du détail classé par criticité pour l'avocat et l'expert-comptable (décision 05)",
+    "Plan d'actions P1 → P4 avec responsable et échéance ; le client coche lui-même ce qu'il a fait et la consultante est notifiée (décision 07)",
     "Proposition de suivi conformité (abonnement) : échéances, revues, veille",
   ],
 } as const;
