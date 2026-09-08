@@ -171,7 +171,7 @@ export const lireConstats = async (missionId: string): Promise<Constat[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("findings")
-    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, point:control_points (code, question, evidence)")
+    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, in_report, report_rank, point:control_points (code, question, evidence)")
     .eq("mission_id", missionId)
     .order("priority")
     .order("created_at");
@@ -189,9 +189,13 @@ export const lireActions = async (missionId: string): Promise<ActionPlan[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("actions")
-    .select("id, finding_id, domain, title, client_owner, due_on, priority, status")
+    .select("id, finding_id, domain, title, client_owner, due_on, priority, status, comment, constat:findings (title)")
     .eq("mission_id", missionId)
     .order("priority")
     .order("due_on", { nullsFirst: false });
-  return (data as ActionPlan[] | null) ?? [];
+  type Jointure = ActionPlan & { constat: { title: string } | null };
+  return ((data as Jointure[] | null) ?? []).map((a) => ({
+    ...a,
+    constat: a.constat?.title ?? null,
+  }));
 };

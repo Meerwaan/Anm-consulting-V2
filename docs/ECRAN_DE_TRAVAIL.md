@@ -143,6 +143,41 @@ la garde applicative seule laissait passer.
 encore, avec l'échéance conseillée : P1 à 7 jours, P2 à 30, P3 à 90, P4 à 180. Le client
 coche ensuite ce qu'il a fait et la consultante est notifiée (décision 07).
 
+## La chaîne complète, du point de contrôle au rapport
+
+| Étape | Ce qu'on y décide | Ce que ça alimente |
+|---|---|---|
+| 6-9 | Point conforme ou en écart | Ouvre un constat pré-rempli |
+| **11** | On écrit le constat : fait, preuve, référence, recommandation, criticité, axe | La criticité fixe la priorité de l'action |
+| **12** | **Ce qui entre au rapport**, et le rang 1 à 5 des constats prioritaires | La synthèse dirigeant |
+| **13** | **Qui fait quoi, pour quand** : responsable, échéance, statut. Actions libres possibles | Le plan remis au client |
+| **14** | Rien — on vérifie l'assemblage et ce qui bloque encore | Le PDF (à construire) |
+| 15 | La restitution | La proposition de suivi |
+
+Chaque étape décide quelque chose que la suivante utilise. Aucune ne répète la précédente.
+
+### 12 — ce qui entre dans le rapport
+
+`findings.in_report` existait sans jamais servir, et rien ne portait l'ordre. La colonne
+`report_rank` (1 à 5) a été ajoutée : c'est ici qu'on choisit les **5 constats prioritaires**
+du modèle 07, pas au moment de rédiger. L'écran signale deux rangs identiques et les
+constats retenus dont la référence n'est pas vérifiée.
+
+### 13 — un plan réellement planifiable
+
+Une action générée depuis un constat n'a ni responsable ni date : ce sont les deux choses
+qui se négocient en restitution. Elles se saisissent donc ici, avec le statut et un
+commentaire. On peut aussi ajouter une action qui ne vient d'aucun constat — une procédure
+à écrire, un classement à reprendre : tout ne naît pas d'un écart.
+
+L'en-tête compte ce qui manque : « 8 actions · 3 sans responsable · 2 sans date ».
+
+### 14 — la vérification avant génération
+
+Assemble ce qui a été décidé et liste ce qui bloque : aucun constat retenu, aucun rang
+attribué, une référence non vérifiée, une action sans responsable ou sans date. Rien ne se
+ressaisit.
+
 ## Reste à construire
 
 - Dépôt de pièce côté client et fil d'échange.

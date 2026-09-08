@@ -555,3 +555,80 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
   const souci = erreurOrg ?? erreurMission;
   retour(missionId, "2", souci ? { erreur: souci.message } : { ok: "Périmètre enregistré." });
 };
+
+/**
+ * Étape 12 — ce qui entre dans le rapport, et dans quel ordre.
+ * Le rang 1 à 5 désigne les « 5 constats prioritaires » qui ouvrent la synthèse dirigeant
+ * (modèle de rapport 07). Ce choix se fait ici, pas au moment de rédiger.
+ */
+export const definirPlaceDansRapport = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const constatId = String(formData.get("constatId"));
+  const dansRapport = formData.get("dansRapport") === "on";
+  const rangBrut = String(formData.get("rang") ?? "").trim();
+  const rang = rangBrut === "" ? null : Number(rangBrut);
+
+  const { error } = await supabase
+    .from("findings")
+    .update({
+      in_report: dansRapport,
+      // Un constat hors rapport ne peut pas occuper une place du top 5.
+      report_rank: dansRapport && rang && rang >= 1 && rang <= 5 ? rang : null,
+    })
+    .eq("id", constatId)
+    .eq("mission_id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/12`);
+  retour(missionId, "12", error ? { erreur: error.message } : { ok: "Rapport mis à jour." });
+};
+
+/** Étape 13 — planifier une action : qui la fait, pour quand, où elle en est. */
+export const enregistrerAction = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const actionId = String(formData.get("actionId"));
+
+  const { error } = await supabase
+    .from("actions")
+    .update({
+      title: String(formData.get("title") ?? "").trim() || "Action",
+      client_owner: String(formData.get("responsable") ?? "").trim() || null,
+      due_on: String(formData.get("echeance") ?? "").trim() || null,
+      priority: String(formData.get("priorite")),
+      status: String(formData.get("statut")),
+      comment: String(formData.get("commentaire") ?? "").trim() || null,
+    })
+    .eq("id", actionId)
+    .eq("mission_id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  retour(missionId, "13", error ? { erreur: error.message } : { ok: "Action mise à jour." });
+};
+
+/** Étape 13 — ajouter une action qui ne vient d'aucun constat (organisation, procédure). */
+export const ajouterAction = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const titre = String(formData.get("title") ?? "").trim();
+  if (!titre) retour(missionId, "13", { erreur: "Une action a besoin d'un intitulé." });
+
+  const { error } = await supabase.from("actions").insert({
+    mission_id: missionId,
+    domain: String(formData.get("domaine") || "operationnel"),
+    title: titre,
+    client_owner: String(formData.get("responsable") ?? "").trim() || null,
+    due_on: String(formData.get("echeance") ?? "").trim() || null,
+    priority: String(formData.get("priorite") || "P3"),
+    status: "a_faire",
+  });
+
+  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  retour(missionId, "13", error ? { erreur: error.message } : { ok: "Action ajoutée." });
+};

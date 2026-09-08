@@ -1,4 +1,5 @@
 import type { Constat } from "@/lib/types";
+import { definirPlaceDansRapport } from "@/app/admin/actions";
 
 const NIVEAUX: { valeur: string; label: string; traitement: string; couleur: string }[] = [
   { valeur: "critique", label: "Critique", traitement: "P1 · immédiat", couleur: "var(--anm-critique)" },
@@ -6,36 +7,36 @@ const NIVEAUX: { valeur: string; label: string; traitement: string; couleur: str
   { valeur: "modere", label: "Modéré", traitement: "P3 · sous 90 jours", couleur: "var(--anm-modere)" },
   { valeur: "mineur", label: "Mineur", traitement: "P4 · amélioration", couleur: "var(--anm-mineur)" },
 ];
+const couleurDe = (s: string) => NIVEAUX.find((n) => n.valeur === s)?.couleur;
 
 interface Props {
+  missionId: string;
   constats: Constat[];
 }
 
 /**
- * Étape 12 — le classement, pas une deuxième saisie.
+ * Étape 12 — ce qui entre dans le rapport, et dans quel ordre.
  *
- * La criticité se fixe en écrivant le constat (étape 11). Ce qu'il reste à faire ici, c'est
- * de REGARDER l'ensemble : combien de chaque niveau, et lesquels ouvriront le rapport. Les
- * « 5 constats prioritaires » sont une section du modèle de rapport 07 — c'est ici qu'on les
- * choisit, pas au moment de la rédaction.
+ * La criticité se fixe en écrivant le constat (étape 11). Ici on décide : quels constats
+ * figurent au rapport, et lesquels ouvrent la synthèse dirigeant. Le modèle de rapport 07
+ * demande « les 5 constats prioritaires » — c'est ce choix-là, fait maintenant plutôt
+ * qu'improvisé au moment de rédiger.
  */
-const ClassementRisques = ({ constats }: Props) => {
-  const parNiveau = NIVEAUX.map((n) => ({
-    ...n,
-    liste: constats.filter((c) => c.severity === n.valeur),
-  }));
-  const ordre = ["critique", "majeur", "modere", "mineur"];
-  const top5 = [...constats]
-    .sort((a, b) => ordre.indexOf(a.severity) - ordre.indexOf(b.severity))
-    .slice(0, 5);
-  const sansReference = constats.filter((c) => c.reference_checked !== "oui").length;
+const ClassementRisques = ({ missionId, constats }: Props) => {
+  const retenus = constats.filter((c) => c.in_report);
+  const top = retenus
+    .filter((c) => c.report_rank)
+    .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
+  const rangsUtilises = top.map((c) => c.report_rank);
+  const doublons = rangsUtilises.filter((r, i) => rangsUtilises.indexOf(r) !== i);
+  const incomplets = retenus.filter((c) => c.reference_checked !== "oui").length;
 
   if (constats.length === 0) {
     return (
       <section>
-        <h2 className="text-xl">Classement des risques</h2>
+        <h2 className="text-xl">Ce qui entre dans le rapport</h2>
         <p className="mt-3 rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
-          Rien à classer : aucun constat n&apos;a encore été écrit. Reviens ici après l&apos;étape 11.
+          Rien à classer : aucun constat n&apos;a encore été écrit. Reviens après l&apos;étape 11.
         </p>
       </section>
     );
@@ -43,91 +44,118 @@ const ClassementRisques = ({ constats }: Props) => {
 
   return (
     <section>
-      <h2 className="text-xl">Classement des risques</h2>
+      <h2 className="text-xl">Ce qui entre dans le rapport</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
-        La criticité se fixe en écrivant le constat. Ici tu regardes l&apos;ensemble et tu choisis
-        ce qui ouvrira le rapport.
+        Coche les constats à faire figurer, et donne un rang de 1 à 5 à ceux qui ouvriront la
+        synthèse dirigeant. L&apos;étape 14 assemble le rapport à partir de ce choix.
       </p>
 
       <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded border border-[var(--anm-hairline)] bg-[var(--anm-hairline)] sm:grid-cols-4">
-        {parNiveau.map((n) => (
-          <div key={n.valeur} className="bg-[var(--anm-paper)] p-3">
-            <b
-              className="block font-[family-name:var(--font-display)] text-3xl leading-none tabular-nums"
-              style={{ color: n.couleur }}
-            >
-              {n.liste.length}
-            </b>
-            <span className="mt-1 block text-sm font-medium">{n.label}</span>
-            <span className="block font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
-              {n.traitement}
-            </span>
-          </div>
-        ))}
+        {NIVEAUX.map((n) => {
+          const total = constats.filter((c) => c.severity === n.valeur).length;
+          const gardes = retenus.filter((c) => c.severity === n.valeur).length;
+          return (
+            <div key={n.valeur} className="bg-[var(--anm-paper)] p-3">
+              <b
+                className="block font-[family-name:var(--font-display)] text-3xl leading-none tabular-nums"
+                style={{ color: n.couleur }}
+              >
+                {total}
+              </b>
+              <span className="mt-1 block text-sm font-medium">{n.label}</span>
+              <span className="block font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
+                {gardes} au rapport · {n.traitement}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {sansReference > 0 ? (
+      {doublons.length > 0 ? (
+        <p className="mt-3 border-l-2 border-[var(--anm-critique)] px-3 py-2 text-sm" style={{ color: "var(--anm-critique)" }}>
+          Deux constats portent le même rang. Chaque place de 1 à 5 doit être unique.
+        </p>
+      ) : null}
+      {incomplets > 0 ? (
         <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
-          {sansReference} constat{sansReference > 1 ? "s" : ""} sans référence vérifiée — à régler
-          à l&apos;étape 11 avant le rapport.
+          {incomplets} constat{incomplets > 1 ? "s" : ""} retenu{incomplets > 1 ? "s" : ""} sans
+          référence vérifiée — à régler à l&apos;étape 11 avant de sortir le rapport.
         </p>
       ) : null}
 
-      <h3 className="mt-7 font-[family-name:var(--font-display)] text-lg">
-        Les 5 constats prioritaires
-      </h3>
-      <p className="mt-1 text-sm text-[var(--anm-muted)]">
-        Ce sont eux qui ouvrent la synthèse dirigeant du rapport.
+      <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
+        Les {top.length > 0 ? top.length : 5} constats prioritaires — synthèse dirigeant
       </p>
-      <ol className="mt-3 flex flex-col">
-        {top5.map((c, i) => (
-          <li
+      {top.length === 0 ? (
+        <p className="mt-2 text-sm text-[var(--anm-muted)]">
+          Aucun rang attribué. Donne un rang 1 à 5 ci-dessous : ce sont eux qui ouvriront le rapport.
+        </p>
+      ) : (
+        <ol className="mt-1 flex flex-col">
+          {top.map((c) => (
+            <li key={c.id} className="flex items-baseline gap-3 border-b border-[var(--anm-hairline)] py-2 text-sm last:border-b-0">
+              <span className="font-[family-name:var(--font-display)] text-xl tabular-nums text-[var(--anm-muted)]">
+                {c.report_rank}
+              </span>
+              <span className="flex-1">{c.title}</span>
+              <span className="font-mono text-[0.68rem] uppercase" style={{ color: couleurDe(c.severity) }}>
+                {c.severity}
+              </span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      <p className="mt-8 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
+        Tous les constats — {retenus.length} sur {constats.length} retenus
+      </p>
+      <div className="mt-1 flex flex-col">
+        {NIVEAUX.flatMap((n) => constats.filter((c) => c.severity === n.valeur)).map((c) => (
+          <form
             key={c.id}
-            className="flex items-baseline gap-3 border-b border-[var(--anm-hairline)] py-2.5 text-sm last:border-b-0"
+            action={definirPlaceDansRapport}
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[var(--anm-hairline)] py-2.5 text-sm last:border-b-0"
           >
-            <span className="font-[family-name:var(--font-display)] text-xl tabular-nums text-[var(--anm-muted)]">
-              {i + 1}
-            </span>
-            <span className="flex-1">
+            <input type="hidden" name="missionId" value={missionId} />
+            <input type="hidden" name="constatId" value={c.id} />
+
+            <span className="min-w-[14rem] flex-1">
               {c.title}
               <span className="mt-0.5 block font-mono text-[0.66rem] text-[var(--anm-muted)]">
-                {c.code_point ?? "—"} · {c.domain} ·{" "}
-                {c.nature === "risque_controle" ? "risque de contrôle" : "amélioration"}
+                {c.code_point ?? "—"} · {c.nature === "risque_controle" ? "risque de contrôle" : "amélioration"}
+                {c.reference_checked !== "oui" ? " · référence non vérifiée" : ""}
               </span>
             </span>
-            <span
-              className="font-mono text-[0.68rem] uppercase tracking-wide"
-              style={{ color: NIVEAUX.find((n) => n.valeur === c.severity)?.couleur }}
-            >
+
+            <span className="font-mono text-[0.68rem] uppercase" style={{ color: couleurDe(c.severity) }}>
               {c.severity} · {c.priority}
             </span>
-          </li>
-        ))}
-      </ol>
 
-      <h3 className="mt-7 font-[family-name:var(--font-display)] text-lg">Tout le classement</h3>
-      {parNiveau
-        .filter((n) => n.liste.length > 0)
-        .map((n) => (
-          <div key={n.valeur} className="mt-4">
-            <p
-              className="border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest"
-              style={{ color: n.couleur }}
-            >
-              {n.label} — {n.traitement}
-            </p>
-            <ul className="mt-1 flex flex-col">
-              {n.liste.map((c) => (
-                <li key={c.id} className="border-b border-[var(--anm-hairline)] py-2 text-sm last:border-b-0">
-                  {c.title}
-                  <span className="ml-2 font-mono text-[0.66rem] text-[var(--anm-muted)]">
-                    {c.code_point ?? ""} {c.visible_to_client ? "· publié" : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <label className="flex items-center gap-2 text-xs">
+              <input type="checkbox" name="dansRapport" defaultChecked={c.in_report} />
+              au rapport
+            </label>
+
+            <label className="flex items-center gap-2 text-xs">
+              rang
+              <select
+                name="rang"
+                defaultValue={c.report_rank ? String(c.report_rank) : ""}
+                className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1 text-sm"
+              >
+                <option value="">—</option>
+                {[1, 2, 3, 4, 5].map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </label>
+
+            <button type="submit" className="rounded border border-[var(--anm-green)] px-2.5 py-1 text-xs text-[var(--anm-green)]">
+              Appliquer
+            </button>
+          </form>
         ))}
+      </div>
     </section>
   );
 };

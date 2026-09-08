@@ -151,6 +151,9 @@ export interface Constat {
   nature: NatureConstat;
   status: StatutConstat;
   visible_to_client: boolean;
+  in_report: boolean;
+  /** Position parmi les 5 constats prioritaires de la synthèse dirigeant. */
+  report_rank: number | null;
   /** Rappels du référentiel, affichés sous les champs pour guider la rédaction. */
   code_point?: string | null;
   question_point?: string | null;
@@ -168,4 +171,7 @@ export interface ActionPlan {
   due_on: string | null;
   priority: Priorite;
   status: StatutAction;
+  comment: string | null;
+  /** Titre du constat d'origine, quand l'action en vient. */
+  constat?: string | null;
 }

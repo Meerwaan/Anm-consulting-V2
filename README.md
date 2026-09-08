@@ -33,6 +33,7 @@ supabase/migrations/0012_validite_pieces_et_rapprochements.sql  # durée de vali
 supabase/migrations/0013_echeances_correctifs.sql     # statut à la création + seuil d'effectif dans le déclencheur
 supabase/migrations/0014_un_constat_par_point.sql     # un seul constat par point de contrôle et par mission
 supabase/migrations/0015_constats_nettoyage_trame.sql  # retire la trame à trous et dépublie les constats incomplets
+supabase/migrations/0016_rang_rapport.sql             # rang 1-5 des constats prioritaires du rapport
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 

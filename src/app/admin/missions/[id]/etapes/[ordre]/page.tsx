@@ -14,6 +14,7 @@ import ClassementRisques from "@/components/portail/ClassementRisques";
 import FicheCadrage from "@/components/portail/FicheCadrage";
 import FichePerimetre from "@/components/portail/FichePerimetre";
 import EtapeGuidee from "@/components/portail/EtapeGuidee";
+import ApercuRapport from "@/components/portail/ApercuRapport";
 import { OFFRES } from "@/content/offres";
 import {
   lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
@@ -171,10 +172,14 @@ export default async function EtapePage({ params, searchParams }: Params) {
         ) : null}
 
         {etape?.kind === "qualification" && etape.sort_order !== 11 ? (
-          <ClassementRisques constats={constats} />
+          <ClassementRisques missionId={id} constats={constats} />
         ) : null}
 
-        {etape && (etape.kind === "echantillon" || etape.kind === "rapport" || etape.kind === "restitution") ? (
+        {etape?.kind === "rapport" ? (
+          <ApercuRapport mission={mission} constats={constats} actions={actions} />
+        ) : null}
+
+        {etape && (etape.kind === "echantillon" || etape.kind === "restitution") ? (
           <EtapeGuidee kind={etape.kind} />
         ) : null}
 
