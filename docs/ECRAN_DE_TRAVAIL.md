@@ -83,9 +83,41 @@ un constat, c'est la consultante qui le qualifie.
 | Sous-traitants actifs ↔ attestations à jour | 0 % | Chaque manquant = solidarité financière |
 | Effectif en paie ↔ effectif en DSN | 0 % | Le cas d'école du contrôle URSSAF |
 
+## Du point de contrôle au constat, puis au plan d'actions
+
+C'est le dernier gros poste de saisie qui restait. Sur une mission 360°, 184 points :
+retaper à la main chaque écart dans le rapport prenait la fin de mission.
+
+**Étapes de contrôle (6, 7, 8, 9)** — un point marqué en écart affiche « Rédiger le
+constat ». Le constat s'ouvre déjà rempli avec ce que le référentiel sait :
+
+| Champ | Pré-rempli depuis |
+|---|---|
+| Titre | Thème et sous-thème du point |
+| Le fait | La note de saisie si elle existe, sinon la trame du pack + la question du point |
+| La preuve | La colonne « preuves à examiner » du référentiel |
+| La référence | Les textes **principaux** du domaine (`textes.ts`), marqués « à vérifier » |
+| Criticité | La gravité retenue à la saisie, sinon le risque initial du point |
+| Priorité | Déduite de la criticité : Critique → P1, Majeur → P2, Modéré → P3, Mineur → P4 |
+| Axe | `partiel` → amélioration · `non_conforme` → risque de contrôle |
+
+Elle ne rédige que ce qui est propre au dossier.
+
+**Étapes 11 et 12 (qualification)** — tous les constats, dans l'ordre de la chaîne du pack :
+fait, preuve, référence, recommandation, puis criticité, axe et statut.
+
+### Le verrou
+
+**Un constat ne part au client que si sa référence est marquée vérifiée.** Cocher
+« publier » sans cocher « référence vérifiée » ne publie rien — c'est refusé côté serveur,
+pas seulement grisé dans l'écran. La règle d'or du pack cesse de dépendre de la vigilance
+d'une fin de journée.
+
+**Étape 13 (plan d'actions)** — un bouton génère une action par constat qui n'en a pas
+encore, avec l'échéance conseillée : P1 à 7 jours, P2 à 30, P3 à 90, P4 à 180. Le client
+coche ensuite ce qu'il a fait et la consultante est notifiée (décision 07).
+
 ## Reste à construire
 
-- Transformer un point en écart directement en constat qualifié (fait / preuve / risque /
-  référence pré-remplis depuis le référentiel) — le prochain gain de temps important.
 - Dépôt de pièce côté client et fil d'échange.
 - Job d'envoi Resend sur la vue `document_requests_a_relancer`.

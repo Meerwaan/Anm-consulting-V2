@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { exigerRole } from "@/lib/supabase/session";
 import type { ResultatPoint, StatutEtape, TypeMission } from "@/lib/types";
+import { textesDuDomaine, type DomaineAudit } from "@/content/textes";
 
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
@@ -266,6 +267,179 @@ export const enregistrerRapprochement = async (formData: FormData): Promise<void
       updated_by: utilisateur.user?.id ?? null,
     },
     { onConflict: "mission_id,kind" },
+  );
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+};
+
+/** Criticité → priorité du plan d'actions (01 Bible §2 : P1 immédiat, P2 30 j, P3 90 j, P4 amélioration). */
+const PRIORITE_PAR_CRITICITE: Record<string, "P1" | "P2" | "P3" | "P4"> = {
+  critique: "P1",
+  majeur: "P2",
+  modere: "P3",
+  mineur: "P4",
+};
+
+/** Échéance conseillée par priorité, en jours (même source). */
+const DELAI_PAR_PRIORITE: Record<string, number> = { P1: 7, P2: 30, P3: 90, P4: 180 };
+
+/**
+ * Ouvre un constat depuis un point de contrôle en écart, pré-rempli avec ce que le
+ * référentiel sait déjà : le fait à qualifier, la preuve à examiner, le risque initial,
+ * et les textes du domaine. Elle ne rédige que ce qui est propre au dossier.
+ *
+ * Sans ça, chaque écart se retape à la main dans le rapport — sur 184 points, c'est le
+ * dernier gros poste de saisie de la mission.
+ */
+export const creerConstatDepuisPoint = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const pointId = Number(formData.get("pointId"));
+  const ordre = String(formData.get("ordre") ?? "11");
+
+  const [{ data: point }, { data: resultat }] = await Promise.all([
+    supabase
+      .from("control_points")
+      .select("id, code, domain, theme, subtheme, question, evidence, initial_risk, module_id")
+      .eq("id", pointId)
+      .maybeSingle(),
+    supabase
+      .from("mission_control_results")
+      .select("status, severity, note, finding_id")
+      .eq("mission_id", missionId)
+      .eq("control_point_id", pointId)
+      .maybeSingle(),
+  ]);
+  if (!point || resultat?.finding_id) return;
+
+  const criticite = (resultat?.severity ?? point.initial_risk) as string;
+  const textes = textesDuDomaine(point.domain as DomaineAudit)
+    .filter((t) => t.role === "principal")
+    .map((t) => `${t.texte.nom}${t.texte.portee ? ` (${t.texte.portee})` : ""}`)
+    .join(" · ");
+
+  const { data: constat } = await supabase
+    .from("findings")
+    .insert({
+      mission_id: missionId,
+      control_point_id: point.id,
+      module_id: point.module_id,
+      domain: point.domain,
+      title: point.subtheme ? `${point.theme} — ${point.subtheme}` : point.theme,
+      // Trame de la formule de constat du pack : elle remplace les crochets, elle ne part pas de zéro.
+      fact: resultat?.note?.trim()
+        ? resultat.note
+        : `Sur l'échantillon examiné, [fait précis à compléter]. Point de contrôle ${point.code} : ${point.question}`,
+      evidence: point.evidence,
+      severity: criticite,
+      control_status: resultat?.status ?? "non_conforme",
+      // Le texte est proposé, jamais présumé vérifié : c'est la règle d'or du pack.
+      reference: textes || null,
+      reference_checked: "a_verifier",
+      recommendation: null,
+      priority: PRIORITE_PAR_CRITICITE[criticite] ?? "P3",
+      nature: resultat?.status === "partiel" ? "amelioration" : "risque_controle",
+      status: "ouvert",
+      visible_to_client: false,
+    })
+    .select("id")
+    .single();
+
+  if (constat) {
+    await supabase
+      .from("mission_control_results")
+      .update({ finding_id: constat.id })
+      .eq("mission_id", missionId)
+      .eq("control_point_id", pointId);
+  }
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(`${chemin(missionId)}/etapes/11`);
+};
+
+/**
+ * Enregistre un constat.
+ *
+ * Un constat ne peut PAS être publié au client tant que sa référence n'est pas marquée
+ * vérifiée : c'est la règle d'or du pack (fait → preuve → risque → référence vérifiée)
+ * rendue mécanique plutôt que laissée à la vigilance.
+ */
+export const enregistrerConstat = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const constatId = String(formData.get("constatId"));
+  const ordre = String(formData.get("ordre") ?? "11");
+  const referenceVerifiee = formData.get("referenceVerifiee") === "on";
+  const publier = formData.get("publier") === "on";
+  const severity = String(formData.get("severity"));
+
+  await supabase
+    .from("findings")
+    .update({
+      title: String(formData.get("title") ?? "").trim() || "Constat",
+      fact: String(formData.get("fact") ?? "").trim(),
+      evidence: String(formData.get("evidence") ?? "").trim() || null,
+      severity,
+      priority: PRIORITE_PAR_CRITICITE[severity] ?? "P3",
+      reference: String(formData.get("reference") ?? "").trim() || null,
+      reference_checked: referenceVerifiee ? "oui" : "a_verifier",
+      recommendation: String(formData.get("recommendation") ?? "").trim() || null,
+      nature: String(formData.get("nature")),
+      status: String(formData.get("statut")),
+      // Verrou : pas de publication sans référence vérifiée.
+      visible_to_client: publier && referenceVerifiee,
+    })
+    .eq("id", constatId)
+    .eq("mission_id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+};
+
+/**
+ * Génère une action par constat qui n'en a pas encore, avec la priorité et l'échéance
+ * conseillée par la criticité. Elle ajuste ensuite le responsable et la date.
+ */
+export const genererPlanActions = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const ordre = String(formData.get("ordre") ?? "13");
+
+  const [{ data: constats }, { data: actions }] = await Promise.all([
+    supabase
+      .from("findings")
+      .select("id, domain, title, recommendation, priority, severity")
+      .eq("mission_id", missionId),
+    supabase.from("actions").select("finding_id").eq("mission_id", missionId),
+  ]);
+
+  const dejaCouverts = new Set(
+    ((actions as { finding_id: string | null }[] | null) ?? []).map((a) => a.finding_id),
+  );
+  const aCreer = ((constats as { id: string; domain: string; title: string; recommendation: string | null; priority: string }[] | null) ?? [])
+    .filter((c) => !dejaCouverts.has(c.id));
+  if (aCreer.length === 0) return;
+
+  const aujourdhui = new Date();
+  await supabase.from("actions").insert(
+    aCreer.map((c) => {
+      const echeance = new Date(aujourdhui);
+      echeance.setDate(echeance.getDate() + (DELAI_PAR_PRIORITE[c.priority] ?? 90));
+      return {
+        mission_id: missionId,
+        finding_id: c.id,
+        domain: c.domain,
+        title: c.recommendation?.trim() || `Traiter : ${c.title}`,
+        priority: c.priority,
+        due_on: echeance.toISOString().slice(0, 10),
+        status: "a_faire" as const,
+      };
+    }),
   );
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);

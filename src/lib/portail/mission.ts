@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
-  AvancementEtape, LigneRapprochement, Mission, PointDeControle,
+  ActionPlan, AvancementEtape, Constat, LigneRapprochement, Mission, PointDeControle,
   ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
@@ -87,7 +87,7 @@ export const lirePointsDEtape = async (
       .order("code"),
     supabase
       .from("mission_control_results")
-      .select("control_point_id, status, severity, note")
+      .select("control_point_id, status, severity, note, finding_id")
       .eq("mission_id", missionId),
   ]);
 
@@ -161,4 +161,31 @@ export const lireRapprochements = async (missionId: string): Promise<LigneRappro
     .select("id, kind, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
     .eq("mission_id", missionId);
   return (data as LigneRapprochement[] | null) ?? [];
+};
+
+/** Constats de la mission, du plus grave au moins grave. */
+export const lireConstats = async (missionId: string): Promise<Constat[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("findings")
+    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, point:control_points (code)")
+    .eq("mission_id", missionId)
+    .order("priority")
+    .order("created_at");
+  return ((data as (Constat & { point: { code: string } | null })[] | null) ?? []).map((c) => ({
+    ...c,
+    code_point: c.point?.code ?? null,
+  }));
+};
+
+/** Plan d'actions de la mission. */
+export const lireActions = async (missionId: string): Promise<ActionPlan[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("actions")
+    .select("id, finding_id, domain, title, client_owner, due_on, priority, status")
+    .eq("mission_id", missionId)
+    .order("priority")
+    .order("due_on", { nullsFirst: false });
+  return (data as ActionPlan[] | null) ?? [];
 };

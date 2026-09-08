@@ -8,10 +8,12 @@ import BlocNotes from "@/components/portail/BlocNotes";
 import BarreEtape from "@/components/portail/BarreEtape";
 import TextesApplicables from "@/components/portail/TextesApplicables";
 import Rapprochements from "@/components/portail/Rapprochements";
+import Constats from "@/components/portail/Constats";
+import PlanActions from "@/components/portail/PlanActions";
 import { OFFRES } from "@/content/offres";
 import {
-  lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission, lireNotes,
-  lireObjectifEtape, lireRapprochements, lireValiditePieces, lirePointsDEtape,
+  lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
+  lireNotes, lireObjectifEtape, lireRapprochements, lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -23,12 +25,14 @@ interface Params {
 export default async function EtapePage({ params }: Params) {
   const { id, ordre } = await params;
 
-  const [mission, etapes, horsEtape, pieces, rapprochements] = await Promise.all([
+  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions] = await Promise.all([
     lireMission(id),
     lireEtapes(id),
     lireHorsEtape(id),
     lireValiditePieces(id),
     lireRapprochements(id),
+    lireConstats(id),
+    lireActions(id),
   ]);
   if (!mission || etapes.length === 0) notFound();
 
@@ -83,6 +87,10 @@ export default async function EtapePage({ params }: Params) {
               </dd>
             </div>
             <div className="flex justify-between gap-2">
+              <dt className="text-[var(--anm-muted)]">Constats</dt>
+              <dd className="font-mono tabular-nums">{constats.length}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
               <dt className="text-[var(--anm-muted)]">Pièces périmées</dt>
               <dd className="font-mono tabular-nums" style={{ color: perimees > 0 ? "var(--anm-majeur)" : "var(--anm-mineur)" }}>
                 {perimees}
@@ -128,7 +136,16 @@ export default async function EtapePage({ params }: Params) {
           <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
         ) : null}
 
-        {etape && points.length === 0 && etape.kind !== "collecte" && etape.kind !== "rapprochement" ? (
+        {etape?.kind === "qualification" ? (
+          <Constats missionId={id} ordre={ordre} constats={constats} />
+        ) : null}
+
+        {etape?.kind === "plan_actions" ? (
+          <PlanActions missionId={id} ordre={ordre} actions={actions} constats={constats} />
+        ) : null}
+
+        {etape && points.length === 0 && etape.kind !== "collecte" && etape.kind !== "rapprochement"
+         && etape.kind !== "qualification" && etape.kind !== "plan_actions" ? (
           <section className="rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
             Cette étape n&apos;a pas de point de contrôle : elle se travaille en notes, en entretien ou
             en document. Les pièces déposées par le client restent accessibles depuis l&apos;étape 03.

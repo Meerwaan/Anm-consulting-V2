@@ -82,6 +82,7 @@ export interface ResultatDePoint {
   status: ResultatPoint;
   severity: Criticite | null;
   note: string | null;
+  finding_id: string | null;
 }
 
 export interface PieceMission {
@@ -127,4 +128,39 @@ export interface LigneRapprochement {
   ecart: number | null;
   ecart_pct: number | null;
   statut: "a_saisir" | "coherent" | "ecart";
+}
+
+export type StatutConstat = "ouvert" | "en_analyse" | "valide" | "clos";
+export type NatureConstat = "risque_controle" | "amelioration";
+export type Priorite = "P1" | "P2" | "P3" | "P4";
+
+export interface Constat {
+  id: string;
+  control_point_id: number | null;
+  domain: Domaine;
+  title: string;
+  fact: string;
+  evidence: string | null;
+  severity: Criticite;
+  reference: string | null;
+  reference_checked: "oui" | "non" | "na" | "a_verifier";
+  recommendation: string | null;
+  priority: Priorite;
+  nature: NatureConstat;
+  status: StatutConstat;
+  visible_to_client: boolean;
+  code_point?: string | null;
+}
+
+export type StatutAction = "a_faire" | "en_cours" | "clos" | "accepte";
+
+export interface ActionPlan {
+  id: string;
+  finding_id: string | null;
+  domain: Domaine;
+  title: string;
+  client_owner: string | null;
+  due_on: string | null;
+  priority: Priorite;
+  status: StatutAction;
 }

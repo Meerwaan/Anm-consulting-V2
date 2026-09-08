@@ -1,5 +1,5 @@
 import type { LignePoint } from "@/lib/portail/mission";
-import { definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
+import { creerConstatDepuisPoint, definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
 
 const LIBELLE: Record<string, string> = {
   conforme: "Conforme",
@@ -102,7 +102,7 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                     </span>
                   </td>
                   <td className="py-3">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       {CHOIX.map((choix) => (
                         <form key={choix} action={definirResultatPoint}>
                           <input type="hidden" name="missionId" value={missionId} />
@@ -123,6 +123,24 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                           </button>
                         </form>
                       ))}
+                      {(statut === "non_conforme" || statut === "partiel") && !p.resultat?.finding_id ? (
+                        <form action={creerConstatDepuisPoint}>
+                          <input type="hidden" name="missionId" value={missionId} />
+                          <input type="hidden" name="ordre" value={ordre} />
+                          <input type="hidden" name="pointId" value={p.id} />
+                          <button
+                            type="submit"
+                            className="rounded bg-[var(--anm-green)] px-2 py-1 text-xs font-medium text-[var(--anm-paper)]"
+                          >
+                            Rédiger le constat
+                          </button>
+                        </form>
+                      ) : null}
+                      {p.resultat?.finding_id ? (
+                        <span className="font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
+                          constat ouvert
+                        </span>
+                      ) : null}
                     </div>
                   </td>
                 </tr>
