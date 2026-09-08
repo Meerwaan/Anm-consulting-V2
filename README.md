@@ -28,6 +28,9 @@ supabase/migrations/0007_revoke_actions_client_guard.sql  # revoke EXECUTE (publ
 supabase/migrations/0008_auth_invitations.sql         # profils créés avec le compte, invitations, portée des points par mission
 supabase/migrations/0009_notes_par_etape.sql          # mission_notes.step_id
 supabase/migrations/0010_textes_applicables.sql       # référentiel des codes et textes par domaine (généré)
+supabase/migrations/0011_categorie_sous_traitance.sql  # catégorie de pièces manquante
+supabase/migrations/0012_validite_pieces_et_rapprochements.sql  # durée de validité des pièces, échéances, contrôles croisés
+supabase/migrations/0013_echeances_correctifs.sql     # statut à la création + seuil d'effectif dans le déclencheur
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 

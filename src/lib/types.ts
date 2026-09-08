@@ -96,3 +96,35 @@ export interface PieceMission {
   module_id: number | null;
   kind: string;
 }
+
+/** État de validité d'une pièce (vue mission_documents_validite). */
+export type EtatValidite =
+  | "sans_objet" | "non_recue" | "date_manquante" | "valide" | "bientot_perimee" | "perimee";
+
+export interface ValiditePiece {
+  id: string;
+  name: string;
+  category: string;
+  required: boolean;
+  received: "oui" | "non" | "na" | "a_verifier";
+  document_date: string | null;
+  validite_nature: "texte" | "pratique" | "date_du_document" | "indefinie" | null;
+  validite_note: string | null;
+  validite_jours: number | null;
+  echeance: string | null;
+  etat: EtatValidite;
+}
+
+/** Contrôle croisé (vue mission_reconciliation_status). */
+export interface LigneRapprochement {
+  id: string;
+  kind: string;
+  periode: string | null;
+  valeur_a: number | null;
+  valeur_b: number | null;
+  tolerance_pct: number;
+  note: string | null;
+  ecart: number | null;
+  ecart_pct: number | null;
+  statut: "a_saisir" | "coherent" | "ecart";
+}

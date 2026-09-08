@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
-  AvancementEtape, Mission, PieceMission, PointDeControle, ResultatDePoint,
+  AvancementEtape, LigneRapprochement, Mission, PointDeControle,
+  ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
 export interface EnTeteMission extends Mission {
@@ -120,18 +121,6 @@ export const lireObjectifEtape = async (stepId: number): Promise<string | null> 
   return data?.objectif ?? null;
 };
 
-/** Pièces attendues du client (kind = piece_client) et feuilles de travail. */
-export const lirePieces = async (missionId: string): Promise<PieceMission[]> => {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("mission_documents")
-    .select("id, name, category, required, received, received_on, complete, requested_on, module_id, kind")
-    .eq("mission_id", missionId)
-    .order("category")
-    .order("name");
-  return (data as PieceMission[] | null) ?? [];
-};
-
 export interface Note {
   id: string;
   created_at: string;
@@ -151,4 +140,25 @@ export const lireNotes = async (missionId: string, stepId?: number): Promise<Not
   if (stepId !== undefined) requete = requete.eq("step_id", stepId);
   const { data } = await requete;
   return (data as Note[] | null) ?? [];
+};
+
+/** État de validité de chaque pièce : ce qui manque, et ce qui est périmé. */
+export const lireValiditePieces = async (missionId: string): Promise<ValiditePiece[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_documents_validite")
+    .select("id, name, category, required, received, document_date, validite_nature, validite_note, validite_jours, echeance, etat")
+    .eq("mission_id", missionId)
+    .order("echeance", { nullsFirst: false });
+  return (data as ValiditePiece[] | null) ?? [];
+};
+
+/** Contrôles croisés saisis sur la mission. */
+export const lireRapprochements = async (missionId: string): Promise<LigneRapprochement[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_reconciliation_status")
+    .select("id, kind, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
+    .eq("mission_id", missionId);
+  return (data as LigneRapprochement[] | null) ?? [];
 };
