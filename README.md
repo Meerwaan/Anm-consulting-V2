@@ -34,7 +34,13 @@ supabase/migrations/0013_echeances_correctifs.sql     # statut à la création +
 supabase/migrations/0014_un_constat_par_point.sql     # un seul constat par point de contrôle et par mission
 supabase/migrations/0015_constats_nettoyage_trame.sql  # retire la trame à trous et dépublie les constats incomplets
 supabase/migrations/0016_rang_rapport.sql             # rang 1-5 des constats prioritaires du rapport
+supabase/migrations/0017_vues_hors_portee_anonyme.sql  # retire les vues de la surface API anonyme
 ```
+Avant toute PR touchant le portail : `python3 scripts/audit_coherence.py` — vérifie que chaque
+champ lu par une action serveur est bien envoyé par un formulaire, et que chaque valeur proposée
+dans un menu existe dans l'énumération correspondante. C'est la famille de bugs qui ne se voit ni
+au typage ni au lint : l'écriture part avec une valeur invalide et la base la refuse sans un mot.
+
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
 ## Structure
