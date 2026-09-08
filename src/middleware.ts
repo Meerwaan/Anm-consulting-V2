@@ -1,14 +1,27 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-/** Rafraîchit la session Supabase avant chaque requête authentifiée. */
-export const middleware = async (request: NextRequest) => updateSession(request);
+const ESPACES_PROTEGES = ["/app", "/admin"];
 
 /**
- * Limité aux espaces authentifiés : portail client, back-office consultante et
- * connexion. La vitrine est publique et servie depuis le cache — inutile de
- * lui coûter un aller-retour d'authentification à chaque page.
+ * Rafraîchit la session Supabase, puis barre l'entrée des espaces authentifiés
+ * aux visiteurs anonymes. Le contrôle du RÔLE se fait dans les layouts, pas ici :
+ * il demande une requête en base, qu'on ne veut pas payer à chaque navigation.
  */
+export const middleware = async (request: NextRequest) => {
+  const { response, utilisateurId } = await updateSession(request);
+
+  const chemin = request.nextUrl.pathname;
+  const protege = ESPACES_PROTEGES.some((p) => chemin === p || chemin.startsWith(`${p}/`));
+  if (protege && !utilisateurId) {
+    const url = new URL("/connexion", request.nextUrl.origin);
+    url.searchParams.set("suite", chemin);
+    return NextResponse.redirect(url);
+  }
+
+  return response;
+};
+
 export const config = {
   matcher: ["/app/:path*", "/admin/:path*", "/connexion/:path*", "/auth/:path*"],
 };

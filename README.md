@@ -25,14 +25,17 @@ supabase/migrations/0004_durcissement_rls.sql         # vues en security_invoker
 supabase/migrations/0005_revoke_execute_public.sql    # revoke EXECUTE à PUBLIC (le grant par défaut de Postgres)
 supabase/migrations/0006_decisions_maman.sql          # décisions du 08/09 : étapes porteuses de périmètre, relances, actions client
 supabase/migrations/0007_revoke_actions_client_guard.sql  # revoke EXECUTE (public, anon, authenticated) sur la fonction de trigger
+supabase/migrations/0008_auth_invitations.sql         # profils créés avec le compte, invitations, portée des points par mission
+supabase/migrations/0009_notes_par_etape.sql          # mission_notes.step_id
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
 ## Structure
 - `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact, ressources)
-- `src/app/(auth)/` — connexion (phase 4)
+- `src/app/(auth)/connexion/` — connexion par lien magique · `src/app/auth/confirm/` et `src/app/auth/deconnexion/` — retour du lien et déconnexion (voir [`docs/AUTHENTIFICATION.md`](docs/AUTHENTIFICATION.md))
 - `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
-- `src/app/admin/` — back-office consultante : missions, saisie des constats, rapport (phase 4)
+- `src/app/admin/` — espace de travail de la consultante : liste des missions, puis l'écran d'une mission **organisé par étape de la méthode** (voir [`docs/ECRAN_DE_TRAVAIL.md`](docs/ECRAN_DE_TRAVAIL.md))
+- `src/lib/portail/` — accès aux données d'une mission · `src/components/portail/` — rail des étapes, feuille de contrôle, pièces, notes
 - `src/app/api/` — routes API (leads, webhook Stripe, alertes d'échéances)
 - `src/lib/supabase/` — accès Supabase : `client.ts` (composants client), `server.ts` (Server Components / actions / routes),
   `middleware.ts` (rafraîchissement de session, câblé dans `src/middleware.ts` sur `/app`, `/admin`, `/connexion`), `env.ts` (variables)
@@ -40,7 +43,7 @@ Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_contr
 - `content/` — leçons et articles en MDX (phase 5)
 - `supabase/` — migrations et seeds versionnés
 - `design/figma/` — scripts de génération des maquettes
-- `docs/` — `DECISIONS_MAMAN.md` (**les 9 arbitrages du 08/09, ils priment**) · `VISION_PRODUIT.md` (5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma) · `RGPD.md`
+- `docs/` — `AUTHENTIFICATION.md` (lien magique, invitations, mise en service) · `ECRAN_DE_TRAVAIL.md` · `DECISIONS_MAMAN.md` (**les 9 arbitrages du 08/09, ils priment**) · `VISION_PRODUIT.md` (5 objectifs, parcours) · `PACK_V2_MAPPING.md` (pack ↔ Notion ↔ repo ↔ Figma) · `RGPD.md`
 
 ## Règles
 - Chaque constat suit la chaîne **FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI** ; la référence officielle datée est obligatoire avant publication au client.
