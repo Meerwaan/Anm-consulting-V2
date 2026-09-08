@@ -121,10 +121,19 @@ Sur les étapes de contrôle, un point qui porte un constat affiche « constat �
 
 ### Le verrou
 
-**Un constat ne part au client que si sa référence est marquée vérifiée.** La case
-« publier » n'est même pas proposée tant que la référence ne l'est pas — pas de refus
-silencieux où elle croirait avoir publié. Le serveur refuse quand même en dernier recours.
-La règle d'or du pack cesse de dépendre de la vigilance d'une fin de journée.
+**Un constat ne part au client que s'il est COMPLET** : le fait, la preuve, la référence,
+sa vérification, la recommandation. Vérifier la seule référence ne suffisait pas — un
+constat a réellement été publié avec la trame « [fait précis à compléter] » dedans. La
+chaîne du pack est indivisible, le verrou l'est aussi.
+
+Et rien n'échoue en silence : si la publication est demandée sur un constat incomplet,
+l'écran répond « enregistré, mais NON publié : il manque la preuve, la recommandation ».
+Chaque écriture confirme ce qu'elle a fait.
+
+**Les champs ne sont jamais pré-remplis d'une trame à trous.** Un encadré qui paraît plein
+mais compte comme vide fait chercher un champ manquant qui n'existe pas. Ce que dit le
+référentiel — le point vérifié, les preuves à examiner — s'affiche **sous** le champ, en
+gris ; le champ, lui, est vide avec un exemple en filigrane.
 
 Un point de contrôle ne peut porter qu'**un** constat par mission (index unique, migration
 0014) : deux clics rapprochés sur « Rédiger le constat » ne créent plus de jumeaux, ce que

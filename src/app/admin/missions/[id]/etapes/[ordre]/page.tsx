@@ -24,10 +24,12 @@ export const metadata: Metadata = { robots: { index: false } };
 
 interface Params {
   params: Promise<{ id: string; ordre: string }>;
+  searchParams: Promise<{ ok?: string; erreur?: string }>;
 }
 
-export default async function EtapePage({ params }: Params) {
+export default async function EtapePage({ params, searchParams }: Params) {
   const { id, ordre } = await params;
+  const { ok, erreur } = await searchParams;
 
   const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions] = await Promise.all([
     lireMission(id),
@@ -112,6 +114,25 @@ export default async function EtapePage({ params }: Params) {
       </aside>
 
       <div className="flex flex-col gap-9">
+        {/* Toute écriture répond : enregistré, ou pourquoi ça a échoué. Jamais rien en silence. */}
+        {erreur ? (
+          <p
+            role="alert"
+            className="border-l-2 border-[var(--anm-critique)] bg-[var(--anm-paper)] px-3 py-2 text-sm"
+            style={{ color: "var(--anm-critique)" }}
+          >
+            L&apos;enregistrement a échoué : {erreur}
+          </p>
+        ) : null}
+        {ok ? (
+          <p
+            role="status"
+            className="border-l-2 border-[var(--anm-green)] bg-[var(--anm-mint)] px-3 py-2 text-sm"
+          >
+            {ok}
+          </p>
+        ) : null}
+
         {etape ? (
           <BarreEtape missionId={id} ordre={ordre} etape={etape} objectif={objectif} />
         ) : (

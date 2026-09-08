@@ -151,7 +151,10 @@ export interface Constat {
   nature: NatureConstat;
   status: StatutConstat;
   visible_to_client: boolean;
+  /** Rappels du référentiel, affichés sous les champs pour guider la rédaction. */
   code_point?: string | null;
+  question_point?: string | null;
+  preuve_attendue?: string | null;
 }
 
 export type StatutAction = "a_faire" | "en_cours" | "clos" | "accepte";

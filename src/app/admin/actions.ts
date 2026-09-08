@@ -10,6 +10,17 @@ import { textesDuDomaine, type DomaineAudit } from "@/content/textes";
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
 /**
+ * Retour à l'écran avec un message.
+ *
+ * Aucune écriture ne doit échouer en silence : sur un outil qui sert à préparer un
+ * contrôle, croire qu'on a enregistré alors que non est le pire des défauts.
+ */
+const retour = (missionId: string, ordre: string, params: Record<string, string>): never => {
+  const q = new URLSearchParams(params).toString();
+  redirect(`${chemin(missionId)}/etapes/${ordre}${q ? `?${q}` : ""}`);
+};
+
+/**
  * Crée l'organisation cliente si besoin, puis la mission.
  * Le trigger `init_mission` fait le reste : modules, 15 étapes, 7 phases et la
  * checklist des pièces s'initialisent seuls selon le type de mission.
@@ -320,7 +331,7 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
     .map((t) => `${t.texte.nom}${t.texte.portee ? ` (${t.texte.portee})` : ""}`)
     .join(" · ");
 
-  const { data: constat } = await supabase
+  const { data: constat, error } = await supabase
     .from("findings")
     .insert({
       mission_id: missionId,
@@ -328,11 +339,11 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
       module_id: point.module_id,
       domain: point.domain,
       title: point.subtheme ? `${point.theme} — ${point.subtheme}` : point.theme,
-      // Trame de la formule de constat du pack : elle remplace les crochets, elle ne part pas de zéro.
-      fact: resultat?.note?.trim()
-        ? resultat.note
-        : `Sur l'échantillon examiné, [fait précis à compléter]. Point de contrôle ${point.code} : ${point.question}`,
-      evidence: point.evidence,
+      // La note de saisie si elle existe, sinon vide : un champ pré-rempli d'une trame
+      // à trous compte comme rempli à l'œil et bloque le contrôle de complétude.
+      // Ce que dit le référentiel est affiché SOUS le champ, pas dedans.
+      fact: resultat?.note?.trim() ?? "",
+      evidence: "",
       severity: criticite,
       control_status: resultat?.status ?? "non_conforme",
       // Le texte est proposé, jamais présumé vérifié : c'est la règle d'or du pack.
@@ -347,16 +358,31 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
     .select("id")
     .single();
 
-  if (constat) {
-    await supabase
-      .from("mission_control_results")
-      .update({ finding_id: constat.id })
+  // L'index unique (mission, point) peut refuser si un constat existe déjà sans que le
+  // résultat ait été relié : on rattache l'existant au lieu de laisser un écran muet.
+  let constatId = constat?.id ?? null;
+  if (!constatId) {
+    const { data: existant } = await supabase
+      .from("findings")
+      .select("id")
       .eq("mission_id", missionId)
-      .eq("control_point_id", pointId);
+      .eq("control_point_id", pointId)
+      .maybeSingle();
+    constatId = existant?.id ?? null;
+    if (!constatId) {
+      retour(missionId, ordre, { erreur: error?.message ?? "Le constat n'a pas pu être créé." });
+    }
   }
+
+  await supabase
+    .from("mission_control_results")
+    .update({ finding_id: constatId })
+    .eq("mission_id", missionId)
+    .eq("control_point_id", pointId);
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
   revalidatePath(`${chemin(missionId)}/etapes/11`);
+  retour(missionId, "11", { ok: `Constat ouvert depuis ${point.code}. Complète-le ici.` });
 };
 
 /**
@@ -377,26 +403,55 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
   const publier = formData.get("publier") === "on";
   const severity = String(formData.get("severity"));
 
-  await supabase
+  const fait = String(formData.get("fact") ?? "").trim();
+  const preuve = String(formData.get("evidence") ?? "").trim();
+  const reference = String(formData.get("reference") ?? "").trim();
+  const reco = String(formData.get("recommendation") ?? "").trim();
+
+  /**
+   * Un constat ne se publie que COMPLET. Vérifier la seule référence ne suffit pas :
+   * un constat a déjà été publié avec la trame « [fait précis à compléter] » dedans.
+   * La chaîne du pack est indivisible — fait, preuve, risque, référence, action.
+   */
+  const manques: string[] = [];
+  if (!fait || fait.includes("[fait précis")) manques.push("le fait");
+  if (!preuve) manques.push("la preuve");
+  if (!reference) manques.push("la référence");
+  else if (!referenceVerifiee) manques.push("la vérification de la référence");
+  if (!reco) manques.push("la recommandation");
+  const complet = manques.length === 0;
+
+  const { error } = await supabase
     .from("findings")
     .update({
       title: String(formData.get("title") ?? "").trim() || "Constat",
-      fact: String(formData.get("fact") ?? "").trim(),
-      evidence: String(formData.get("evidence") ?? "").trim() || null,
+      fact: fait,
+      evidence: preuve || null,
       severity,
       priority: PRIORITE_PAR_CRITICITE[severity] ?? "P3",
-      reference: String(formData.get("reference") ?? "").trim() || null,
+      reference: reference || null,
       reference_checked: referenceVerifiee ? "oui" : "a_verifier",
-      recommendation: String(formData.get("recommendation") ?? "").trim() || null,
+      recommendation: reco || null,
       nature: String(formData.get("nature")),
-      // Verrou : pas de publication sans référence vérifiée. La case n'est même pas
-      // proposée tant que la référence ne l'est pas — pas de refus silencieux.
-      visible_to_client: publier && referenceVerifiee,
+      // Verrou : publication réservée aux constats complets, et retirée dès qu'un
+      // constat publié redevient incomplet.
+      visible_to_client: publier && complet,
     })
     .eq("id", constatId)
     .eq("mission_id", missionId);
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  if (error) retour(missionId, ordre, { erreur: error.message });
+  if (publier && !complet) {
+    retour(missionId, ordre, {
+      erreur: `Constat enregistré, mais NON publié : il manque ${manques.join(", ")}.`,
+    });
+  }
+  retour(missionId, ordre, {
+    ok: complet
+      ? `Constat enregistré${publier ? " et publié au client" : ""}.`
+      : `Constat enregistré. Il reste : ${manques.join(", ")}.`,
+  });
 };
 
 /**
@@ -426,7 +481,7 @@ export const genererPlanActions = async (formData: FormData): Promise<void> => {
   if (aCreer.length === 0) return;
 
   const aujourdhui = new Date();
-  await supabase.from("actions").insert(
+  const { error } = await supabase.from("actions").insert(
     aCreer.map((c) => {
       const echeance = new Date(aujourdhui);
       echeance.setDate(echeance.getDate() + (DELAI_PAR_PRIORITE[c.priority] ?? 90));
@@ -443,6 +498,9 @@ export const genererPlanActions = async (formData: FormData): Promise<void> => {
   );
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  retour(missionId, ordre, error
+    ? { erreur: error.message }
+    : { ok: `${aCreer.length} action${aCreer.length > 1 ? "s" : ""} générée${aCreer.length > 1 ? "s" : ""}.` });
 };
 
 /** Étape 1 — ce que dit le dirigeant : contexte, contrôle en cours, points sensibles. */
@@ -451,7 +509,7 @@ export const enregistrerCadrage = async (formData: FormData): Promise<void> => {
   const supabase = await createClient();
   const missionId = String(formData.get("missionId"));
 
-  await supabase
+  const { error } = await supabase
     .from("missions")
     .update({
       control_in_progress: formData.get("controleEnCours") === "on",
@@ -464,6 +522,7 @@ export const enregistrerCadrage = async (formData: FormData): Promise<void> => {
     .eq("id", missionId);
 
   revalidatePath(`${chemin(missionId)}/etapes/1`);
+  retour(missionId, "1", error ? { erreur: error.message } : { ok: "Cadrage enregistré." });
 };
 
 /** Étape 2 — le périmètre : effectif, établissements, sites clients, ce qui est audité. */
@@ -477,7 +536,7 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
     return Number.isFinite(n) && n > 0 ? n : null;
   };
 
-  await Promise.all([
+  const [{ error: erreurOrg }, { error: erreurMission }] = await Promise.all([
     supabase
       .from("organizations")
       .update({
@@ -493,4 +552,6 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
   ]);
 
   revalidatePath(`${chemin(missionId)}/etapes/2`);
+  const souci = erreurOrg ?? erreurMission;
+  retour(missionId, "2", souci ? { erreur: souci.message } : { ok: "Périmètre enregistré." });
 };

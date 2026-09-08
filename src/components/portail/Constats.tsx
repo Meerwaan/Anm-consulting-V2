@@ -18,6 +18,18 @@ const COULEUR: Record<string, string> = {
 const champ = "rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm";
 const rempli = (v: string | null | undefined): boolean => Boolean(v && v.trim().length > 0);
 
+/** Pastille « à remplir » posée sur l'intitulé du champ concerné. */
+const ARemplir = ({ si }: { si: boolean }) =>
+  si ? (
+    <span className="font-mono text-[0.6rem] uppercase tracking-wider text-[var(--anm-majeur)]">
+      à remplir
+    </span>
+  ) : null;
+
+/** Rappel du référentiel, sous le champ — jamais dedans. */
+const Rappel = ({ texte }: { texte: string | null | undefined }) =>
+  texte ? <span className="text-[0.7rem] leading-snug text-[var(--anm-muted)]">{texte}</span> : null;
+
 /** Ce qui manque à un constat pour être publiable, dans l'ordre de la chaîne du pack. */
 const cequiManque = (c: Constat): string[] => {
   const manques: string[] = [];
@@ -66,22 +78,40 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
 
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">
-          Le fait constaté
-          <textarea name="fact" rows={4} defaultValue={c.fact} className={champ} />
+          <span className="flex items-baseline gap-2">
+            Le fait constaté <ARemplir si={!rempli(c.fact) || c.fact.includes("[fait précis")} />
+          </span>
+          <textarea
+            name="fact" rows={4} defaultValue={c.fact}
+            placeholder="Sur l'échantillon examiné, …"
+            className={champ}
+          />
+          <Rappel texte={c.question_point ? `Point vérifié : ${c.question_point}` : null} />
         </label>
         <label className="flex flex-col gap-1 text-xs">
-          La preuve — documents, dates, site, salarié
-          <textarea name="evidence" rows={4} defaultValue={c.evidence ?? ""} className={champ} />
+          <span className="flex items-baseline gap-2">
+            La preuve <ARemplir si={!rempli(c.evidence)} />
+          </span>
+          <textarea
+            name="evidence" rows={4} defaultValue={c.evidence ?? ""}
+            placeholder="Documents, dates, site, salarié…"
+            className={champ}
+          />
+          <Rappel texte={c.preuve_attendue ? `À examiner : ${c.preuve_attendue}` : null} />
         </label>
       </div>
 
       <label className="mt-3 flex flex-col gap-1 text-xs">
-        La référence — texte applicable, article, date de vérification
+        <span className="flex items-baseline gap-2">
+          La référence — texte, article, date de vérification <ARemplir si={!rempli(c.reference)} />
+        </span>
         <textarea name="reference" rows={2} defaultValue={c.reference ?? ""} className={champ} />
       </label>
 
       <label className="mt-3 flex flex-col gap-1 text-xs">
-        La recommandation — action, responsable, délai
+        <span className="flex items-baseline gap-2">
+          La recommandation — action, responsable, délai <ARemplir si={!rempli(c.recommendation)} />
+        </span>
         <textarea
           name="recommendation" rows={2} defaultValue={c.recommendation ?? ""}
           placeholder="Il est recommandé de …, sous la responsabilité de …, avant le …"
@@ -111,6 +141,7 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" name="referenceVerifiee" defaultChecked={c.reference_checked === "oui"} />
           Référence vérifiée et datée
+          <ARemplir si={rempli(c.reference) && c.reference_checked !== "oui"} />
         </label>
 
         {c.reference_checked === "oui" ? (

@@ -171,13 +171,16 @@ export const lireConstats = async (missionId: string): Promise<Constat[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("findings")
-    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, point:control_points (code)")
+    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, point:control_points (code, question, evidence)")
     .eq("mission_id", missionId)
     .order("priority")
     .order("created_at");
-  return ((data as (Constat & { point: { code: string } | null })[] | null) ?? []).map((c) => ({
+  type Jointure = Constat & { point: { code: string; question: string; evidence: string | null } | null };
+  return ((data as Jointure[] | null) ?? []).map((c) => ({
     ...c,
     code_point: c.point?.code ?? null,
+    question_point: c.point?.question ?? null,
+    preuve_attendue: c.point?.evidence ?? null,
   }));
 };
 
