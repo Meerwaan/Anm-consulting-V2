@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { LignePoint } from "@/lib/portail/mission";
+import type { Constat } from "@/lib/types";
 import { creerConstatDepuisPoint, definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
 
 const LIBELLE: Record<string, string> = {
@@ -22,6 +24,8 @@ interface Props {
   missionId: string;
   ordre: string;
   points: LignePoint[];
+  /** Constats de la mission : dit si celui d'un point est fini ou reste à écrire. */
+  constats: Constat[];
 }
 
 /**
@@ -30,7 +34,19 @@ interface Props {
  * vérifier : sur une mission 360°, l'essentiel est conforme, et le temps de la
  * consultante doit aller aux écarts, pas à la saisie de la normalité.
  */
-const TableauPoints = ({ missionId, ordre, points }: Props) => {
+const TableauPoints = ({ missionId, ordre, points, constats }: Props) => {
+  // Un constat est fini quand la chaîne du pack est complète et la référence vérifiée.
+  const etatDuConstat = new Map(
+    constats
+      .filter((c) => c.control_point_id != null)
+      .map((c) => [
+        c.control_point_id as number,
+        c.fact?.trim() && !c.fact.includes("[fait précis") && c.evidence?.trim()
+          && c.reference?.trim() && c.reference_checked === "oui" && c.recommendation?.trim()
+          ? "prêt"
+          : "à finir",
+      ]),
+  );
   const restants = points.filter((p) => !p.resultat || p.resultat.status === "a_verifier");
 
   return (
@@ -137,9 +153,18 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                         </form>
                       ) : null}
                       {p.resultat?.finding_id ? (
-                        <span className="font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
-                          constat ouvert
-                        </span>
+                        <Link
+                          href={`/admin/missions/${missionId}/etapes/11`}
+                          className="font-mono text-[0.64rem] uppercase tracking-wide underline decoration-[var(--anm-hairline)] underline-offset-2"
+                          style={{
+                            color:
+                              etatDuConstat.get(p.id) === "prêt"
+                                ? "var(--anm-mineur)"
+                                : "var(--anm-majeur)",
+                          }}
+                        >
+                          constat {etatDuConstat.get(p.id) ?? "à finir"}
+                        </Link>
                       ) : null}
                     </div>
                   </td>

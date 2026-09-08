@@ -130,7 +130,7 @@ export default async function EtapePage({ params }: Params) {
 
         {domaines.length > 0 ? <TextesApplicables domaines={domaines} /> : null}
 
-        {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} /> : null}
+        {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} constats={constats} /> : null}
 
         {etape?.kind === "collecte" ? (
           <ListePieces missionId={id} ordre={ordre} pieces={pieces} />

@@ -1,6 +1,5 @@
 import type { Constat } from "@/lib/types";
 import { enregistrerConstat } from "@/app/admin/actions";
-import { REGLE_OR } from "@/content/methode";
 
 const CRITICITES: { valeur: string; label: string; priorite: string }[] = [
   { valeur: "critique", label: "Critique", priorite: "P1 · immédiat" },
@@ -16,6 +15,20 @@ const COULEUR: Record<string, string> = {
   mineur: "var(--anm-mineur)",
 };
 
+const champ = "rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm";
+const rempli = (v: string | null | undefined): boolean => Boolean(v && v.trim().length > 0);
+
+/** Ce qui manque à un constat pour être publiable, dans l'ordre de la chaîne du pack. */
+const cequiManque = (c: Constat): string[] => {
+  const manques: string[] = [];
+  if (!rempli(c.fact) || c.fact.includes("[fait précis")) manques.push("le fait");
+  if (!rempli(c.evidence)) manques.push("la preuve");
+  if (!rempli(c.reference)) manques.push("la référence");
+  else if (c.reference_checked !== "oui") manques.push("la vérification de la référence");
+  if (!rempli(c.recommendation)) manques.push("la recommandation");
+  return manques;
+};
+
 interface Props {
   missionId: string;
   ordre: string;
@@ -23,22 +36,135 @@ interface Props {
 }
 
 /**
- * Les constats de la mission.
+ * Écriture des constats.
  *
- * Chaque champ suit la chaîne du pack, dans l'ordre. Le verrou est en bas : un constat
- * ne part au client que si sa référence est marquée vérifiée — la règle d'or rendue
- * mécanique plutôt que laissée à la vigilance en fin de journée.
+ * Seuls ceux qui demandent encore du travail sont ouverts. Un constat complet se replie
+ * sur une ligne : elle voit d'un coup d'œil ce qui lui reste, au lieu de faire défiler
+ * vingt formulaires identiques pour retrouver lesquels sont finis.
  */
 const Constats = ({ missionId, ordre, constats }: Props) => {
-  const publiables = constats.filter((c) => c.reference_checked !== "oui").length;
+  const analyses = constats.map((c) => ({ c, manques: cequiManque(c) }));
+  const aFinir = analyses.filter((a) => a.manques.length > 0);
+  const prets = analyses.filter((a) => a.manques.length === 0);
+  const publies = prets.filter((a) => a.c.visible_to_client).length;
+
+  const formulaire = (c: Constat, manques: string[], ouvert: boolean) => (
+    <form
+      action={enregistrerConstat}
+      className={`rounded border bg-[var(--anm-paper)] p-4 ${
+        ouvert ? "border-[var(--anm-hairline)]" : "border-transparent pt-2"
+      }`}
+    >
+      <input type="hidden" name="missionId" value={missionId} />
+      <input type="hidden" name="ordre" value={ordre} />
+      <input type="hidden" name="constatId" value={c.id} />
+
+      <label className="flex flex-col gap-1 text-xs">
+        Titre
+        <input name="title" defaultValue={c.title} className={`${champ} font-medium`} />
+      </label>
+
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs">
+          Le fait constaté
+          <textarea name="fact" rows={4} defaultValue={c.fact} className={champ} />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          La preuve — documents, dates, site, salarié
+          <textarea name="evidence" rows={4} defaultValue={c.evidence ?? ""} className={champ} />
+        </label>
+      </div>
+
+      <label className="mt-3 flex flex-col gap-1 text-xs">
+        La référence — texte applicable, article, date de vérification
+        <textarea name="reference" rows={2} defaultValue={c.reference ?? ""} className={champ} />
+      </label>
+
+      <label className="mt-3 flex flex-col gap-1 text-xs">
+        La recommandation — action, responsable, délai
+        <textarea
+          name="recommendation" rows={2} defaultValue={c.recommendation ?? ""}
+          placeholder="Il est recommandé de …, sous la responsabilité de …, avant le …"
+          className={champ}
+        />
+      </label>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs">
+          Criticité — fixe la priorité
+          <select name="severity" defaultValue={c.severity} className={champ}>
+            {CRITICITES.map((s) => (
+              <option key={s.valeur} value={s.valeur}>{s.label} → {s.priorite}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          Axe du rapport
+          <select name="nature" defaultValue={c.nature} className={champ}>
+            <option value="risque_controle">Risque réel en cas de contrôle</option>
+            <option value="amelioration">Axe d&apos;amélioration</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[var(--anm-hairline)] pt-3">
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" name="referenceVerifiee" defaultChecked={c.reference_checked === "oui"} />
+          Référence vérifiée et datée
+        </label>
+
+        {c.reference_checked === "oui" ? (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="publier" defaultChecked={c.visible_to_client} />
+            Publier au client
+          </label>
+        ) : (
+          <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
+            publication disponible une fois la référence vérifiée
+          </span>
+        )}
+
+        {manques.length > 0 ? (
+          <span className="text-xs text-[var(--anm-majeur)]">
+            manque : {manques.join(", ")}
+          </span>
+        ) : null}
+
+        <button
+          type="submit"
+          className="ml-auto rounded bg-[var(--anm-green)] px-3 py-1.5 text-sm font-medium text-[var(--anm-paper)]"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  );
+
+  const enTete = (c: Constat) => (
+    <span className="flex flex-1 flex-wrap items-baseline justify-between gap-2">
+      <span className="flex-1 font-medium">{c.title}</span>
+      <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
+        {c.code_point ?? "—"} · {c.domain}
+      </span>
+      <span
+        className="font-mono text-[0.68rem] uppercase tracking-wide"
+        style={{ color: COULEUR[c.severity] }}
+      >
+        {c.severity} · {c.priority}
+        {c.visible_to_client ? " · publié" : ""}
+      </span>
+    </span>
+  );
 
   return (
     <section>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-xl">Constats</h2>
-        <p className="font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-          {REGLE_OR.join(" → ")}
-        </p>
+        {constats.length > 0 ? (
+          <p className="font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
+            {aFinir.length} à finir · {prets.length} prêts · {publies} publiés
+          </p>
+        ) : null}
       </div>
 
       {constats.length === 0 ? (
@@ -49,137 +175,40 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
         </p>
       ) : null}
 
-      {publiables > 0 ? (
-        <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
-          {publiables} constat{publiables > 1 ? "s" : ""} sans référence vérifiée. Ils ne
-          peuvent pas être publiés au client tant que la référence n&apos;est pas confirmée et datée.
-        </p>
+      {aFinir.length > 0 ? (
+        <>
+          <p className="mt-5 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-majeur)]">
+            À finir — {aFinir.length}
+          </p>
+          <div className="mt-3 flex flex-col gap-4">
+            {aFinir.map(({ c, manques }) => (
+              <div key={c.id}>
+                <div className="mb-1 flex px-1 text-sm">{enTete(c)}</div>
+                {formulaire(c, manques, true)}
+              </div>
+            ))}
+          </div>
+        </>
       ) : null}
 
-      <div className="mt-5 flex flex-col gap-4">
-        {constats.map((c) => (
-          <form
-            key={c.id}
-            action={enregistrerConstat}
-            className="rounded border border-[var(--anm-hairline)] bg-[var(--anm-paper)] p-4"
-          >
-            <input type="hidden" name="missionId" value={missionId} />
-            <input type="hidden" name="ordre" value={ordre} />
-            <input type="hidden" name="constatId" value={c.id} />
-
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="font-mono text-[0.68rem] text-[var(--anm-muted)]">
-                {c.code_point ?? "—"} · {c.domain}
-              </span>
-              <span
-                className="font-mono text-[0.68rem] uppercase tracking-wide"
-                style={{ color: COULEUR[c.severity] }}
-              >
-                {c.severity} · {c.priority}
-                {c.visible_to_client ? " · publié" : ""}
-              </span>
-            </div>
-
-            <label className="mt-2 flex flex-col gap-1 text-xs">
-              Titre
-              <input
-                name="title" defaultValue={c.title}
-                className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm font-medium"
-              />
-            </label>
-
-            <div className="mt-3 grid gap-3 md:grid-cols-2">
-              <label className="flex flex-col gap-1 text-xs">
-                Le fait constaté
-                <textarea
-                  name="fact" rows={4} defaultValue={c.fact}
-                  className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-                />
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                La preuve — documents, dates, site, salarié
-                <textarea
-                  name="evidence" rows={4} defaultValue={c.evidence ?? ""}
-                  className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-                />
-              </label>
-            </div>
-
-            <label className="mt-3 flex flex-col gap-1 text-xs">
-              La référence — texte applicable, article, date de vérification
-              <textarea
-                name="reference" rows={2} defaultValue={c.reference ?? ""}
-                className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-              />
-            </label>
-
-            <label className="mt-3 flex flex-col gap-1 text-xs">
-              La recommandation — action, responsable, délai
-              <textarea
-                name="recommendation" rows={2} defaultValue={c.recommendation ?? ""}
-                placeholder="Il est recommandé de …, sous la responsabilité de …, avant le …"
-                className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-              />
-            </label>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <label className="flex flex-col gap-1 text-xs">
-                Criticité — fixe la priorité
-                <select
-                  name="severity" defaultValue={c.severity}
-                  className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-                >
-                  {CRITICITES.map((s) => (
-                    <option key={s.valeur} value={s.valeur}>{s.label} → {s.priorite}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                Axe du rapport
-                <select
-                  name="nature" defaultValue={c.nature}
-                  className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-                >
-                  <option value="risque_controle">Risque réel en cas de contrôle</option>
-                  <option value="amelioration">Axe d&apos;amélioration</option>
-                </select>
-              </label>
-              <label className="flex flex-col gap-1 text-xs">
-                Statut
-                <select
-                  name="statut" defaultValue={c.status}
-                  className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1.5 text-sm"
-                >
-                  <option value="ouvert">Ouvert</option>
-                  <option value="en_analyse">En analyse</option>
-                  <option value="valide">Validé</option>
-                  <option value="clos">Clos</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[var(--anm-hairline)] pt-3">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="referenceVerifiee" defaultChecked={c.reference_checked === "oui"} />
-                Référence vérifiée et datée
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="publier" defaultChecked={c.visible_to_client} />
-                Publier au client
-              </label>
-              <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
-                sans référence vérifiée, la publication est refusée
-              </span>
-              <button
-                type="submit"
-                className="ml-auto rounded bg-[var(--anm-green)] px-3 py-1.5 text-sm font-medium text-[var(--anm-paper)]"
-              >
-                Enregistrer
-              </button>
-            </div>
-          </form>
-        ))}
-      </div>
+      {prets.length > 0 ? (
+        <>
+          <p className="mt-8 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-mineur)]">
+            Prêts — {prets.length}
+          </p>
+          <div className="mt-1 flex flex-col">
+            {prets.map(({ c, manques }) => (
+              <details key={c.id} className="border-b border-[var(--anm-hairline)] last:border-b-0">
+                <summary className="flex cursor-pointer list-none items-baseline gap-2 py-2.5 text-sm marker:content-none">
+                  <span aria-hidden className="mt-1 text-[var(--anm-muted)]">›</span>
+                  {enTete(c)}
+                </summary>
+                <div className="pb-3">{formulaire(c, manques, false)}</div>
+              </details>
+            ))}
+          </div>
+        </>
+      ) : null}
     </section>
   );
 };

@@ -389,8 +389,8 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
       reference_checked: referenceVerifiee ? "oui" : "a_verifier",
       recommendation: String(formData.get("recommendation") ?? "").trim() || null,
       nature: String(formData.get("nature")),
-      status: String(formData.get("statut")),
-      // Verrou : pas de publication sans référence vérifiée.
+      // Verrou : pas de publication sans référence vérifiée. La case n'est même pas
+      // proposée tant que la référence ne l'est pas — pas de refus silencieux.
       visible_to_client: publier && referenceVerifiee,
     })
     .eq("id", constatId)

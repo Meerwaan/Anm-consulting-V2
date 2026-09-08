@@ -106,12 +106,29 @@ Elle ne rédige que ce qui est propre au dossier.
 **Étapes 11 et 12 (qualification)** — tous les constats, dans l'ordre de la chaîne du pack :
 fait, preuve, référence, recommandation, puis criticité, axe et statut.
 
+### Ce qui reste à faire est visible sans rien ouvrir
+
+Un constat n'est **fini** que quand la chaîne du pack est complète : le fait (pas la trame
+pré-remplie), la preuve, la référence, sa vérification, la recommandation. L'écran s'en sert :
+
+- en-tête de section : « 3 à finir · 4 prêts · 2 publiés » ;
+- les constats **à finir** sont ouverts, avec la liste de ce qui manque sous le formulaire ;
+- les constats **prêts** se replient sur une ligne, dépliables si besoin.
+
+Elle ne fait plus défiler vingt formulaires identiques pour retrouver lesquels sont finis.
+Sur les étapes de contrôle, un point qui porte un constat affiche « constat à finir » ou
+« constat prêt », en lien direct vers l'étape 11.
+
 ### Le verrou
 
-**Un constat ne part au client que si sa référence est marquée vérifiée.** Cocher
-« publier » sans cocher « référence vérifiée » ne publie rien — c'est refusé côté serveur,
-pas seulement grisé dans l'écran. La règle d'or du pack cesse de dépendre de la vigilance
-d'une fin de journée.
+**Un constat ne part au client que si sa référence est marquée vérifiée.** La case
+« publier » n'est même pas proposée tant que la référence ne l'est pas — pas de refus
+silencieux où elle croirait avoir publié. Le serveur refuse quand même en dernier recours.
+La règle d'or du pack cesse de dépendre de la vigilance d'une fin de journée.
+
+Un point de contrôle ne peut porter qu'**un** constat par mission (index unique, migration
+0014) : deux clics rapprochés sur « Rédiger le constat » ne créent plus de jumeaux, ce que
+la garde applicative seule laissait passer.
 
 **Étape 13 (plan d'actions)** — un bouton génère une action par constat qui n'en a pas
 encore, avec l'échéance conseillée : P1 à 7 jours, P2 à 30, P3 à 90, P4 à 180. Le client

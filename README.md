@@ -31,6 +31,7 @@ supabase/migrations/0010_textes_applicables.sql       # référentiel des codes 
 supabase/migrations/0011_categorie_sous_traitance.sql  # catégorie de pièces manquante
 supabase/migrations/0012_validite_pieces_et_rapprochements.sql  # durée de validité des pièces, échéances, contrôles croisés
 supabase/migrations/0013_echeances_correctifs.sql     # statut à la création + seuil d'effectif dans le déclencheur
+supabase/migrations/0014_un_constat_par_point.sql     # un seul constat par point de contrôle et par mission
 ```
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
