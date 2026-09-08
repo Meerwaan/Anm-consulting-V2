@@ -5,7 +5,10 @@ import type {
 } from "@/lib/types";
 
 export interface EnTeteMission extends Mission {
-  organisation: { id: string; name: string; headcount: number | null; establishments: number | null } | null;
+  organisation: {
+    id: string; name: string; headcount: number | null;
+    establishments: number | null; client_sites: number | null; activities: string[] | null;
+  } | null;
 }
 
 export interface HorsEtape {
@@ -20,7 +23,7 @@ export const lireMission = async (missionId: string): Promise<EnTeteMission | nu
   const { data } = await supabase
     .from("missions")
     .select(
-      "id, reference, type, status, opened_on, control_in_progress, control_body, control_deadline, intervention_on, scope, org_id, organisation:organizations (id, name, headcount, establishments)",
+      "id, reference, type, status, opened_on, control_in_progress, control_body, control_deadline, intervention_on, restitution_on, scope, initial_hotspots, org_id, organisation:organizations (id, name, headcount, establishments, client_sites, activities)",
     )
     .eq("id", missionId)
     .maybeSingle();

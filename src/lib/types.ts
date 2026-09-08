@@ -46,7 +46,9 @@ export interface Mission {
   control_body: string | null;
   control_deadline: string | null;
   intervention_on: string | null;
+  restitution_on: string | null;
   scope: string | null;
+  initial_hotspots: string | null;
   org_id: string;
 }
 

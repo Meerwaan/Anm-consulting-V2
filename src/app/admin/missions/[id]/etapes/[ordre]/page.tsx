@@ -10,6 +10,10 @@ import TextesApplicables from "@/components/portail/TextesApplicables";
 import Rapprochements from "@/components/portail/Rapprochements";
 import Constats from "@/components/portail/Constats";
 import PlanActions from "@/components/portail/PlanActions";
+import ClassementRisques from "@/components/portail/ClassementRisques";
+import FicheCadrage from "@/components/portail/FicheCadrage";
+import FichePerimetre from "@/components/portail/FichePerimetre";
+import EtapeGuidee from "@/components/portail/EtapeGuidee";
 import { OFFRES } from "@/content/offres";
 import {
   lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
@@ -136,21 +140,28 @@ export default async function EtapePage({ params }: Params) {
           <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
         ) : null}
 
-        {etape?.kind === "qualification" ? (
+        {etape?.kind === "entretien" ? <FicheCadrage mission={mission} /> : null}
+
+        {etape?.kind === "perimetre" ? <FichePerimetre mission={mission} /> : null}
+
+        {/* 11 on écrit les constats, 12 on les regarde classés : deux moments, deux écrans. */}
+        {etape?.kind === "qualification" && etape.sort_order === 11 ? (
           <Constats missionId={id} ordre={ordre} constats={constats} />
+        ) : null}
+
+        {etape?.kind === "qualification" && etape.sort_order !== 11 ? (
+          <ClassementRisques constats={constats} />
+        ) : null}
+
+        {etape && (etape.kind === "echantillon" || etape.kind === "rapport" || etape.kind === "restitution") ? (
+          <EtapeGuidee kind={etape.kind} />
         ) : null}
 
         {etape?.kind === "plan_actions" ? (
           <PlanActions missionId={id} ordre={ordre} actions={actions} constats={constats} />
         ) : null}
 
-        {etape && points.length === 0 && etape.kind !== "collecte" && etape.kind !== "rapprochement"
-         && etape.kind !== "qualification" && etape.kind !== "plan_actions" ? (
-          <section className="rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
-            Cette étape n&apos;a pas de point de contrôle : elle se travaille en notes, en entretien ou
-            en document. Les pièces déposées par le client restent accessibles depuis l&apos;étape 03.
-          </section>
-        ) : null}
+
 
         {etape ? <BlocNotes missionId={id} stepId={etape.step_id} ordre={ordre} notes={notes} /> : null}
       </div>

@@ -444,3 +444,53 @@ export const genererPlanActions = async (formData: FormData): Promise<void> => {
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
 };
+
+/** Étape 1 — ce que dit le dirigeant : contexte, contrôle en cours, points sensibles. */
+export const enregistrerCadrage = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+  const missionId = String(formData.get("missionId"));
+
+  await supabase
+    .from("missions")
+    .update({
+      control_in_progress: formData.get("controleEnCours") === "on",
+      control_body: String(formData.get("organisme") ?? "").trim() || null,
+      control_deadline: String(formData.get("echeance") ?? "").trim() || null,
+      initial_hotspots: String(formData.get("pointsSensibles") ?? "").trim() || null,
+      intervention_on: String(formData.get("intervention") ?? "").trim() || null,
+      restitution_on: String(formData.get("restitution") ?? "").trim() || null,
+    })
+    .eq("id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/1`);
+};
+
+/** Étape 2 — le périmètre : effectif, établissements, sites clients, ce qui est audité. */
+export const enregistrerPerimetre = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+  const missionId = String(formData.get("missionId"));
+  const orgId = String(formData.get("orgId"));
+  const entier = (v: FormDataEntryValue | null): number | null => {
+    const n = Number(String(v ?? "").trim());
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+
+  await Promise.all([
+    supabase
+      .from("organizations")
+      .update({
+        headcount: entier(formData.get("effectif")),
+        establishments: entier(formData.get("etablissements")),
+        client_sites: entier(formData.get("sitesClients")),
+      })
+      .eq("id", orgId),
+    supabase
+      .from("missions")
+      .update({ scope: String(formData.get("perimetre") ?? "").trim() || null })
+      .eq("id", missionId),
+  ]);
+
+  revalidatePath(`${chemin(missionId)}/etapes/2`);
+};
