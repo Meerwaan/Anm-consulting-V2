@@ -6,6 +6,7 @@ import TableauPoints from "@/components/portail/TableauPoints";
 import ListePieces from "@/components/portail/ListePieces";
 import BlocNotes from "@/components/portail/BlocNotes";
 import BarreEtape from "@/components/portail/BarreEtape";
+import TextesApplicables from "@/components/portail/TextesApplicables";
 import { OFFRES } from "@/content/offres";
 import {
   lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission, lireNotes,
@@ -108,6 +109,8 @@ export default async function EtapePage({ params }: Params) {
             </p>
           </header>
         )}
+
+        {domaines.length > 0 ? <TextesApplicables domaines={domaines} /> : null}
 
         {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} /> : null}
 

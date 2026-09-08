@@ -79,7 +79,7 @@ export const lirePointsDEtape = async (
   const [{ data: points }, { data: resultats }] = await Promise.all([
     supabase
       .from("control_points")
-      .select("id, code, domain, theme, subtheme, question, evidence, initial_risk, reference")
+      .select("id, code, domain, theme, subtheme, question, evidence, initial_risk, reference, reference_kind")
       .eq("active", true)
       .in("domain", domaines)
       .in("module_id", modules)

@@ -61,6 +61,9 @@ export interface AvancementEtape {
   points_traites: number;
 }
 
+/** Qualité de la référence héritée du pack. */
+export type NatureReference = "source" | "interne" | "a_qualifier";
+
 export interface PointDeControle {
   id: number;
   code: string;
@@ -71,6 +74,7 @@ export interface PointDeControle {
   evidence: string | null;
   initial_risk: Criticite;
   reference: string | null;
+  reference_kind: NatureReference;
 }
 
 export interface ResultatDePoint {
