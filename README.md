@@ -35,6 +35,7 @@ supabase/migrations/0014_un_constat_par_point.sql     # un seul constat par poin
 supabase/migrations/0015_constats_nettoyage_trame.sql  # retire la trame à trous et dépublie les constats incomplets
 supabase/migrations/0016_rang_rapport.sql             # rang 1-5 des constats prioritaires du rapport
 supabase/migrations/0017_vues_hors_portee_anonyme.sql  # retire les vues de la surface API anonyme
+supabase/migrations/0018_tout_au_rapport.sql          # le rapport contient tous les constats
 ```
 Avant toute PR touchant le portail : `python3 scripts/audit_coherence.py` — vérifie que chaque
 champ lu par une action serveur est bien envoyé par un formulaire, et que chaque valeur proposée

@@ -557,9 +557,11 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
 };
 
 /**
- * Étape 12 — ce qui entre dans le rapport, et dans quel ordre.
- * Le rang 1 à 5 désigne les « 5 constats prioritaires » qui ouvrent la synthèse dirigeant
- * (modèle de rapport 07). Ce choix se fait ici, pas au moment de rédiger.
+ * Étape 12 — la mise en avant dans la synthèse dirigeant.
+ *
+ * Le rapport contient TOUS les constats : c'est un dossier complet, rien ne s'en exclut.
+ * Ce rang 1 à 5 ne décide donc pas d'une inclusion, seulement de ce qui ouvre la synthèse
+ * (« les 5 constats prioritaires » du modèle 07). Le reste suit, classé par criticité.
  */
 export const definirPlaceDansRapport = async (formData: FormData): Promise<void> => {
   await exigerRole("consultant");
@@ -567,22 +569,19 @@ export const definirPlaceDansRapport = async (formData: FormData): Promise<void>
 
   const missionId = String(formData.get("missionId"));
   const constatId = String(formData.get("constatId"));
-  const dansRapport = formData.get("dansRapport") === "on";
   const rangBrut = String(formData.get("rang") ?? "").trim();
   const rang = rangBrut === "" ? null : Number(rangBrut);
 
   const { error } = await supabase
     .from("findings")
     .update({
-      in_report: dansRapport,
-      // Un constat hors rapport ne peut pas occuper une place du top 5.
-      report_rank: dansRapport && rang && rang >= 1 && rang <= 5 ? rang : null,
+      report_rank: rang && rang >= 1 && rang <= 5 ? rang : null,
     })
     .eq("id", constatId)
     .eq("mission_id", missionId);
 
   revalidatePath(`${chemin(missionId)}/etapes/12`);
-  retour(missionId, "12", error ? { erreur: error.message } : { ok: "Rapport mis à jour." });
+  retour(missionId, "12", error ? { erreur: error.message } : { ok: "Mise en avant enregistrée." });
 };
 
 /** Étape 13 — planifier une action : qui la fait, pour quand, où elle en est. */

@@ -15,21 +15,20 @@ interface Props {
 }
 
 /**
- * Étape 12 — ce qui entre dans le rapport, et dans quel ordre.
+ * Étape 12 — le classement, et ce qui ouvre la synthèse.
  *
- * La criticité se fixe en écrivant le constat (étape 11). Ici on décide : quels constats
- * figurent au rapport, et lesquels ouvrent la synthèse dirigeant. Le modèle de rapport 07
- * demande « les 5 constats prioritaires » — c'est ce choix-là, fait maintenant plutôt
- * qu'improvisé au moment de rédiger.
+ * Le rapport est un dossier complet : TOUS les constats y figurent, rien ne s'en exclut.
+ * On ne choisit donc pas ce qui entre, seulement ce qui est mis en avant — « les 5 constats
+ * prioritaires » du modèle 07, que le dirigeant lit en premier. Le reste suit, classé par
+ * criticité.
  */
 const ClassementRisques = ({ missionId, constats }: Props) => {
-  const retenus = constats.filter((c) => c.in_report);
-  const top = retenus
+  const top = constats
     .filter((c) => c.report_rank)
     .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
   const rangsUtilises = top.map((c) => c.report_rank);
   const doublons = rangsUtilises.filter((r, i) => rangsUtilises.indexOf(r) !== i);
-  const incomplets = retenus.filter((c) => c.reference_checked !== "oui").length;
+  const incomplets = constats.filter((c) => c.reference_checked !== "oui").length;
 
   if (constats.length === 0) {
     return (
@@ -44,16 +43,17 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
 
   return (
     <section>
-      <h2 className="text-xl">Ce qui entre dans le rapport</h2>
+      <h2 className="text-xl">Classement et mise en avant</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
-        Coche les constats à faire figurer, et donne un rang de 1 à 5 à ceux qui ouvriront la
-        synthèse dirigeant. L&apos;étape 14 assemble le rapport à partir de ce choix.
+        <strong>Les {constats.length} constats figureront au rapport</strong> — c&apos;est un
+        dossier complet, rien ne s&apos;en exclut. Donne un rang de 1 à 5 à ceux que le dirigeant
+        doit lire en premier : ils ouvrent la synthèse, le reste suit classé par criticité.
       </p>
 
       <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded border border-[var(--anm-hairline)] bg-[var(--anm-hairline)] sm:grid-cols-4">
         {NIVEAUX.map((n) => {
           const total = constats.filter((c) => c.severity === n.valeur).length;
-          const gardes = retenus.filter((c) => c.severity === n.valeur).length;
+          const misEnAvant = top.filter((c) => c.severity === n.valeur).length;
           return (
             <div key={n.valeur} className="bg-[var(--anm-paper)] p-3">
               <b
@@ -64,7 +64,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
               </b>
               <span className="mt-1 block text-sm font-medium">{n.label}</span>
               <span className="block font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
-                {gardes} au rapport · {n.traitement}
+                {misEnAvant > 0 ? `${misEnAvant} en avant · ` : ""}{n.traitement}
               </span>
             </div>
           );
@@ -78,13 +78,13 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       ) : null}
       {incomplets > 0 ? (
         <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
-          {incomplets} constat{incomplets > 1 ? "s" : ""} retenu{incomplets > 1 ? "s" : ""} sans
-          référence vérifiée — à régler à l&apos;étape 11 avant de sortir le rapport.
+          {incomplets} constat{incomplets > 1 ? "s" : ""} sans référence vérifiée — à régler à
+          l&apos;étape 11 avant de sortir le rapport.
         </p>
       ) : null}
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-        Les {top.length > 0 ? top.length : 5} constats prioritaires — synthèse dirigeant
+        Ce que le dirigeant lit en premier — {top.length} sur 5
       </p>
       {top.length === 0 ? (
         <p className="mt-2 text-sm text-[var(--anm-muted)]">
@@ -107,7 +107,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       )}
 
       <p className="mt-8 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-        Tous les constats — {retenus.length} sur {constats.length} retenus
+        Tous les constats — {constats.length}, tous au rapport
       </p>
       <div className="mt-1 flex flex-col">
         {NIVEAUX.flatMap((n) => constats.filter((c) => c.severity === n.valeur)).map((c) => (
@@ -132,12 +132,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
             </span>
 
             <label className="flex items-center gap-2 text-xs">
-              <input type="checkbox" name="dansRapport" defaultChecked={c.in_report} />
-              au rapport
-            </label>
-
-            <label className="flex items-center gap-2 text-xs">
-              rang
+              mettre en avant
               <select
                 name="rang"
                 defaultValue={c.report_rank ? String(c.report_rank) : ""}

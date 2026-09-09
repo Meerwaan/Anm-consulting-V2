@@ -149,19 +149,23 @@ coche ensuite ce qu'il a fait et la consultante est notifiée (décision 07).
 |---|---|---|
 | 6-9 | Point conforme ou en écart | Ouvre un constat pré-rempli |
 | **11** | On écrit le constat : fait, preuve, référence, recommandation, criticité, axe | La criticité fixe la priorité de l'action |
-| **12** | **Ce qui entre au rapport**, et le rang 1 à 5 des constats prioritaires | La synthèse dirigeant |
+| **12** | Le rang 1 à 5 des constats **mis en avant** | L'ouverture de la synthèse dirigeant |
 | **13** | **Qui fait quoi, pour quand** : responsable, échéance, statut. Actions libres possibles | Le plan remis au client |
 | **14** | Rien — on vérifie l'assemblage et ce qui bloque encore | Le PDF (à construire) |
 | 15 | La restitution | La proposition de suivi |
 
 Chaque étape décide quelque chose que la suivante utilise. Aucune ne répète la précédente.
 
-### 12 — ce qui entre dans le rapport
+### 12 — classement et mise en avant
 
-`findings.in_report` existait sans jamais servir, et rien ne portait l'ordre. La colonne
-`report_rank` (1 à 5) a été ajoutée : c'est ici qu'on choisit les **5 constats prioritaires**
-du modèle 07, pas au moment de rédiger. L'écran signale deux rangs identiques et les
-constats retenus dont la référence n'est pas vérifiée.
+**Le rapport contient tous les constats.** C'est un dossier complet : rien ne s'en exclut.
+Un constat relevé puis écarté du dossier serait un constat que le dirigeant ne verrait
+jamais — exactement ce qu'un audit doit empêcher.
+
+L'étape 12 ne choisit donc pas ce qui entre, seulement ce qui est **mis en avant** : le rang
+1 à 5 des constats que le dirigeant lit en premier (« les 5 constats prioritaires » du
+modèle 07). Le reste suit, classé par criticité. L'écran signale deux rangs identiques et
+les constats dont la référence n'est pas vérifiée.
 
 ### 13 — un plan réellement planifiable
 

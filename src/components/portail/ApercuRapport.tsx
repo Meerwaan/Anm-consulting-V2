@@ -23,18 +23,17 @@ interface Props {
  * Rien ne se ressaisit ici — tout vient du travail déjà fait.
  */
 const ApercuRapport = ({ mission, constats, actions }: Props) => {
-  const retenus = constats.filter((c) => c.in_report);
-  const top = retenus
+  const top = constats
     .filter((c) => c.report_rank)
     .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
-  const risques = retenus.filter((c) => c.nature === "risque_controle");
-  const ameliorations = retenus.filter((c) => c.nature === "amelioration");
+  const risques = constats.filter((c) => c.nature === "risque_controle");
+  const ameliorations = constats.filter((c) => c.nature === "amelioration");
 
   const bloquants: string[] = [];
-  if (retenus.length === 0) bloquants.push("aucun constat n'est retenu pour le rapport (étape 12)");
-  if (top.length === 0 && retenus.length > 0) bloquants.push("aucun rang 1 à 5 attribué (étape 12)");
-  const sansRef = retenus.filter((c) => c.reference_checked !== "oui").length;
-  if (sansRef > 0) bloquants.push(`${sansRef} constat(s) retenu(s) sans référence vérifiée (étape 11)`);
+  if (constats.length === 0) bloquants.push("aucun constat n'a été écrit (étape 11)");
+  if (top.length === 0 && constats.length > 0) bloquants.push("aucun constat mis en avant pour la synthèse (étape 12)");
+  const sansRef = constats.filter((c) => c.reference_checked !== "oui").length;
+  if (sansRef > 0) bloquants.push(`${sansRef} constat(s) sans référence vérifiée (étape 11)`);
   const sansResp = actions.filter((a) => !a.client_owner).length;
   if (sansResp > 0) bloquants.push(`${sansResp} action(s) sans responsable (étape 13)`);
   const sansDate = actions.filter((a) => !a.due_on).length;
@@ -44,7 +43,8 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
     <section>
       <h2 className="text-xl">Ce que contiendra le rapport</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
-        Assemblé depuis les étapes 11 à 13. Rien ne se ressaisit ici.
+        Un dossier complet : les {constats.length} constats y figurent, plus le plan d&apos;actions
+        et les pièces. Assemblé depuis les étapes 11 à 13, rien ne se ressaisit ici.
       </p>
 
       {bloquants.length > 0 ? (
@@ -62,7 +62,7 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
       )}
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-        Synthèse dirigeant — {top.length} constat{top.length > 1 ? "s" : ""} prioritaire{top.length > 1 ? "s" : ""}
+        Synthèse dirigeant — {top.length} constat{top.length > 1 ? "s" : ""} mis en avant
       </p>
       <ol className="mt-1 flex flex-col">
         {top.map((c) => (
@@ -76,7 +76,7 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
             </span>
           </li>
         ))}
-        {top.length === 0 ? <li className="py-2 text-sm text-[var(--anm-muted)]">— à choisir à l&apos;étape 12</li> : null}
+        {top.length === 0 ? <li className="py-2 text-sm text-[var(--anm-muted)]">— à désigner à l&apos;étape 12</li> : null}
       </ol>
 
       <div className="mt-7 grid gap-6 md:grid-cols-2">
