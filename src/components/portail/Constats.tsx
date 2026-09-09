@@ -1,6 +1,7 @@
 import type { Constat } from "@/lib/types";
 import { ajouterConstatLibre, enregistrerConstat, supprimerConstat } from "@/app/admin/actions";
 import { CRITICITES, DOMAINES, cequiManque, jour } from "@/content/constat";
+import { FORMULE_CONSTAT, REGLE_OR } from "@/content/methode";
 
 const COULEUR: Record<string, string> = {
   critique: "var(--anm-critique)",
@@ -85,6 +86,23 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           <Rappel texte={c.preuve_attendue ? `À examiner : ${c.preuve_attendue}` : null} />
         </label>
       </div>
+
+      <label className="mt-3 flex flex-col gap-1 text-xs">
+        <span className="flex items-baseline gap-2">
+          Le risque encouru — ce que le dirigeant retient <ARemplir si={!rempli(c.risk)} />
+        </span>
+        <textarea
+          name="risk" rows={2} defaultValue={c.risk ?? ""}
+          placeholder={FORMULE_CONSTAT.risque}
+          className={champ}
+        />
+        <span className="text-[0.7rem] leading-snug text-[var(--anm-muted)]">
+          Requalification, redressement, sanction, retrait d&apos;autorisation… La criticité
+          dit dans quel ordre traiter ; le risque dit ce qu&apos;il encourt. Formulé sous
+          réserve de confirmation de la règle applicable — la qualification juridique revient
+          à l&apos;avocat ou à l&apos;expert-comptable.
+        </span>
+      </label>
 
       <label className="mt-3 flex flex-col gap-1 text-xs">
         <span className="flex items-baseline gap-2">
@@ -230,6 +248,11 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           </p>
         ) : null}
       </div>
+      {/* La règle d'or (01 Bible §1), affichée là où elle s'applique : c'est elle que
+          reprend le contrôle de complétude, maillon par maillon. */}
+      <p className="mt-1 font-mono text-[0.66rem] uppercase tracking-widest text-[var(--anm-muted)]">
+        {REGLE_OR.join(" → ")}
+      </p>
 
       {constats.length === 0 ? (
         <p className="mt-3 rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">

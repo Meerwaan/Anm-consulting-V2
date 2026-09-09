@@ -143,6 +143,8 @@ export interface Constat {
   title: string;
   fact: string;
   evidence: string | null;
+  /** Ce que la situation expose, sous réserve de confirmation de la règle applicable. */
+  risk: string | null;
   severity: Criticite;
   reference: string | null;
   reference_checked: "oui" | "non" | "na" | "a_verifier";

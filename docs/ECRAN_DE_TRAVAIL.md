@@ -103,8 +103,28 @@ constat ». Le constat s'ouvre déjà rempli avec ce que le référentiel sait :
 
 Elle ne rédige que ce qui est propre au dossier.
 
-**Étapes 11 et 12 (qualification)** — tous les constats, dans l'ordre de la chaîne du pack :
-fait, preuve, référence, recommandation, puis criticité, axe et statut.
+**Étapes 11 et 12 (qualification)** — tous les constats, dans l'ordre de la règle d'or :
+fait, preuve, **risque encouru**, référence vérifiée, action et délai, puis criticité et axe.
+
+### La règle d'or, en entier
+
+`FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI` (01 Bible §1). La fiche n'en
+portait que cinq maillons : **le risque encouru n'existait ni comme champ ni comme colonne**,
+alors que le sous-titre de l'étape 11 le promettait et que la formule type (01 annexe 2)
+l'écrit mot pour mot. Corrigé en migration 0021.
+
+Une criticité n'est pas un risque. « Critique » dit à la consultante dans quel ordre traiter ;
+ça ne dit pas au dirigeant qu'il encourt une requalification en travail dissimulé, un
+redressement ou un retrait d'autorisation. C'est cette phrase-là qu'il retient et qui justifie
+la mission — et c'est celle que le pack demande d'écrire.
+
+Le champ reste **factuel et prudent** : la formule affichée en filigrane est « Cette situation
+peut exposer l'entreprise à …, sous réserve de confirmation de la règle applicable ». Le
+portail ne qualifie pas juridiquement ; il décrit une exposition et renvoie la qualification à
+l'avocat ou à l'expert-comptable (règle de conception 1).
+
+La chaîne est affichée en haut de l'étape 11 : c'est elle, maillon par maillon, que reprend le
+contrôle de complétude.
 
 ### Ce qui reste à faire est visible sans rien ouvrir
 
@@ -215,7 +235,7 @@ pas, écrire « publié » ferait croire à un envoi qui n'a pas lieu.
 | Étape | Ce qu'on y décide | Ce que ça alimente |
 |---|---|---|
 | 6-9 | Point conforme ou en écart | Ouvre un constat pré-rempli |
-| **11** | On écrit le constat : fait, preuve, référence, recommandation, criticité, axe | La criticité fixe la priorité de l'action |
+| **11** | On écrit le constat : fait, preuve, risque encouru, référence, recommandation, criticité, axe | La criticité fixe la priorité de l'action |
 | **12** | Le rang 1 à 5 des constats **mis en avant** | L'ouverture de la synthèse dirigeant |
 | **13** | **Qui fait quoi, pour quand** : responsable, échéance, statut. Actions libres possibles | Le plan remis au client |
 | **14** | Rien — on vérifie l'assemblage et ce qui bloque encore | Le PDF (à construire) |

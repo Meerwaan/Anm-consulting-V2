@@ -357,6 +357,7 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
       // Ce que dit le référentiel est affiché SOUS le champ, pas dedans.
       fact: resultat?.note?.trim() ?? "",
       evidence: "",
+      risk: null,
       severity: criticite,
       control_status: resultat?.status ?? "non_conforme",
       // Le texte est proposé, jamais présumé vérifié : c'est la règle d'or du pack.
@@ -418,6 +419,7 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
 
   const fait = String(formData.get("fact") ?? "").trim();
   const preuve = String(formData.get("evidence") ?? "").trim();
+  const risque = String(formData.get("risk") ?? "").trim();
   const reference = String(formData.get("reference") ?? "").trim();
   const reco = String(formData.get("recommendation") ?? "").trim();
 
@@ -429,6 +431,7 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
   const manques = cequiManque({
     fact: fait,
     evidence: preuve,
+    risk: risque,
     reference,
     reference_checked: referenceVerifiee ? "oui" : "a_verifier",
     recommendation: reco,
@@ -457,6 +460,7 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
       title: String(formData.get("title") ?? "").trim() || "Constat",
       fact: fait,
       evidence: preuve || null,
+      risk: risque || null,
       severity,
       priority: PRIORITE_PAR_CRITICITE[severity] ?? "P3",
       reference: reference || null,
@@ -699,6 +703,7 @@ export const ajouterConstatLibre = async (formData: FormData): Promise<void> => 
     title: titre,
     fact: "",
     evidence: null,
+    risk: null,
     severity: criticite,
     control_status: null,
     reference: null,

@@ -46,15 +46,21 @@ const rempli = (v: string | null | undefined): boolean => Boolean(v && v.trim().
 export interface PiecesDuConstat {
   fact: string | null | undefined;
   evidence: string | null | undefined;
+  risk: string | null | undefined;
   reference: string | null | undefined;
   reference_checked: string | null | undefined;
   recommendation: string | null | undefined;
 }
 
 /**
- * Ce qui manque à un constat pour être publiable, dans l'ordre de la chaîne du pack :
- * fait → preuve → référence vérifiée → recommandation. La chaîne est indivisible ;
- * un maillon absent rend le constat inutilisable devant un contrôleur.
+ * Ce qui manque à un constat pour être publiable, dans l'ordre de la règle d'or
+ * (01 Bible §1) : fait → preuve → risque → référence vérifiée → action → délai.
+ * La chaîne est indivisible ; un maillon absent rend le constat inutilisable devant un
+ * contrôleur.
+ *
+ * Le risque encouru n'est pas la criticité. « Critique » dit à la consultante dans quel
+ * ordre traiter ; ça ne dit pas au dirigeant ce qu'il encourt, et c'est cette phrase-là
+ * qu'il retient.
  *
  * `[fait précis` reste testé : une ancienne trame à trous pré-remplissait ce champ, et
  * un encadré plein à l'œil mais vide au fond a déjà été publié à un client.
@@ -63,6 +69,7 @@ export const cequiManque = (c: PiecesDuConstat): string[] => {
   const manques: string[] = [];
   if (!rempli(c.fact) || (c.fact ?? "").includes("[fait précis")) manques.push("le fait");
   if (!rempli(c.evidence)) manques.push("la preuve");
+  if (!rempli(c.risk)) manques.push("le risque encouru");
   if (!rempli(c.reference)) manques.push("la référence");
   else if (c.reference_checked !== "oui") manques.push("la vérification de la référence");
   if (!rempli(c.recommendation)) manques.push("la recommandation");
