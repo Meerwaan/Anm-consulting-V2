@@ -336,3 +336,79 @@ ressaisit.
 
 - Dépôt de pièce côté client et fil d'échange.
 - Job d'envoi Resend sur la vue `document_requests_a_relancer`.
+
+## Ce que l'audit croisé code / pack a trouvé (09/09)
+
+Un essaim de 37 agents a croisé le portail avec les sept documents du pack sur sept
+dimensions — chaîne du constat, échantillonnage, structure du rapport, phases et
+restitution, pièces et entretien, contrôles croisés et visite de site, règles
+professionnelles. **30 écarts remontés, 19 réfutés par des sceptiques chargés de les
+démolir, 11 confirmés.** Le taux de réfutation est le chiffre important : deux
+accusations sur trois ne tenaient pas devant le code.
+
+### Une pièce jamais reçue s'affichait « Reçue »
+
+`mission_documents_validite` testait `validite_nature = 'indefinie'` **avant**
+`received <> 'oui'`. Les 29 modèles sur 37 sans durée de péremption — registre du
+personnel, DPAE, contrats, bulletins, plannings, pointages — basculaient en
+« sans_objet », que `ListePieces.tsx` affiche en vert avec le mot « Reçue ». Sur la
+mission Secu 91 : **23 pièces dans cet état, jamais reçues, et l'en-tête annonçait 4
+manquantes au lieu de 27**. La phase de collecte du pack ne fonctionnait que pour huit
+documents sur trente-sept.
+
+« Sans objet » ne veut plus dire qu'une chose : ce document ne s'applique pas à cette
+entreprise (seuil d'effectif). Un état `recue` distinct dit « reçu, rien à surveiller ».
+
+### Le deuxième site écrasait le premier
+
+`mission_reconciliations` n'acceptait qu'une ligne par `(mission, kind)`. La procédure §7
+dit « prendre un site client et un mois représentatif » et le §5 demande d'élargir quand
+une anomalie sérieuse apparaît : saisir un second site remplaçait silencieusement les
+chiffres du premier. Colonne `site`, unicité sur `(mission, kind, période, site)`, et
+l'écran porte autant de lignes que la mission en demande.
+
+### La section 7 du rapport n'était pas produisible
+
+Le modèle 07 impose un tableau **par salarié** : Salarié | Période | Planning | Pointage |
+Payé | Facturé | Écart. Le portail ne stockait que deux totaux par type de croisement :
+la section devait se retaper à la main dans Word, agent par agent, à partir de chiffres
+qu'il avait déjà. `mission_heures_agent` (migration 0026) porte la table du rapport, avec
+les trois écarts calculés et aucune tolérance — la procédure §7 dit « investiguer tout
+écart ».
+
+### Le questionnaire d'entretien du dirigeant
+
+Quinze questions dans le pack (§4), zéro dans le portail : l'étape 01 ne demandait que six
+champs administratifs. Deux agents indépendants, sur deux dimensions différentes, ont
+trouvé le même manque. Ces réponses orientent l'échantillon de l'étape 05 et les contrôles
+croisés de l'étape 10 — « quel document fait foi pour les heures ? » décide de ce qu'on
+croise. Migration 0025 ; la colonne « preuve à demander » du pack est là.
+
+### L'échantillonnage
+
+Les quatre tranches chiffrées du §5 n'étaient nulle part alors que l'effectif est saisi à
+l'étape 02. Les huit profils obligatoires étaient réduits à quatre, et ceux qui sautaient
+portent le risque : le CDD, l'agent en heures supplémentaires, le départ récent, le
+salarié par sous-traitant. L'écran y avait ajouté « au moins un site à effectif tournant
+et un site isolé » — un critère que le pack n'écrit nulle part.
+
+On **affiche** la règle du pack et on met en évidence la tranche du client ; on ne calcule
+pas un nombre à sa place, et on ne borne pas « très petite entreprise », que le pack ne
+chiffre pas.
+
+### Trois autres
+
+L'ordre du jour minuté de la restitution (§11, six blocs) n'était nulle part. Les pièces
+que le pack ne demande que « si applicable » étaient toutes créées obligatoires — une
+société de huit agents se voyait réclamer des PV de CSE. Et `DOMAINES_RAPPORT` ajoutait un
+septième domaine « Fiscal (à intégrer au modèle 07) » à une section qui en compte six : ce
+libellé de note interne serait parti comme titre de sous-section dans un document client.
+
+### La leçon
+
+Sur les onze écarts confirmés, **six étaient des valeurs inventées** — un chiffre, un
+seuil, un critère, un plafond que le portail imposait sans qu'aucune phrase du pack ne le
+justifie. C'est la famille de défaut la plus dangereuse ici, parce qu'elle ne se voit pas :
+l'écran a l'air d'appliquer une méthode, et personne ne sait que ce n'est pas la sienne.
+La question à poser devant chaque compteur reste : **est-ce sa règle, ou est-ce ce qui
+rentrait dans le Word ?**

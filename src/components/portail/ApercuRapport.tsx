@@ -1,4 +1,4 @@
-import type { ActionPlan, Constat } from "@/lib/types";
+import type { ActionPlan, Constat, HeuresAgent } from "@/lib/types";
 import type { EnTeteMission } from "@/lib/portail/mission";
 import { SECTIONS_RAPPORT } from "@/content/methode";
 import { AXES_RAPPORT, axeIncoherent } from "@/content/vision";
@@ -15,6 +15,8 @@ interface Props {
   mission: EnTeteMission;
   constats: Constat[];
   actions: ActionPlan[];
+  /** Section 7 du modèle 07 : les heures reconstituées agent par agent. */
+  heures: HeuresAgent[];
 }
 
 /**
@@ -23,13 +25,15 @@ interface Props {
  * Écran de vérification avant génération : ce qui est prêt, et ce qui bloque encore.
  * Rien ne se ressaisit ici — tout vient du travail déjà fait.
  */
-const ApercuRapport = ({ mission, constats, actions }: Props) => {
+const ApercuRapport = ({ mission, constats, actions, heures }: Props) => {
   const top = constats
     .filter((c) => c.report_rank)
     .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
   const risques = constats.filter((c) => c.nature === "risque_controle");
   const aOrienter = constats.filter((c) => c.escalation && c.escalation !== "aucune");
   const sansEscalade = constats.filter((c) => !c.escalation).length;
+  const heuresAInvestiguer = heures.filter((h) => h.a_investiguer).length;
+  const heuresIncompletes = heures.filter((h) => h.incomplet).length;
   const ameliorations = constats.filter((c) => c.nature === "amelioration");
 
   const bloquants: string[] = [];
@@ -65,6 +69,11 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
   // n'est pas un oubli. La compter manquante forçait à inventer une échéance.
   const sansDate = actions.filter((a) => !a.due_on && a.priority !== "P4").length;
   if (sansDate > 0) bloquants.push(`${sansDate} action(s) sans échéance (étape 13)`);
+  // La section 7 du rapport est un tableau par salarié : sans une seule ligne, elle sort vide.
+  if (heures.length === 0)
+    bloquants.push("aucune heure reconstituée agent par agent — la section 7 du rapport serait vide (étape 10)");
+  if (heuresIncompletes > 0)
+    bloquants.push(`${heuresIncompletes} ligne(s) d'heures où une des quatre sources manque (étape 10)`);
   const malClasses = constats.filter((c) => axeIncoherent(c.nature, c.severity)).length;
   if (malClasses > 0)
     bloquants.push(
@@ -143,6 +152,41 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
           );
         })}
       </div>
+
+      <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
+        Contrôle croisé par salarié — {heures.length} ligne{heures.length > 1 ? "s" : ""}
+      </p>
+      <ul className="mt-1 flex flex-col">
+        {heures.slice(0, 8).map((h) => (
+          <li key={h.id} className="flex flex-wrap items-baseline gap-x-3 border-b border-[var(--anm-hairline)] py-1.5 text-sm last:border-b-0">
+            <span className="font-medium">{h.salarie}</span>
+            <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
+              {[h.site, h.periode].filter(Boolean).join(" · ") || "—"}
+            </span>
+            <span className="font-mono text-[0.66rem] tabular-nums text-[var(--anm-muted)]">
+              {h.planning ?? "—"} / {h.pointage ?? "—"} / {h.paye ?? "—"} / {h.facture ?? "—"}
+            </span>
+            {h.a_investiguer ? (
+              <span className="font-mono text-[0.64rem] uppercase" style={{ color: "var(--anm-critique)" }}>
+                écart
+              </span>
+            ) : null}
+          </li>
+        ))}
+        {heures.length > 8 ? (
+          <li className="py-1.5 text-sm text-[var(--anm-muted)]">… et {heures.length - 8} autre(s).</li>
+        ) : null}
+        {heures.length === 0 ? (
+          <li className="py-1.5 text-sm text-[var(--anm-muted)]">
+            — rien de saisi : la section 7 du rapport sortirait vide. Elle se remplit à l&apos;étape 10.
+          </li>
+        ) : (
+          <li className="py-1.5 text-[0.7rem] text-[var(--anm-muted)]">
+            planning / pointage / payé / facturé
+            {heuresAInvestiguer > 0 ? ` · ${heuresAInvestiguer} ligne(s) portent un écart à investiguer` : ""}
+          </li>
+        )}
+      </ul>
 
       {/* Modèle 07 §9 : « les éventuels sujets à faire valider par avocat /
           expert-comptable / autre spécialiste ». La liste se déduit des constats. */}

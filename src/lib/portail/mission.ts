@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
   ActionPlan, AvancementEtape, Constat, LigneRapprochement, Mission, PointDeControle,
-  ReponseEntretien, ResultatDePoint, ValiditePiece,
+  HeuresAgent, ReponseEntretien, ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
 export interface EnTeteMission extends Mission {
@@ -210,4 +210,16 @@ export const lireReponsesEntretien = async (missionId: string): Promise<ReponseE
     .select("question_code, reponse, preuve")
     .eq("mission_id", missionId);
   return (data as ReponseEntretien[] | null) ?? [];
+};
+
+/** Section 7 du rapport : les heures reconstituées agent par agent (07 §7). */
+export const lireHeuresAgents = async (missionId: string): Promise<HeuresAgent[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_heures_agent_ecarts")
+    .select("id, salarie, site, periode, planning, pointage, paye, facture, conclusion, ecart_planning_pointage, ecart_pointage_paye, ecart_paye_facture, a_investiguer, incomplet")
+    .eq("mission_id", missionId)
+    .order("site", { nullsFirst: true })
+    .order("salarie");
+  return (data as HeuresAgent[] | null) ?? [];
 };

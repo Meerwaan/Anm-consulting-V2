@@ -901,3 +901,65 @@ export const enregistrerReponseEntretien = async (formData: FormData): Promise<v
   revalidatePath(`${chemin(missionId)}/etapes/1`);
   retour(missionId, "1", error ? { erreur: error.message } : { ok: "Réponse enregistrée." });
 };
+
+/**
+ * Étape 10 — la section 7 du rapport, agent par agent.
+ *
+ * Le modèle 07 impose « Salarié | Période | Planning | Pointage | Payé | Facturé |
+ * Écart / conclusion ». Le portail ne stockait que des totaux : la section devait se
+ * remplir à la main dans Word à partir de chiffres qu'il avait déjà.
+ */
+export const enregistrerHeuresAgent = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const ligneId = String(formData.get("ligneId") ?? "").trim();
+  const salarie = String(formData.get("salarie") ?? "").trim();
+  if (!salarie) retour(missionId, "10", { erreur: "Une ligne a besoin d'un nom de salarié." });
+
+  const nombre = (n: FormDataEntryValue | null): number | null => {
+    const v = String(n ?? "").replace(",", ".").trim();
+    return v === "" || Number.isNaN(Number(v)) ? null : Number(v);
+  };
+  const { data: utilisateur } = await supabase.auth.getUser();
+  const valeurs = {
+    salarie,
+    site: String(formData.get("site") ?? "").trim() || null,
+    periode: String(formData.get("periode") ?? "").trim() || null,
+    planning: nombre(formData.get("planning")),
+    pointage: nombre(formData.get("pointage")),
+    paye: nombre(formData.get("paye")),
+    facture: nombre(formData.get("facture")),
+    conclusion: String(formData.get("conclusion") ?? "").trim() || null,
+    updated_at: new Date().toISOString(),
+    updated_by: utilisateur.user?.id ?? null,
+  };
+
+  const { error } = ligneId
+    ? await supabase.from("mission_heures_agent").update(valeurs).eq("id", ligneId).eq("mission_id", missionId)
+    : await supabase.from("mission_heures_agent").insert({ mission_id: missionId, ...valeurs });
+
+  revalidatePath(`${chemin(missionId)}/etapes/10`);
+  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  retour(missionId, "10", error
+    ? { erreur: error.message.includes("heures_agent_uniq")
+        ? "Cet agent a déjà une ligne pour ce site et cette période."
+        : error.message }
+    : { ok: ligneId ? "Ligne mise à jour." : `Ligne ajoutée pour ${salarie}.` });
+};
+
+/** Étape 10 — retirer une ligne d'heures saisie par erreur. */
+export const supprimerHeuresAgent = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+  const missionId = String(formData.get("missionId"));
+  const { error } = await supabase
+    .from("mission_heures_agent")
+    .delete()
+    .eq("id", String(formData.get("ligneId")))
+    .eq("mission_id", missionId);
+  revalidatePath(`${chemin(missionId)}/etapes/10`);
+  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  retour(missionId, "10", error ? { erreur: error.message } : { ok: "Ligne supprimée." });
+};

@@ -197,3 +197,24 @@ export interface ActionPlan {
   /** Titre du constat d'origine, quand l'action en vient. */
   constat?: string | null;
 }
+
+/**
+ * Une ligne de la section 7 du rapport (07 §7) : la reconstitution d'une prestation
+ * pour un agent, sur un site et une période, à partir de quatre sources indépendantes.
+ */
+export interface HeuresAgent {
+  id: string;
+  salarie: string;
+  site: string | null;
+  periode: string | null;
+  planning: number | null;
+  pointage: number | null;
+  paye: number | null;
+  facture: number | null;
+  conclusion: string | null;
+  ecart_planning_pointage: number | null;
+  ecart_pointage_paye: number | null;
+  ecart_paye_facture: number | null;
+  a_investiguer: boolean;
+  incomplet: boolean;
+}

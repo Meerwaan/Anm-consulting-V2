@@ -8,6 +8,7 @@ import BlocNotes from "@/components/portail/BlocNotes";
 import BarreEtape from "@/components/portail/BarreEtape";
 import TextesApplicables from "@/components/portail/TextesApplicables";
 import Rapprochements from "@/components/portail/Rapprochements";
+import HeuresParAgent from "@/components/portail/HeuresParAgent";
 import Constats from "@/components/portail/Constats";
 import PlanActions from "@/components/portail/PlanActions";
 import ClassementRisques from "@/components/portail/ClassementRisques";
@@ -18,7 +19,7 @@ import ApercuRapport from "@/components/portail/ApercuRapport";
 import { OFFRES } from "@/content/offres";
 import {
   lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
-  lireNotes, lireObjectifEtape, lireRapprochements, lireReponsesEntretien,
+  lireHeuresAgents, lireNotes, lireObjectifEtape, lireRapprochements, lireReponsesEntretien,
   lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
@@ -33,7 +34,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
   const { id, ordre } = await params;
   const { ok, erreur } = await searchParams;
 
-  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien] =
+  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien, heures] =
     await Promise.all([
       lireMission(id),
       lireEtapes(id),
@@ -43,6 +44,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
       lireConstats(id),
       lireActions(id),
       lireReponsesEntretien(id),
+      lireHeuresAgents(id),
     ]);
   if (!mission || etapes.length === 0) notFound();
 
@@ -162,7 +164,11 @@ export default async function EtapePage({ params, searchParams }: Params) {
         ) : null}
 
         {etape?.kind === "rapprochement" ? (
-          <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
+          <>
+            <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
+            {/* La section 7 du rapport se remplit ici, pas à la main dans Word. */}
+            <HeuresParAgent missionId={id} lignes={heures} />
+          </>
         ) : null}
 
         {etape?.kind === "entretien" ? <FicheCadrage mission={mission} reponses={entretien} /> : null}
@@ -179,7 +185,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
         ) : null}
 
         {etape?.kind === "rapport" ? (
-          <ApercuRapport mission={mission} constats={constats} actions={actions} />
+          <ApercuRapport mission={mission} constats={constats} actions={actions} heures={heures} />
         ) : null}
 
         {etape && (etape.kind === "echantillon" || etape.kind === "restitution") ? (
