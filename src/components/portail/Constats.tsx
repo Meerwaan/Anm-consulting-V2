@@ -1,6 +1,6 @@
 import type { Constat } from "@/lib/types";
 import { ajouterConstatLibre, enregistrerConstat, supprimerConstat } from "@/app/admin/actions";
-import { CRITICITES, DOMAINES, cequiManque, jour } from "@/content/constat";
+import { CRITICITES, DOMAINES, ESCALADES, cequiManque, jour } from "@/content/constat";
 import { FORMULE_CONSTAT, REGLE_OR } from "@/content/methode";
 
 const COULEUR: Record<string, string> = {
@@ -121,6 +121,38 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           className={champ}
         />
       </label>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="flex items-baseline gap-2">
+            Escalade — qui doit reprendre le sujet
+            {c.escalation ? null : (
+              <span className="font-mono text-[0.6rem] uppercase tracking-wider text-[var(--anm-muted)]">
+                à trancher
+              </span>
+            )}
+          </span>
+          <select name="escalation" defaultValue={c.escalation ?? ""} className={champ}>
+            <option value="">— pas encore tranché</option>
+            {ESCALADES.map((e) => (
+              <option key={e.valeur} value={e.valeur}>{e.libelle}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          Escalade — pourquoi, en une ligne
+          <input
+            name="escalationNote" defaultValue={c.escalation_note ?? ""}
+            placeholder="Ce qui dépasse le périmètre : interprétation, contentieux, requalification…"
+            className={champ}
+          />
+        </label>
+      </div>
+      <p className="mt-1 text-[0.7rem] leading-snug text-[var(--anm-muted)]">
+        Sixième maillon de la chaîne du Manuel de terrain. C&apos;est la frontière de ton
+        périmètre : « je ne remplace ni l&apos;avocat ni l&apos;expert-comptable ». Le rapport
+        en tire la liste des sujets à faire valider.
+      </p>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">

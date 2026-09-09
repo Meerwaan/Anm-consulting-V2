@@ -126,6 +126,51 @@ l'avocat ou à l'expert-comptable (règle de conception 1).
 La chaîne est affichée en haut de l'étape 11 : c'est elle, maillon par maillon, que reprend le
 contrôle de complétude.
 
+### L'escalade — le maillon qui protège la consultante
+
+Le Manuel de terrain énumère **six** éléments de constat : Fait, Preuve, Risque, Référence,
+Action, **Escalade** — « avocat, expert-comptable ou autre spécialiste lorsque le sujet
+dépasse votre périmètre ». Chaque fiche de la Bible et du Manuel porte une section « Quand
+escalader ». Le modèle 07 §9 demande les sujets à faire valider. Le corrigé du cas 01 en fait
+un tableau entier.
+
+Dans le portail, « avocat » et « expert-comptable » n'apparaissaient **que sur la vitrine**.
+Aucun constat ne pouvait porter cette décision — alors que c'est la frontière de responsabilité
+de la consultante et le cœur de son positionnement : « je ne remplace ni l'avocat ni
+l'expert-comptable ».
+
+Chaque constat porte désormais un spécialiste (les six que nomme le pack, plus « aucune ») et
+une ligne d'explication. L'étape 14 en tire la section « Sujets à faire valider par un
+spécialiste », groupée par métier. Migration 0023.
+
+**Question ouverte pour Sofia** : l'escalade doit-elle être obligatoire sur un constat critique
+ou majeur avant publication ? Elle n'est aujourd'hui pas bloquante — une décision non prise
+s'affiche « à trancher ».
+
+### Les délais du plan sont ceux du pack
+
+`P1 immédiat · P2 sous 30 jours · P3 sous 90 jours · P4 amélioration continue` — la procédure
+§10, le Manuel de terrain et le modèle 07 §3 disent la même chose, mot pour mot.
+
+Le code posait **P1 à 7 jours** et **P4 à 180 jours**. Deux chiffres inventés. « Immédiat »
+n'est pas « sous une semaine » : un P1, c'est un titre manquant, du travail dissimulé ou un
+risque santé-sécurité grave — écrire J+7 sur le plan remis au dirigeant lui accorde une semaine
+que la méthode ne lui donne pas. Et « amélioration continue » n'a pas de date : en inventer une
+fabrique une échéance que personne n'a décidée et qui déclenchera des relances. Une action P4
+naît donc **sans échéance**, et son absence n'est pas comptée comme un oubli.
+
+### Les tolérances des contrôles croisés repassent à zéro
+
+La procédure §7 dit : « **investiguer tout écart** — erreur de saisie, remplacement, heure non
+payée, heure non déclarée, double facturation, sous-traitant différent ». Le pack ne donne
+aucun seuil, nulle part.
+
+Le code posait 5 % entre planning et pointage, 1 % entre pointage et paie, 10 % entre paie et
+facturation. Mes chiffres. Sur un site à 1 000 heures, 5 % laissaient passer 40 heures sans que
+personne ne les regarde — et c'est exactement le terrain du travail dissimulé. Tolérances à
+zéro par défaut ; la consultante peut les relever mission par mission, mais c'est alors une
+décision prise, pas un réglage hérité.
+
 ### Ce qui reste à faire est visible sans rien ouvrir
 
 Un constat n'est **fini** que quand la chaîne du pack est complète : le fait (pas la trame

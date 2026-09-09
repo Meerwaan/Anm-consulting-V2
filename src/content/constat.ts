@@ -17,8 +17,42 @@ export const PRIORITE_PAR_CRITICITE: Record<string, "P1" | "P2" | "P3" | "P4"> =
   mineur: "P4",
 };
 
-/** Échéance conseillée par priorité, en jours (même source). */
-export const DELAI_PAR_PRIORITE: Record<string, number> = { P1: 7, P2: 30, P3: 90, P4: 180 };
+/**
+ * Échéance conseillée par priorité (06 §10, Manuel de terrain, 07 §3 — les trois disent
+ * la même chose) : **P1 immédiat · P2 sous 30 jours · P3 sous 90 jours · P4 amélioration
+ * continue**.
+ *
+ * P1 valait 7 jours et P4 valait 180 : deux chiffres que j'avais inventés. « Immédiat »
+ * n'est pas « sous une semaine » — un P1, c'est un titre manquant, du travail dissimulé
+ * ou un risque santé-sécurité grave ; écrire J+7 sur le plan remis au dirigeant lui donne
+ * une semaine de délai que la méthode ne lui donne pas. Et « amélioration continue » n'a
+ * pas de date : en inventer une fabrique une échéance qui déclenchera des relances.
+ */
+export const DELAI_PAR_PRIORITE: Record<string, number | null> = {
+  P1: 0,
+  P2: 30,
+  P3: 90,
+  P4: null,
+};
+
+/** Le mot du pack, pour l'afficher tel quel. */
+export const TRAITEMENT_PAR_PRIORITE: Record<string, string> = {
+  P1: "immédiat",
+  P2: "sous 30 jours",
+  P3: "sous 90 jours",
+  P4: "amélioration continue",
+};
+
+/** Les six spécialistes que le pack nomme, plus « aucune » (Manuel de terrain, corrigé 14). */
+export const ESCALADES: { valeur: string; libelle: string }[] = [
+  { valeur: "aucune", libelle: "Aucune — le sujet reste dans le périmètre" },
+  { valeur: "avocat_social", libelle: "Avocat en droit social" },
+  { valeur: "avocat_fiscaliste", libelle: "Avocat fiscaliste" },
+  { valeur: "avocat_securite_privee", libelle: "Avocat / spécialiste sécurité privée" },
+  { valeur: "expert_comptable", libelle: "Expert-comptable / prestataire paie" },
+  { valeur: "preventeur_sst", libelle: "Préventeur / service de santé au travail" },
+  { valeur: "autre", libelle: "Autre spécialiste" },
+];
 
 export const CRITICITES: { valeur: string; label: string; priorite: string }[] = [
   { valeur: "critique", label: "Critique", priorite: "P1 · immédiat" },

@@ -10,6 +10,7 @@ import { axeParDefaut } from "@/content/vision";
 import {
   DELAI_PAR_PRIORITE,
   PRIORITE_PAR_CRITICITE,
+  TRAITEMENT_PAR_PRIORITE,
   cequiManque,
 } from "@/content/constat";
 
@@ -472,6 +473,9 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
         ? (dateVerifieeExistante ?? new Date().toISOString().slice(0, 10))
         : null,
       recommendation: reco || null,
+      // Sixième maillon : le spécialiste à saisir si le sujet dépasse le périmètre.
+      escalation: String(formData.get("escalation") ?? "") || null,
+      escalation_note: String(formData.get("escalationNote") ?? "").trim() || null,
       nature: String(formData.get("nature")),
       // Le statut cessait d'être vrai : tous les constats restaient « ouvert ».
       status: complet ? "valide" : "ouvert",
@@ -525,15 +529,25 @@ export const genererPlanActions = async (formData: FormData): Promise<void> => {
   const aujourdhui = new Date();
   const { error } = await supabase.from("actions").insert(
     aCreer.map((c) => {
-      const echeance = new Date(aujourdhui);
-      echeance.setDate(echeance.getDate() + (DELAI_PAR_PRIORITE[c.priority] ?? 90));
+      /**
+       * P1 est « immédiat » : l'échéance est le jour même, pas J+7. P4 est
+       * « amélioration continue » : pas de date du tout — en inventer une créerait une
+       * échéance que personne n'a décidée et qui déclencherait des relances.
+       */
+      const jours = DELAI_PAR_PRIORITE[c.priority];
+      let echeance: string | null = null;
+      if (jours !== null && jours !== undefined) {
+        const d = new Date(aujourdhui);
+        d.setDate(d.getDate() + jours);
+        echeance = d.toISOString().slice(0, 10);
+      }
       return {
         mission_id: missionId,
         finding_id: c.id,
         domain: c.domain,
         title: c.recommendation?.trim() || `Traiter : ${c.title}`,
         priority: c.priority,
-        due_on: echeance.toISOString().slice(0, 10),
+        due_on: echeance,
         status: "a_faire" as const,
       };
     }),
@@ -812,9 +826,9 @@ export const realignerAction = async (formData: FormData): Promise<void> => {
     error
       ? { erreur: error.message }
       : {
-          ok: `Action repassée en ${constat?.priority} (délai conseillé : ${
-            DELAI_PAR_PRIORITE[constat?.priority as string] ?? 90
-          } jours). L'échéance n'a pas été touchée.`,
+          ok: `Action repassée en ${constat?.priority} (${
+            TRAITEMENT_PAR_PRIORITE[constat?.priority as string] ?? "à fixer"
+          }). L'échéance n'a pas été touchée.`,
         },
   );
 };

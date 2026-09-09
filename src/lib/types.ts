@@ -156,7 +156,10 @@ export interface Constat {
   status: StatutConstat;
   visible_to_client: boolean;
   in_report: boolean;
-  /** Position parmi les 5 constats prioritaires de la synthèse dirigeant. */
+  /** Le spécialiste à saisir quand le sujet dépasse le périmètre. NULL = pas encore tranché. */
+  escalation: string | null;
+  escalation_note: string | null;
+  /** Place dans la synthèse dirigeant. Sans plafond ; NULL = pas mis en avant. */
   report_rank: number | null;
   updated_at: string;
   /** Rappels du référentiel, affichés sous les champs pour guider la rédaction. */

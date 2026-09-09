@@ -22,6 +22,8 @@ ENUMS = {
     "audit_domain": {"gouvernance", "cnaps", "social", "paie", "temps", "urssaf",
                      "inspection_sst", "sous_traitance", "operationnel", "fiscal"},
     "check_result": {"oui", "non", "na", "a_verifier"},
+    "escalade": {"aucune", "avocat_social", "avocat_fiscaliste", "avocat_securite_privee",
+                 "expert_comptable", "preventeur_sst", "autre"},
     "control_status": {"conforme", "partiel", "non_conforme", "na", "a_verifier"},
     "finding_nature": {"risque_controle", "amelioration"},
     "finding_status": {"ouvert", "en_analyse", "valide", "clos"},
@@ -38,6 +40,7 @@ CIBLES = {
     "statut": ["action_status", "control_status", "etape_status", "finding_status"],
     "priorite": ["priority"], "severity": ["severity"], "nature": ["finding_nature"],
     "domaine": ["audit_domain"], "type": ["mission_type"], "kind": ["rapprochement_kind"],
+    "escalation": ["escalade"],
 }
 
 def sources(*motifs):

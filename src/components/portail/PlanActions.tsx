@@ -45,7 +45,9 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
   const couverts = new Set(actions.map((a) => a.finding_id));
   const restants = constats.filter((c) => !couverts.has(c.id)).length;
   const sansResponsable = actions.filter((a) => !a.client_owner).length;
-  const sansDate = actions.filter((a) => !a.due_on).length;
+  // Une action P4 sans date n'a rien d'anormal : « amélioration continue » n'a pas
+  // d'échéance dans le pack.
+  const sansDate = actions.filter((a) => !a.due_on && a.priority !== "P4").length;
 
   /**
    * Une action née d'un constat garde la priorité qu'avait ce constat le jour de la

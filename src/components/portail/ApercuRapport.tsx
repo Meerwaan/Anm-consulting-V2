@@ -2,7 +2,7 @@ import type { ActionPlan, Constat } from "@/lib/types";
 import type { EnTeteMission } from "@/lib/portail/mission";
 import { SECTIONS_RAPPORT } from "@/content/methode";
 import { AXES_RAPPORT, axeIncoherent } from "@/content/vision";
-import { cequiManque } from "@/content/constat";
+import { ESCALADES, cequiManque } from "@/content/constat";
 
 const COULEUR: Record<string, string> = {
   critique: "var(--anm-critique)",
@@ -28,6 +28,8 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
     .filter((c) => c.report_rank)
     .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
   const risques = constats.filter((c) => c.nature === "risque_controle");
+  const aOrienter = constats.filter((c) => c.escalation && c.escalation !== "aucune");
+  const sansEscalade = constats.filter((c) => !c.escalation).length;
   const ameliorations = constats.filter((c) => c.nature === "amelioration");
 
   const bloquants: string[] = [];
@@ -59,7 +61,9 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
     );
   const sansResp = actions.filter((a) => !a.client_owner).length;
   if (sansResp > 0) bloquants.push(`${sansResp} action(s) sans responsable (étape 13)`);
-  const sansDate = actions.filter((a) => !a.due_on).length;
+  // P4 est « amélioration continue » : le pack ne lui donne pas de date, donc son absence
+  // n'est pas un oubli. La compter manquante forçait à inventer une échéance.
+  const sansDate = actions.filter((a) => !a.due_on && a.priority !== "P4").length;
   if (sansDate > 0) bloquants.push(`${sansDate} action(s) sans échéance (étape 13)`);
   const malClasses = constats.filter((c) => axeIncoherent(c.nature, c.severity)).length;
   if (malClasses > 0)
@@ -139,6 +143,38 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
           );
         })}
       </div>
+
+      {/* Modèle 07 §9 : « les éventuels sujets à faire valider par avocat /
+          expert-comptable / autre spécialiste ». La liste se déduit des constats. */}
+      <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
+        Sujets à faire valider par un spécialiste — {aOrienter.length}
+      </p>
+      <ul className="mt-1 flex flex-col">
+        {ESCALADES.filter((e) => e.valeur !== "aucune").map((e) => {
+          const liste = aOrienter.filter((c) => c.escalation === e.valeur);
+          if (liste.length === 0) return null;
+          return (
+            <li key={e.valeur} className="border-b border-[var(--anm-hairline)] py-2 text-sm last:border-b-0">
+              <span className="font-medium">{e.libelle}</span>
+              <ul className="mt-0.5 flex flex-col gap-0.5 text-[var(--anm-muted)]">
+                {liste.map((c) => (
+                  <li key={c.id}>
+                    — {c.title}
+                    {c.escalation_note ? ` : ${c.escalation_note}` : ""}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          );
+        })}
+        {aOrienter.length === 0 ? (
+          <li className="py-2 text-sm text-[var(--anm-muted)]">
+            {sansEscalade > 0
+              ? `— ${sansEscalade} constat(s) sans décision d'escalade : à trancher à l'étape 11.`
+              : "— aucun : tous les sujets restent dans le périmètre du diagnostic."}
+          </li>
+        ) : null}
+      </ul>
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
         Plan d&apos;actions — {actions.length}

@@ -20,7 +20,16 @@ export interface Rapprochement {
   libelleA: string;
   libelleB: string;
   unite: string;
-  /** Écart en deçà duquel on ne s'alarme pas, en %. 0 = toute différence compte. */
+  /**
+   * Écart en deçà duquel on ne s'alarme pas, en %. 0 = toute différence compte.
+   *
+   * Par défaut 0 partout : la procédure (06 §7) dit « investiguer TOUT écart : erreur de
+   * saisie, remplacement, heure non payée, heure non déclarée, double facturation,
+   * sous-traitant différent ». Le pack ne donne aucun seuil. Les 5 %, 1 % et 10 % qui
+   * étaient posés ici étaient les miens : sur un site à 1 000 heures, 5 % laissaient
+   * passer 40 heures sans que personne ne les regarde. La consultante peut relever la
+   * tolérance mission par mission — mais c'est alors une décision prise, pas un défaut.
+   */
   toleranceParDefaut: number;
   pourquoi: string;
 }
@@ -42,9 +51,9 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     libelleA: "Heures au planning",
     libelleB: "Heures pointées",
     unite: "heures",
-    toleranceParDefaut: 5,
+    toleranceParDefaut: 0,
     pourquoi:
-      "Un écart normal existe (remplacements, absences). Un écart large signale un planning théorique que personne ne tient.",
+      "Des remplacements et des absences expliquent souvent l'écart — mais c'est l'explication qui doit être trouvée, pas l'écart qui doit être toléré d'avance. Un écart large signale un planning théorique que personne ne tient.",
   },
   {
     kind: "heures_pointage_vs_paie",
@@ -52,9 +61,9 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     libelleA: "Heures pointées",
     libelleB: "Heures sur les bulletins",
     unite: "heures",
-    toleranceParDefaut: 1,
+    toleranceParDefaut: 0,
     pourquoi:
-      "Des heures travaillées et non payées, c'est du travail dissimulé (C. trav. art. L8221-5). Terrain commun URSSAF et inspection.",
+      "Des heures travaillées et non payées, c'est du travail dissimulé (C. trav. art. L8221-5). Terrain commun URSSAF et inspection : aucune heure ne se tolère d'avance.",
   },
   {
     kind: "heures_paie_vs_facturation",
@@ -62,9 +71,9 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     libelleA: "Heures payées",
     libelleB: "Heures facturées",
     unite: "heures",
-    toleranceParDefaut: 10,
+    toleranceParDefaut: 0,
     pourquoi:
-      "Facturer nettement plus qu'on ne paie interroge sur la sous-traitance non déclarée ; facturer nettement moins interroge sur la rentabilité et sur la réalité des prestations.",
+      "Facturer plus qu'on ne paie interroge sur la sous-traitance non déclarée ; facturer moins interroge sur la rentabilité et sur la réalité des prestations. La marge sur les heures sous-traitées explique souvent l'écart — c'est cette explication qu'il faut obtenir, pas un seuil qui la dispense.",
   },
   {
     kind: "sous_traitants_contrats_vs_vigilance",
