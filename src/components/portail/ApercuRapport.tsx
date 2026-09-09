@@ -32,7 +32,16 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
 
   const bloquants: string[] = [];
   if (constats.length === 0) bloquants.push("aucun constat n'a été écrit (étape 11)");
-  if (top.length === 0 && constats.length > 0) bloquants.push("aucun constat mis en avant pour la synthèse (étape 12)");
+  /**
+   * Ne rien mettre en avant est un résultat légitime : un client bien tenu n'a pas de
+   * constat qui doit ouvrir son rapport. Ça ne devient bloquant que s'il porte un écart
+   * critique ou majeur — sinon la synthèse s'ouvrirait sur rien pendant qu'il est exposé.
+   */
+  const graves = constats.filter((c) => c.severity === "critique" || c.severity === "majeur").length;
+  if (top.length === 0 && graves > 0)
+    bloquants.push(
+      `aucun constat mis en avant alors que ${graves} sont cotés critique ou majeur (étape 12)`,
+    );
   /**
    * On applique ici la chaîne entière, pas la seule référence. Un constat sans fait ni
    * preuve mais dont la case « référence vérifiée » était cochée ne produisait aucun
@@ -81,7 +90,7 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
       )}
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-        Synthèse dirigeant — {top.length} constat{top.length > 1 ? "s" : ""} mis en avant
+        Synthèse dirigeant — {top.length === 0 ? "aucun constat mis en avant" : `${top.length} constat${top.length > 1 ? "s" : ""} mis en avant`}
       </p>
       <ol className="mt-1 flex flex-col">
         {top.map((c) => (
@@ -95,7 +104,13 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
             </span>
           </li>
         ))}
-        {top.length === 0 ? <li className="py-2 text-sm text-[var(--anm-muted)]">— à désigner à l&apos;étape 12</li> : null}
+        {top.length === 0 ? (
+          <li className="py-2 text-sm text-[var(--anm-muted)]">
+            {graves > 0
+              ? "— à désigner à l'étape 12"
+              : "— rien ne se détache ; le rapport ouvrira sur le classement par criticité."}
+          </li>
+        ) : null}
       </ol>
 
       <div className="mt-7 grid gap-6 md:grid-cols-2">

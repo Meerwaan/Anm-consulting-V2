@@ -49,8 +49,9 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       <h2 className="text-xl">Classement et mise en avant</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
         <strong>Les {constats.length} constats figureront au rapport</strong> — c&apos;est un
-        dossier complet, rien ne s&apos;en exclut. Donne un rang de 1 à 5 à ceux que le dirigeant
-        doit lire en premier : ils ouvrent la synthèse, le reste suit classé par criticité.
+        dossier complet, rien ne s&apos;en exclut. Numérote ceux que le dirigeant doit lire en
+        premier : ils ouvrent la synthèse, le reste suit classé par criticité. Autant que la
+        mission en demande — un client bien tenu peut n&apos;en avoir aucun, un autre dix.
       </p>
 
       <div className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded border border-[var(--anm-hairline)] bg-[var(--anm-hairline)] sm:grid-cols-4">
@@ -81,7 +82,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
 
       {doublons.length > 0 ? (
         <p className="mt-3 border-l-2 border-[var(--anm-critique)] px-3 py-2 text-sm" style={{ color: "var(--anm-critique)" }}>
-          Deux constats portent le même rang. Chaque place de 1 à 5 doit être unique.
+          Deux constats portent le même rang. Chaque place doit être unique.
         </p>
       ) : null}
       {incomplets > 0 ? (
@@ -108,11 +109,13 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       ) : null}
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-        Ce que le dirigeant lit en premier — {top.length} sur 5
+        Ce que le dirigeant lit en premier — {top.length === 0 ? "aucun" : top.length}
       </p>
       {top.length === 0 ? (
         <p className="mt-2 text-sm text-[var(--anm-muted)]">
-          Aucun rang attribué. Donne un rang 1 à 5 ci-dessous : ce sont eux qui ouvriront le rapport.
+          Aucun constat mis en avant. Numérote ci-dessous ceux qui ouvriront le rapport — ou
+          laisse vide si rien ne se détache : le rapport reste complet, il commencera par le
+          classement par criticité.
         </p>
       ) : (
         <ol className="mt-1 flex flex-col">
@@ -163,7 +166,8 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
                 className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1 text-sm"
               >
                 <option value="">—</option>
-                {[1, 2, 3, 4, 5].map((r) => (
+                {/* Autant de places que de constats : le nombre appartient à la mission. */}
+                {Array.from({ length: constats.length }, (_, i) => i + 1).map((r) => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>

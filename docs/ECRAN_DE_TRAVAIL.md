@@ -185,9 +185,27 @@ gestes volontaires, pas de confirmation par fenêtre : l'écran fonctionne sans 
   formulaire. Utile en reprenant une mission une semaine plus tard.
 - `status` — passe à `valide` quand la chaîne est complète. Il restait à `ouvert` pour
   tout le monde, donc il mentait.
-- Le rang 1 à 5 de la synthèse est **unique en base** (migration 0019). Si la place est
-  prise, l'étape 12 **échange** les deux constats au lieu de refuser : elle vient de dire
-  lequel passe devant, l'obliger à défaire l'autre d'abord serait absurde.
+- La place dans la synthèse est **unique en base** (migration 0019). Si elle est prise,
+  l'étape 12 **échange** les deux constats au lieu de refuser : elle vient de dire lequel
+  passe devant, l'obliger à défaire l'autre d'abord serait absurde.
+
+### Le nombre de constats mis en avant appartient à la mission
+
+Le rang était plafonné à 5, repris du modèle 07 §5 qui dessine cinq blocs « Constat
+prioritaire n°1 » à « n°5 ». **Ce n'est pas une règle** : c'est le nombre de blocs qui
+tiennent dans le gabarit Word, comme le plan d'actions y tient sur dix lignes et le tableau
+de rapprochement sur cinq. Personne n'a jamais soutenu qu'un plan d'actions s'arrête à dix
+actions.
+
+Le pack se contredit d'ailleurs lui-même : section 4, le message clé au dirigeant demande
+« les **3** principaux risques » ; section 5, cinq blocs. Deux nombres dans le même
+document — c'est la preuve que le nombre est illustratif.
+
+Plafond retiré (migration 0022). Il reste le plancher (une place commence à 1) et
+l'unicité. **Zéro est un résultat légitime** : un client bien tenu n'a pas de constat qui
+doit ouvrir son rapport. L'étape 14 ne le compte comme bloquant que si la mission porte au
+moins un écart critique ou majeur — sinon la synthèse s'ouvrirait sur rien pendant que le
+dirigeant est exposé.
 
 ### Deux opérations indivisibles
 

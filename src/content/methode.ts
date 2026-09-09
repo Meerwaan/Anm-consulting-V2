@@ -112,7 +112,8 @@ export const SECTIONS_RAPPORT = [
   "Limites et méthode",
   "Échelle de criticité",
   "Synthèse dirigeant",
-  "Les 5 constats prioritaires",
+  // Le gabarit Word en dessine cinq ; le nombre appartient à la mission, pas au modèle.
+  "Constats prioritaires",
   "Analyse par domaine",
   "Contrôle croisé planning → pointage → paie → facturation",
   "Plan d'actions",

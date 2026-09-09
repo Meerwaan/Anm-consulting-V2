@@ -602,7 +602,7 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
  * Étape 12 — la mise en avant dans la synthèse dirigeant.
  *
  * Le rapport contient TOUS les constats : c'est un dossier complet, rien ne s'en exclut.
- * Ce rang 1 à 5 ne décide donc pas d'une inclusion, seulement de ce qui ouvre la synthèse
+ * Ce rang ne décide donc pas d'une inclusion, seulement de ce qui ouvre la synthèse
  * (« les 5 constats prioritaires » du modèle 07). Le reste suit, classé par criticité.
  */
 export const definirPlaceDansRapport = async (formData: FormData): Promise<void> => {
@@ -613,9 +613,11 @@ export const definirPlaceDansRapport = async (formData: FormData): Promise<void>
   const constatId = String(formData.get("constatId"));
   const rangBrut = String(formData.get("rang") ?? "").trim();
   const rang = rangBrut === "" ? null : Number(rangBrut);
+  // Aucun plafond : le modèle 07 dessine cinq blocs de constats prioritaires comme il
+  // dessine dix lignes de plan d'actions — c'est un gabarit de page, pas une règle.
 
   /**
-   * Une place de 1 à 5 n'appartient qu'à un constat. L'échange se fait en base, dans
+   * Une place n'appartient qu'à un constat. L'échange se fait en base, dans
    * une seule transaction : écrit d'ici en trois requêtes, une coupure entre deux
    * laissait un rang perdu et l'écran annonçait quand même « rangs échangés ».
    */
