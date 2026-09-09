@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { LignePoint } from "@/lib/portail/mission";
 import type { Constat } from "@/lib/types";
 import { creerConstatDepuisPoint, definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
+import { constatComplet } from "@/content/constat";
 
 const LIBELLE: Record<string, string> = {
   conforme: "Conforme",
@@ -35,17 +36,12 @@ interface Props {
  * consultante doit aller aux écarts, pas à la saisie de la normalité.
  */
 const TableauPoints = ({ missionId, ordre, points, constats }: Props) => {
-  // Un constat est fini quand la chaîne du pack est complète et la référence vérifiée.
+  // La règle vient du référentiel partagé : recopiée ici, elle finissait par diverger
+  // de celle de l'étape 11, et deux écrans répondaient différemment à « est-il fini ? ».
   const etatDuConstat = new Map(
     constats
       .filter((c) => c.control_point_id != null)
-      .map((c) => [
-        c.control_point_id as number,
-        c.fact?.trim() && !c.fact.includes("[fait précis") && c.evidence?.trim()
-          && c.reference?.trim() && c.reference_checked === "oui" && c.recommendation?.trim()
-          ? "prêt"
-          : "à finir",
-      ]),
+      .map((c) => [c.control_point_id as number, constatComplet(c) ? "prêt" : "à finir"]),
   );
   const restants = points.filter((p) => !p.resultat || p.resultat.status === "a_verifier");
 

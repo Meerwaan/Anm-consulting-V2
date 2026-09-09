@@ -49,7 +49,13 @@ def champs_envoyes():
     for f in sources("*.tsx"):
         s = f.read_text(encoding="utf-8")
         for m in re.finditer(r"<form\s+[^>]*action=\{(\w+)\}(.*?)</form>", s, re.S):
-            envoyes.setdefault(m.group(1), set()).update(re.findall(r'name="([^"]+)"', m.group(2)))
+            corps = m.group(2)
+            champs = set(re.findall(r'name="([^"]+)"', corps))
+            envoyes.setdefault(m.group(1), set()).update(champs)
+            # Un bouton `formAction={autreAction}` poste le MÊME formulaire vers une
+            # autre action serveur : ses champs comptent aussi pour celle-là.
+            for autre in re.findall(r"formAction=\{(\w+)\}", corps):
+                envoyes.setdefault(autre, set()).update(champs)
     return envoyes
 
 def champs_lus():
@@ -59,6 +65,27 @@ def champs_lus():
         for m in re.finditer(r"export const (\w+) = async \([^)]*\)[^{]*\{(.*?)\n\};", s, re.S):
             lus[m.group(1)] = set(re.findall(r'formData\.get\("([^"]+)"\)', m.group(2)))
     return lus
+
+def constantes_de_valeurs():
+    """
+    Valeurs des tableaux de constantes servant à peupler un <select>.
+
+    Reconnaît `{ valeur: "x", ... }` (nos listes d'options) et les tableaux de chaînes
+    nues, dans les composants comme dans les actions serveur.
+    """
+    listes = {}
+    # Les listes d'options vivent aussi dans le référentiel partagé (src/content) :
+    # sans ce répertoire, un <select> alimenté par DOMAINES redevenait invérifiable.
+    for f in list(sources("*.tsx")) + list(sources("*.ts")):
+        s = f.read_text(encoding="utf-8")
+        for m in re.finditer(r"(?:const|export const) (\w+)(?:\s*:[^=]+)?= \[(.*?)\];", s, re.S):
+            corps = m.group(2)
+            vals = set(re.findall(r'valeur: "([^"]+)"', corps))
+            if not vals and re.fullmatch(r'[\s"\w,-]+', corps):
+                vals = set(re.findall(r'"([\w-]+)"', corps))
+            if vals:
+                listes.setdefault(m.group(1), set()).update(vals)
+    return listes
 
 def main() -> int:
     soucis = []
@@ -72,6 +99,7 @@ def main() -> int:
             soucis.append(f"{action} lit {sorted(manquants)} — aucun formulaire ne l'envoie. "
                           "L'écriture partira avec une valeur nulle et sera refusée en silence.")
 
+    listes = constantes_de_valeurs()
     for f in sources("*.tsx"):
         s = f.read_text(encoding="utf-8")
         for m in re.finditer(r'name="(\w+)"(.*?)</select>', s, re.S):
@@ -79,6 +107,14 @@ def main() -> int:
             if champ not in CIBLES:
                 continue
             vals = {v for v in re.findall(r'<option[^>]*value="([^"]*)"', corps) if v}
+            # Les options peuvent venir d'une constante (`DOMAINES.map(...)`) : sans ça,
+            # un select alimenté par une liste passait le contrôle sans être vérifié.
+            for nom in re.findall(r"\{(\w+)\.map\(", corps):
+                vals |= listes.get(nom, set())
+            if not vals:
+                soucis.append(f"{f.relative_to(RACINE)} · « {champ} » n'expose aucune valeur "
+                              "vérifiable : le contrôle d'énumération ne sert à rien ici.")
+                continue
             if not any(vals <= ENUMS[e] for e in CIBLES[champ]):
                 proche = min((ENUMS[e] for e in CIBLES[champ]), key=lambda E: len(vals - E))
                 soucis.append(f"{f.relative_to(RACINE)} · « {champ} » propose "

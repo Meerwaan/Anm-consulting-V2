@@ -1,5 +1,11 @@
 import type { ActionPlan, Constat } from "@/lib/types";
-import { ajouterAction, enregistrerAction, genererPlanActions } from "@/app/admin/actions";
+import {
+  ajouterAction,
+  enregistrerAction,
+  genererPlanActions,
+  realignerAction,
+} from "@/app/admin/actions";
+import { DOMAINES } from "@/content/constat";
 
 const PRIORITES: { valeur: string; libelle: string }[] = [
   { valeur: "P1", libelle: "P1 · immédiat" },
@@ -41,6 +47,22 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
   const sansResponsable = actions.filter((a) => !a.client_owner).length;
   const sansDate = actions.filter((a) => !a.due_on).length;
 
+  /**
+   * Une action née d'un constat garde la priorité qu'avait ce constat le jour de la
+   * génération. Si la criticité change ensuite, plus rien ne le dit : le plan promet un
+   * traitement sous 180 jours pour un écart devenu critique.
+   *
+   * On constate l'écart, on n'en donne pas la cause : elle a aussi le droit de décaler
+   * une priorité à la main en restitution. Lui dire « la criticité a changé » serait
+   * faux une fois sur deux, et l'inviterait à défaire son propre arbitrage.
+   */
+  const parConstat = new Map(constats.map((c) => [c.id, c]));
+  const desaccordee = (a: ActionPlan) => {
+    const c = a.finding_id ? parConstat.get(a.finding_id) : undefined;
+    return c && c.priority !== a.priority ? c : null;
+  };
+  const desaccordees = actions.filter((a) => desaccordee(a) !== null).length;
+
   return (
     <section>
       <div className="flex flex-wrap items-baseline justify-between gap-3">
@@ -71,6 +93,16 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
           ? " · toutes affectées et datées"
           : " — à fixer avec le dirigeant en restitution."}
       </p>
+      {desaccordees > 0 ? (
+        <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-sable)] px-3 py-2 text-sm">
+          {desaccordees > 1
+            ? `${desaccordees} actions n'ont pas la priorité de leur constat`
+            : "Une action n'a pas la priorité de son constat"}{" "}
+          — soit la criticité a changé depuis la génération, soit c&apos;est un choix fait en
+          restitution. Chaque ligne concernée dit laquelle et propose de s&apos;aligner ;
+          l&apos;échéance, elle, n&apos;est jamais réécrite.
+        </p>
+      ) : null}
 
       <div className="mt-5 flex flex-col gap-3">
         {actions.map((a) => (
@@ -86,6 +118,11 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
               <span className="font-mono text-[0.66rem] uppercase tracking-wide" style={{ color: COULEUR[a.priority] }}>
                 {a.priority}
               </span>
+              {desaccordee(a) ? (
+                <span className="font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-majeur)]">
+                  constat en {desaccordee(a)?.priority} · action en {a.priority}
+                </span>
+              ) : null}
               <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
                 {a.domain}
                 {a.constat ? ` · depuis « ${a.constat} »` : " · action libre"}
@@ -125,9 +162,20 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
                 Commentaire
                 <input name="commentaire" defaultValue={a.comment ?? ""} placeholder="Ce qui a été convenu, un blocage…" className={champ} />
               </label>
+              {/* « Enregistrer » en premier : c'est lui que la touche Entrée déclenche. */}
               <button type="submit" className="rounded border border-[var(--anm-green)] px-3 py-1.5 text-sm text-[var(--anm-green)]">
                 Enregistrer
               </button>
+              {desaccordee(a) ? (
+                <button
+                  type="submit"
+                  formAction={realignerAction}
+                  className="rounded border border-[var(--anm-majeur)] px-3 py-1.5 text-sm"
+                  style={{ color: "var(--anm-majeur)" }}
+                >
+                  Aligner sur le constat ({desaccordee(a)?.priority})
+                </button>
+              ) : null}
             </div>
           </form>
         ))}
@@ -163,8 +211,8 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
           <label className="flex flex-col gap-1 text-xs">
             Domaine
             <select name="domaine" defaultValue="operationnel" className={champ}>
-              {["gouvernance", "cnaps", "social", "paie", "temps", "urssaf", "inspection_sst", "sous_traitance", "operationnel", "fiscal"].map((d) => (
-                <option key={d} value={d}>{d}</option>
+              {DOMAINES.map((d) => (
+                <option key={d.valeur} value={d.valeur}>{d.libelle}</option>
               ))}
             </select>
           </label>

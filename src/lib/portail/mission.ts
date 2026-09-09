@@ -171,7 +171,7 @@ export const lireConstats = async (missionId: string): Promise<Constat[]> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("findings")
-    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, recommendation, priority, nature, status, visible_to_client, in_report, report_rank, point:control_points (code, question, evidence)")
+    .select("id, control_point_id, domain, title, fact, evidence, severity, reference, reference_checked, reference_checked_on, recommendation, priority, nature, status, visible_to_client, in_report, report_rank, updated_at, point:control_points (code, question, evidence)")
     .eq("mission_id", missionId)
     .order("priority")
     .order("created_at");

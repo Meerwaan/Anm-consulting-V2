@@ -2,6 +2,7 @@ import type { ActionPlan, Constat } from "@/lib/types";
 import type { EnTeteMission } from "@/lib/portail/mission";
 import { SECTIONS_RAPPORT } from "@/content/methode";
 import { AXES_RAPPORT, axeIncoherent } from "@/content/vision";
+import { cequiManque } from "@/content/constat";
 
 const COULEUR: Record<string, string> = {
   critique: "var(--anm-critique)",
@@ -32,8 +33,21 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
   const bloquants: string[] = [];
   if (constats.length === 0) bloquants.push("aucun constat n'a été écrit (étape 11)");
   if (top.length === 0 && constats.length > 0) bloquants.push("aucun constat mis en avant pour la synthèse (étape 12)");
-  const sansRef = constats.filter((c) => c.reference_checked !== "oui").length;
-  if (sansRef > 0) bloquants.push(`${sansRef} constat(s) sans référence vérifiée (étape 11)`);
+  /**
+   * On applique ici la chaîne entière, pas la seule référence. Un constat sans fait ni
+   * preuve mais dont la case « référence vérifiée » était cochée ne produisait aucun
+   * bloquant : l'étape 11 le classait « à finir » pendant que l'étape 14 affichait
+   * « tout est en place ». Le verrou de sortie du rapport disait le contraire de la
+   * vérité au moment où elle allait le sortir.
+   */
+  const incomplets = constats.filter((c) => cequiManque(c).length > 0);
+  if (incomplets.length > 0)
+    bloquants.push(
+      `${incomplets.length} constat(s) incomplet(s) — ${incomplets
+        .slice(0, 3)
+        .map((c) => `${c.title} : il manque ${cequiManque(c).join(", ")}`)
+        .join(" ; ")}${incomplets.length > 3 ? " ; …" : ""} (étape 11)`,
+    );
   const sansResp = actions.filter((a) => !a.client_owner).length;
   if (sansResp > 0) bloquants.push(`${sansResp} action(s) sans responsable (étape 13)`);
   const sansDate = actions.filter((a) => !a.due_on).length;

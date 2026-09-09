@@ -146,6 +146,8 @@ export interface Constat {
   severity: Criticite;
   reference: string | null;
   reference_checked: "oui" | "non" | "na" | "a_verifier";
+  /** Jour où la référence a été ouverte dans le texte — le pack l'exige datée. */
+  reference_checked_on: string | null;
   recommendation: string | null;
   priority: Priorite;
   nature: NatureConstat;
@@ -154,6 +156,7 @@ export interface Constat {
   in_report: boolean;
   /** Position parmi les 5 constats prioritaires de la synthèse dirigeant. */
   report_rank: number | null;
+  updated_at: string;
   /** Rappels du référentiel, affichés sous les champs pour guider la rédaction. */
   code_point?: string | null;
   question_point?: string | null;

@@ -7,6 +7,11 @@ import { exigerRole } from "@/lib/supabase/session";
 import type { ResultatPoint, StatutEtape, TypeMission } from "@/lib/types";
 import { textesDuDomaine, type DomaineAudit } from "@/content/textes";
 import { axeParDefaut } from "@/content/vision";
+import {
+  DELAI_PAR_PRIORITE,
+  PRIORITE_PAR_CRITICITE,
+  cequiManque,
+} from "@/content/constat";
 
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
@@ -16,7 +21,11 @@ const chemin = (missionId: string) => `/admin/missions/${missionId}`;
  * Aucune écriture ne doit échouer en silence : sur un outil qui sert à préparer un
  * contrôle, croire qu'on a enregistré alors que non est le pire des défauts.
  */
-const retour = (missionId: string, ordre: string, params: Record<string, string>): never => {
+type Retour = (missionId: string, ordre: string, params: Record<string, string>) => never;
+// Le type est porté par la constante, pas seulement par la flèche : c'est ce qui
+// permet à TypeScript de savoir qu'un appel à `retour` interrompt la suite, et donc
+// de comprendre qu'après « si le point est introuvable, retour », le point existe.
+const retour: Retour = (missionId, ordre, params) => {
   const q = new URLSearchParams(params).toString();
   redirect(`${chemin(missionId)}/etapes/${ordre}${q ? `?${q}` : ""}`);
 };
@@ -284,17 +293,6 @@ export const enregistrerRapprochement = async (formData: FormData): Promise<void
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
 };
 
-/** Criticité → priorité du plan d'actions (01 Bible §2 : P1 immédiat, P2 30 j, P3 90 j, P4 amélioration). */
-const PRIORITE_PAR_CRITICITE: Record<string, "P1" | "P2" | "P3" | "P4"> = {
-  critique: "P1",
-  majeur: "P2",
-  modere: "P3",
-  mineur: "P4",
-};
-
-/** Échéance conseillée par priorité, en jours (même source). */
-const DELAI_PAR_PRIORITE: Record<string, number> = { P1: 7, P2: 30, P3: 90, P4: 180 };
-
 /**
  * Ouvre un constat depuis un point de contrôle en écart, pré-rempli avec ce que le
  * référentiel sait déjà : le fait à qualifier, la preuve à examiner, le risque initial,
@@ -314,7 +312,7 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
   const [{ data: point }, { data: resultat }] = await Promise.all([
     supabase
       .from("control_points")
-      .select("id, code, domain, theme, subtheme, question, evidence, initial_risk, module_id")
+      .select("id, code, domain, theme, subtheme, question, evidence, initial_risk, module_id, reference, reference_kind")
       .eq("id", pointId)
       .maybeSingle(),
     supabase
@@ -324,13 +322,27 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
       .eq("control_point_id", pointId)
       .maybeSingle(),
   ]);
-  if (!point || resultat?.finding_id) return;
+  if (!point) retour(missionId, ordre, { erreur: "Point de contrôle introuvable." });
+  if (resultat?.finding_id) {
+    // Ce n'est pas une erreur : le constat existe déjà. On y renvoie au lieu de
+    // laisser le clic sans effet visible.
+    retour(missionId, ordre, { ok: "Ce point a déjà son constat, il est plus bas dans la liste." });
+  }
 
   const criticite = (resultat?.severity ?? point.initial_risk) as string;
-  const textes = textesDuDomaine(point.domain as DomaineAudit)
+
+  /**
+   * La référence proposée part du plus précis vers le plus général : l'article porté
+   * par le point de contrôle lui-même quand il en a un (`reference_kind = 'source'`),
+   * puis les textes du domaine en complément. Ne servir que les textes du domaine
+   * revenait à proposer « Code du travail » là où le point disait déjà « L8221-1 ».
+   */
+  const textesDomaine = textesDuDomaine(point.domain as DomaineAudit)
     .filter((t) => t.role === "principal")
-    .map((t) => `${t.texte.nom}${t.texte.portee ? ` (${t.texte.portee})` : ""}`)
-    .join(" · ");
+    .map((t) => `${t.texte.nom}${t.texte.portee ? ` (${t.texte.portee})` : ""}`);
+  const referencePoint =
+    point.reference_kind === "source" && point.reference?.trim() ? point.reference.trim() : null;
+  const textes = [referencePoint, ...textesDomaine].filter(Boolean).join(" · ");
 
   const { data: constat, error } = await supabase
     .from("findings")
@@ -414,13 +426,30 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
    * un constat a déjà été publié avec la trame « [fait précis à compléter] » dedans.
    * La chaîne du pack est indivisible — fait, preuve, risque, référence, action.
    */
-  const manques: string[] = [];
-  if (!fait || fait.includes("[fait précis")) manques.push("le fait");
-  if (!preuve) manques.push("la preuve");
-  if (!reference) manques.push("la référence");
-  else if (!referenceVerifiee) manques.push("la vérification de la référence");
-  if (!reco) manques.push("la recommandation");
+  const manques = cequiManque({
+    fact: fait,
+    evidence: preuve,
+    reference,
+    reference_checked: referenceVerifiee ? "oui" : "a_verifier",
+    recommendation: reco,
+  });
   const complet = manques.length === 0;
+
+  // On ne réécrit pas une date de vérification déjà posée : c'est le jour où elle a
+  // ouvert le texte, pas celui de la dernière retouche du constat.
+  const { data: avant } = await supabase
+    .from("findings")
+    .select("reference_checked_on, reference")
+    .eq("id", constatId)
+    .eq("mission_id", missionId)
+    .maybeSingle();
+  // La date ne suit que la référence qu'elle a réellement ouverte : si le texte change,
+  // elle repart. Sinon une nouvelle référence hériterait de la vérification de l'ancienne,
+  // et l'écran afficherait « vérifiée le … » pour un article jamais lu.
+  const referenceInchangee = (avant?.reference ?? "").trim() === reference;
+  const dateVerifieeExistante = referenceInchangee
+    ? ((avant?.reference_checked_on as string | null) ?? null)
+    : null;
 
   const { error } = await supabase
     .from("findings")
@@ -432,8 +461,16 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
       priority: PRIORITE_PAR_CRITICITE[severity] ?? "P3",
       reference: reference || null,
       reference_checked: referenceVerifiee ? "oui" : "a_verifier",
+      // Le pack demande une référence « vérifiée ET datée » : la date est celle du
+      // jour où elle coche, et elle repart si elle décoche — une date de vérification
+      // qui survit à son propre décochage ne vaut rien dans un dossier.
+      reference_checked_on: referenceVerifiee
+        ? (dateVerifieeExistante ?? new Date().toISOString().slice(0, 10))
+        : null,
       recommendation: reco || null,
       nature: String(formData.get("nature")),
+      // Le statut cessait d'être vrai : tous les constats restaient « ouvert ».
+      status: complet ? "valide" : "ouvert",
       // Verrou : publication réservée aux constats complets, et retirée dès qu'un
       // constat publié redevient incomplet.
       visible_to_client: publier && complet,
@@ -573,16 +610,20 @@ export const definirPlaceDansRapport = async (formData: FormData): Promise<void>
   const rangBrut = String(formData.get("rang") ?? "").trim();
   const rang = rangBrut === "" ? null : Number(rangBrut);
 
-  const { error } = await supabase
-    .from("findings")
-    .update({
-      report_rank: rang && rang >= 1 && rang <= 5 ? rang : null,
-    })
-    .eq("id", constatId)
-    .eq("mission_id", missionId);
+  /**
+   * Une place de 1 à 5 n'appartient qu'à un constat. L'échange se fait en base, dans
+   * une seule transaction : écrit d'ici en trois requêtes, une coupure entre deux
+   * laissait un rang perdu et l'écran annonçait quand même « rangs échangés ».
+   */
+  const { data, error } = await supabase.rpc("definir_rang_constat", {
+    p_mission: missionId,
+    p_constat: constatId,
+    p_rang: rang,
+  });
 
   revalidatePath(`${chemin(missionId)}/etapes/12`);
-  retour(missionId, "12", error ? { erreur: error.message } : { ok: "Mise en avant enregistrée." });
+  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  retour(missionId, "12", error ? { erreur: error.message } : { ok: String(data) });
 };
 
 /** Étape 13 — planifier une action : qui la fait, pour quand, où elle en est. */
@@ -631,4 +672,142 @@ export const ajouterAction = async (formData: FormData): Promise<void> => {
 
   revalidatePath(`${chemin(missionId)}/etapes/13`);
   retour(missionId, "13", error ? { erreur: error.message } : { ok: "Action ajoutée." });
+};
+
+/**
+ * Étape 11 — écrire un constat qui ne vient d'aucun point de contrôle.
+ *
+ * Les 208 points couvrent ce qu'on sait chercher. Un audit sur site fait remonter
+ * autre chose : une pratique, une organisation, un propos du dirigeant. Sans cette
+ * porte, ce constat-là finit sur un carnet et ne rentre jamais dans le rapport.
+ */
+export const ajouterConstatLibre = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const ordre = String(formData.get("ordre") ?? "11");
+  const titre = String(formData.get("title") ?? "").trim();
+  if (!titre) retour(missionId, ordre, { erreur: "Un constat a besoin d'un intitulé." });
+
+  const criticite = String(formData.get("severity") || "majeur");
+  const { error } = await supabase.from("findings").insert({
+    mission_id: missionId,
+    control_point_id: null,
+    module_id: null,
+    domain: String(formData.get("domaine") || "operationnel"),
+    title: titre,
+    fact: "",
+    evidence: null,
+    severity: criticite,
+    control_status: null,
+    reference: null,
+    reference_checked: "a_verifier",
+    recommendation: null,
+    priority: PRIORITE_PAR_CRITICITE[criticite] ?? "P3",
+    nature: String(formData.get("nature") || "risque_controle"),
+    status: "ouvert",
+    visible_to_client: false,
+  });
+
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  retour(
+    missionId,
+    ordre,
+    error
+      ? { erreur: error.message }
+      : { ok: "Constat ajouté. Il est dans « à finir » : fait, preuve, référence, recommandation." },
+  );
+};
+
+/**
+ * Étape 11 — supprimer un constat.
+ *
+ * Un clic sur le mauvais point crée un constat définitif qui fausse ensuite tous les
+ * compteurs des étapes 12, 13 et 14. On efface aussi l'action générée depuis lui :
+ * la laisser en ferait une action orpheline dont plus personne ne sait d'où elle vient.
+ * Le point de contrôle est délié automatiquement (clé étrangère à null).
+ */
+export const supprimerConstat = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const constatId = String(formData.get("constatId"));
+  const ordre = String(formData.get("ordre") ?? "11");
+
+  // Le constat et son action partent ensemble ou pas du tout : une action seule,
+  // sans le constat qui l'a produite, est une ligne de plan dont plus personne ne
+  // sait d'où elle vient.
+  const { data, error } = await supabase.rpc("supprimer_constat", {
+    p_mission: missionId,
+    p_constat: constatId,
+  });
+
+  for (const etape of [ordre, "11", "12", "13", "14"]) {
+    revalidatePath(`${chemin(missionId)}/etapes/${etape}`);
+  }
+  if (error) retour(missionId, ordre, { erreur: error.message });
+
+  const bilan = (Array.isArray(data) ? data[0] : data) as
+    | { titre: string; actions_supprimees: number; avait_ete_negocie: boolean }
+    | undefined;
+  const n = bilan?.actions_supprimees ?? 0;
+  retour(missionId, ordre, {
+    ok:
+      `Constat « ${bilan?.titre ?? ""} » supprimé` +
+      (n > 0 ? `, avec ${n} action${n > 1 ? "s" : ""} du plan` : "") +
+      (bilan?.avait_ete_negocie ? " — dont une avec responsable ou échéance déjà fixés" : "") +
+      ". Le point de contrôle redevient disponible.",
+  });
+};
+
+/**
+ * Étape 13 — remettre une action à la priorité de son constat.
+ *
+ * La criticité d'un constat peut changer après la génération du plan : l'action garde
+ * alors une priorité qui ne correspond plus à rien. On réaligne la priorité seulement.
+ * L'échéance, elle, a pu être négociée avec le dirigeant en restitution — la réécrire
+ * effacerait un engagement pris.
+ */
+export const realignerAction = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const actionId = String(formData.get("actionId"));
+
+  const { data: action } = await supabase
+    .from("actions")
+    .select("finding_id")
+    .eq("id", actionId)
+    .eq("mission_id", missionId)
+    .maybeSingle();
+  if (!action?.finding_id) retour(missionId, "13", { erreur: "Cette action ne vient d'aucun constat." });
+
+  const { data: constat } = await supabase
+    .from("findings")
+    .select("priority")
+    .eq("id", action?.finding_id as string)
+    .maybeSingle();
+  if (!constat) retour(missionId, "13", { erreur: "Constat introuvable." });
+
+  const { error } = await supabase
+    .from("actions")
+    .update({ priority: constat?.priority })
+    .eq("id", actionId)
+    .eq("mission_id", missionId);
+
+  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  retour(
+    missionId,
+    "13",
+    error
+      ? { erreur: error.message }
+      : {
+          ok: `Action repassée en ${constat?.priority} (délai conseillé : ${
+            DELAI_PAR_PRIORITE[constat?.priority as string] ?? 90
+          } jours). L'échéance n'a pas été touchée.`,
+        },
+  );
 };

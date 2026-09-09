@@ -111,7 +111,7 @@ fait, preuve, référence, recommandation, puis criticité, axe et statut.
 Un constat n'est **fini** que quand la chaîne du pack est complète : le fait (pas la trame
 pré-remplie), la preuve, la référence, sa vérification, la recommandation. L'écran s'en sert :
 
-- en-tête de section : « 3 à finir · 4 prêts · 2 publiés » ;
+- en-tête de section : « 3 à finir · 4 prêts · 2 pour le client » ;
 - les constats **à finir** sont ouverts, avec la liste de ce qui manque sous le formulaire ;
 - les constats **prêts** se replient sur une ligne, dépliables si besoin.
 
@@ -139,9 +139,76 @@ Un point de contrôle ne peut porter qu'**un** constat par mission (index unique
 0014) : deux clics rapprochés sur « Rédiger le constat » ne créent plus de jumeaux, ce que
 la garde applicative seule laissait passer.
 
+### Ce qui n'est pas dans la grille
+
+Les 208 points couvrent ce qu'on sait chercher. Un audit sur site fait remonter autre
+chose : une pratique, une organisation, un propos du dirigeant. En bas de l'étape 11,
+**« écrire un constat qui ne vient d'aucun point de contrôle »** ouvre un constat vide,
+soumis exactement aux mêmes exigences que les autres. Sans cette porte, ce constat-là
+finit sur un carnet et n'entre jamais au rapport. Il s'affiche « hors grille » là où les
+autres portent leur code de point.
+
+### Défaire
+
+Un clic sur le mauvais point crée un constat qui fausse ensuite tous les compteurs des
+étapes 12, 13 et 14. **« Supprimer ce constat »**, replié sous chaque formulaire, efface
+le constat et l'action générée depuis lui, et rend le point de contrôle disponible. Deux
+gestes volontaires, pas de confirmation par fenêtre : l'écran fonctionne sans JavaScript.
+
+### Ce que la base garde en plus
+
+- `reference_checked_on` — le pack exige une référence « vérifiée **et datée** ». La date
+  se pose seule au moment où elle coche, et repart si elle décoche **ou si elle change le
+  texte de la référence** : une date qui survit au texte qu'elle datait ferait dire à
+  l'écran « vérifiée le 8 septembre » pour un article jamais ouvert.
+- `updated_at` — quand le constat a été retouché pour la dernière fois, affiché sous le
+  formulaire. Utile en reprenant une mission une semaine plus tard.
+- `status` — passe à `valide` quand la chaîne est complète. Il restait à `ouvert` pour
+  tout le monde, donc il mentait.
+- Le rang 1 à 5 de la synthèse est **unique en base** (migration 0019). Si la place est
+  prise, l'étape 12 **échange** les deux constats au lieu de refuser : elle vient de dire
+  lequel passe devant, l'obliger à défaire l'autre d'abord serait absurde.
+
+### Deux opérations indivisibles
+
+L'échange de rang et la suppression touchent chacun plusieurs lignes. Écrits en trois
+requêtes depuis l'action serveur, une coupure entre deux laissait la base à moitié
+modifiée — un rang de synthèse perdu, ou une action effacée alors que son constat existe
+toujours — pendant que l'écran annonçait un succès qu'il n'avait pas vérifié.
+
+Ils passent désormais par deux fonctions Postgres (migration 0020), exécutées dans une
+seule transaction : `definir_rang_constat` et `supprimer_constat`. Elles sont en
+`security invoker`, donc les politiques RLS s'appliquent comme si la consultante écrivait
+elle-même. Le message affiché est celui que rend la fonction : il décrit ce qui s'est
+réellement passé, pas ce que l'écran espérait.
+
+### Une seule règle de complétude
+
+« Ce constat est-il fini ? » se calculait à quatre endroits : l'étape 11, le tableau des
+points, l'action serveur et l'étape 14. La quatrième copie ne testait que la référence :
+un constat sans fait ni preuve, mais avec la case cochée, ne bloquait pas la sortie du
+rapport et déclenchait « tout est en place » — l'inverse de ce que disait l'étape 11.
+
+La règle vit maintenant dans `src/content/constat.ts` (`cequiManque`), avec la table des
+criticités, celle des domaines et les priorités. Les écrans et les actions serveur
+l'importent. Ce fichier n'est **pas** un module `use server` : un fichier d'actions
+serveur ne peut exporter que des fonctions asynchrones, et y laisser une table de
+constantes casse `next build` sans que `tsc` ne dise rien.
+
 **Étape 13 (plan d'actions)** — un bouton génère une action par constat qui n'en a pas
 encore, avec l'échéance conseillée : P1 à 7 jours, P2 à 30, P3 à 90, P4 à 180. Le client
 coche ensuite ce qu'il a fait et la consultante est notifiée (décision 07).
+
+Si la criticité d'un constat change **après** la génération, l'action garde son ancienne
+priorité et le plan promet 180 jours pour un écart devenu critique. L'étape 13 le signale
+et propose de réaligner la priorité. Elle ne touche pas à l'échéance : celle-là a pu être
+négociée avec le dirigeant en restitution, la réécrire effacerait un engagement pris.
+
+### L'espace client n'est pas ouvert
+
+La case dit **« prêt à montrer au client »**, pas « publié ». C'est un choix de séquence
+assumé : l'écran de la consultante d'abord, l'espace client ensuite. Tant qu'il n'existe
+pas, écrire « publié » ferait croire à un envoi qui n'a pas lieu.
 
 ## La chaîne complète, du point de contrôle au rapport
 

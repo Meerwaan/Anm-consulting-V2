@@ -1,12 +1,6 @@
 import type { Constat } from "@/lib/types";
-import { enregistrerConstat } from "@/app/admin/actions";
-
-const CRITICITES: { valeur: string; label: string; priorite: string }[] = [
-  { valeur: "critique", label: "Critique", priorite: "P1 · immédiat" },
-  { valeur: "majeur", label: "Majeur", priorite: "P2 · 30 jours" },
-  { valeur: "modere", label: "Modéré", priorite: "P3 · 90 jours" },
-  { valeur: "mineur", label: "Mineur", priorite: "P4 · amélioration" },
-];
+import { ajouterConstatLibre, enregistrerConstat, supprimerConstat } from "@/app/admin/actions";
+import { CRITICITES, DOMAINES, cequiManque, jour } from "@/content/constat";
 
 const COULEUR: Record<string, string> = {
   critique: "var(--anm-critique)",
@@ -30,17 +24,6 @@ const ARemplir = ({ si }: { si: boolean }) =>
 const Rappel = ({ texte }: { texte: string | null | undefined }) =>
   texte ? <span className="text-[0.7rem] leading-snug text-[var(--anm-muted)]">{texte}</span> : null;
 
-/** Ce qui manque à un constat pour être publiable, dans l'ordre de la chaîne du pack. */
-const cequiManque = (c: Constat): string[] => {
-  const manques: string[] = [];
-  if (!rempli(c.fact) || c.fact.includes("[fait précis")) manques.push("le fait");
-  if (!rempli(c.evidence)) manques.push("la preuve");
-  if (!rempli(c.reference)) manques.push("la référence");
-  else if (c.reference_checked !== "oui") manques.push("la vérification de la référence");
-  if (!rempli(c.recommendation)) manques.push("la recommandation");
-  return manques;
-};
-
 interface Props {
   missionId: string;
   ordre: string;
@@ -58,7 +41,9 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
   const analyses = constats.map((c) => ({ c, manques: cequiManque(c) }));
   const aFinir = analyses.filter((a) => a.manques.length > 0);
   const prets = analyses.filter((a) => a.manques.length === 0);
-  const publies = prets.filter((a) => a.c.visible_to_client).length;
+  // Sur tous les constats, pas seulement les prêts : un constat incomplet resté coché
+  // visible existe bel et bien, et sa ligne l'affiche. L'en-tête ne peut pas dire zéro.
+  const publies = constats.filter((c) => c.visible_to_client).length;
 
   const formulaire = (c: Constat, manques: string[], ouvert: boolean) => (
     <form
@@ -144,14 +129,24 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           <ARemplir si={rempli(c.reference) && c.reference_checked !== "oui"} />
         </label>
 
+        <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
+          {c.reference_checked === "oui" && c.reference_checked_on
+            ? `référence vérifiée le ${jour(c.reference_checked_on)} · `
+            : ""}
+          modifié le {jour(c.updated_at)}
+        </span>
+
         {c.reference_checked === "oui" ? (
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="publier" defaultChecked={c.visible_to_client} />
-            Publier au client
+            Prêt à montrer au client
+            <span className="font-mono text-[0.6rem] uppercase tracking-wider text-[var(--anm-muted)]">
+              espace client pas encore ouvert
+            </span>
           </label>
         ) : (
           <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
-            publication disponible une fois la référence vérifiée
+            disponible une fois la référence vérifiée
           </span>
         )}
 
@@ -172,6 +167,35 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
   );
 
   /**
+   * La suppression vit hors du formulaire d'édition : deux formulaires imbriqués ne
+   * sont pas valides en HTML, et le repli oblige à un second geste volontaire.
+   */
+  const suppression = (c: Constat) => (
+    <details className="mt-2">
+      <summary className="cursor-pointer font-mono text-[0.64rem] uppercase tracking-wider text-[var(--anm-muted)]">
+        Supprimer ce constat
+      </summary>
+      <form action={supprimerConstat} className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+        <input type="hidden" name="missionId" value={missionId} />
+        <input type="hidden" name="ordre" value={ordre} />
+        <input type="hidden" name="constatId" value={c.id} />
+        <span className="text-[var(--anm-muted)]">
+          Le constat et l&apos;action générée depuis lui disparaissent
+          {c.control_point_id ? ", et le point de contrôle redevient disponible" : ""}. C&apos;est
+          définitif.
+        </span>
+        <button
+          type="submit"
+          className="rounded border border-[var(--anm-critique)] px-3 py-1 text-xs"
+          style={{ color: "var(--anm-critique)" }}
+        >
+          Supprimer définitivement
+        </button>
+      </form>
+    </details>
+  );
+
+  /**
    * Bandeau d'identification. Le titre n'y figure que si le formulaire est replié :
    * ouvert, c'est le champ « Titre » qui le porte, et l'afficher deux fois donne
    * l'impression de deux constats.
@@ -184,14 +208,14 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
         <span className="flex-1" aria-hidden />
       )}
       <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
-        {c.code_point ?? "—"} · {c.domain}
+        {c.code_point ?? "hors grille"} · {c.domain}
       </span>
       <span
         className="font-mono text-[0.68rem] uppercase tracking-wide"
         style={{ color: COULEUR[c.severity] }}
       >
         {c.severity} · {c.priority}
-        {c.visible_to_client ? " · publié" : ""}
+        {c.visible_to_client ? " · prêt pour le client" : ""}
       </span>
     </span>
   );
@@ -202,16 +226,17 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
         <h2 className="text-xl">Constats</h2>
         {constats.length > 0 ? (
           <p className="font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
-            {aFinir.length} à finir · {prets.length} prêts · {publies} publiés
+            {aFinir.length} à finir · {prets.length} prêts · {publies} pour le client
           </p>
         ) : null}
       </div>
 
       {constats.length === 0 ? (
         <p className="mt-3 rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
-          Aucun constat pour l&apos;instant. Ils s&apos;ouvrent depuis les étapes de contrôle :
+          Aucun constat pour l&apos;instant. La voie normale part des étapes de contrôle :
           marque un point en écart, puis clique « Rédiger le constat » — il arrive ici déjà
-          pré-rempli.
+          pré-rempli, avec la référence du point. Pour ce que la grille ne prévoit pas, le
+          formulaire en bas de page ouvre un constat hors grille.
         </p>
       ) : null}
 
@@ -225,6 +250,7 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
               <div key={c.id}>
                 <div className="mb-1 flex px-1 text-sm">{enTete(c, false)}</div>
                 {formulaire(c, manques, true)}
+                <div className="px-4">{suppression(c)}</div>
               </div>
             ))}
           </div>
@@ -243,12 +269,63 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
                   <span aria-hidden className="mt-1 text-[var(--anm-muted)] group-open:rotate-90">›</span>
                   {enTete(c, true)}
                 </summary>
-                <div className="pb-3">{formulaire(c, manques, false)}</div>
+                <div className="pb-3">
+                  {formulaire(c, manques, false)}
+                  <div className="px-4">{suppression(c)}</div>
+                </div>
               </details>
             ))}
           </div>
         </>
       ) : null}
+
+      <details className="mt-8 rounded border border-dashed border-[var(--anm-hairline)] p-4">
+        <summary className="cursor-pointer text-sm font-medium">
+          Écrire un constat qui ne vient d&apos;aucun point de contrôle
+        </summary>
+        <p className="mt-1 text-sm text-[var(--anm-muted)]">
+          La grille couvre ce qu&apos;on sait chercher. Une pratique observée sur site, une
+          organisation, un propos du dirigeant : ça n&apos;a pas de case et ça doit quand même
+          entrer au rapport. Le constat s&apos;ouvre vide, à compléter comme les autres.
+        </p>
+        <form action={ajouterConstatLibre} className="mt-3 grid gap-2 sm:grid-cols-4">
+          <input type="hidden" name="missionId" value={missionId} />
+          <input type="hidden" name="ordre" value={ordre} />
+          <label className="flex flex-col gap-1 text-xs sm:col-span-2">
+            L&apos;intitulé du constat
+            <input name="title" required placeholder="Ce qu'on a vu, en quelques mots" className={champ} />
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            Domaine
+            <select name="domaine" defaultValue="operationnel" className={champ}>
+              {DOMAINES.map((d) => (
+                <option key={d.valeur} value={d.valeur}>{d.libelle}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs">
+            Criticité
+            <select name="severity" defaultValue="majeur" className={champ}>
+              {CRITICITES.map((s) => (
+                <option key={s.valeur} value={s.valeur}>{s.label} → {s.priorite}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs sm:col-span-3">
+            Axe du rapport
+            <select name="nature" defaultValue="risque_controle" className={champ}>
+              <option value="risque_controle">Risque réel en cas de contrôle</option>
+              <option value="amelioration">Axe d&apos;amélioration</option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="self-end rounded bg-[var(--anm-green)] px-3 py-1.5 text-sm font-medium text-[var(--anm-paper)]"
+          >
+            Ouvrir le constat
+          </button>
+        </form>
+      </details>
     </section>
   );
 };

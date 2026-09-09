@@ -1,6 +1,7 @@
 import type { Constat } from "@/lib/types";
 import { definirPlaceDansRapport } from "@/app/admin/actions";
 import { axeIncoherent } from "@/content/vision";
+import { constatComplet } from "@/content/constat";
 
 const NIVEAUX: { valeur: string; label: string; traitement: string; couleur: string }[] = [
   { valeur: "critique", label: "Critique", traitement: "P1 · immédiat", couleur: "var(--anm-critique)" },
@@ -29,7 +30,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
     .sort((a, b) => (a.report_rank ?? 9) - (b.report_rank ?? 9));
   const rangsUtilises = top.map((c) => c.report_rank);
   const doublons = rangsUtilises.filter((r, i) => rangsUtilises.indexOf(r) !== i);
-  const incomplets = constats.filter((c) => c.reference_checked !== "oui").length;
+  const incomplets = constats.filter((c) => !constatComplet(c)).length;
   const malClasses = constats.filter((c) => axeIncoherent(c.nature, c.severity));
 
   if (constats.length === 0) {
@@ -85,7 +86,8 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       ) : null}
       {incomplets > 0 ? (
         <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-sable)] px-3 py-2 text-sm">
-          {incomplets} constat{incomplets > 1 ? "s" : ""} sans référence vérifiée — à régler à
+          {incomplets} constat{incomplets > 1 ? "s" : ""} incomplet{incomplets > 1 ? "s" : ""} —
+          il manque le fait, la preuve, la référence vérifiée ou la recommandation. À régler à
           l&apos;étape 11 avant de sortir le rapport.
         </p>
       ) : null}
@@ -144,7 +146,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
             <span className="min-w-[14rem] flex-1">
               {c.title}
               <span className="mt-0.5 block font-mono text-[0.66rem] text-[var(--anm-muted)]">
-                {c.code_point ?? "—"} · {c.nature === "risque_controle" ? "risque de contrôle" : "amélioration"}
+                {c.code_point ?? "hors grille"} · {c.nature === "risque_controle" ? "risque de contrôle" : "amélioration"}
                 {c.reference_checked !== "oui" ? " · référence non vérifiée" : ""}
               </span>
             </span>
