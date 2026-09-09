@@ -121,7 +121,13 @@ export const SECTIONS_RAPPORT = [
   "Sources officielles vérifiées (datées)",
 ] as const;
 
-/** Domaines de la section 6 du rapport (07). ⚠ Le fiscal n'y figure pas encore : à ajouter dans le docx. */
+/**
+ * Domaines de la section 6 du rapport (07) — SIX sous-sections, exactement celles du
+ * modèle. Le fiscal n'y figure pas : c'est un pilier du portail, pas une section du
+ * gabarit de rapport de Sofia. L'ajouter ici ferait atterrir un titre de sous-section
+ * inventé dans un document remis au client. Si elle veut le fiscal au rapport, c'est le
+ * docx 07 qu'elle met à jour, et cette constante suivra.
+ */
 export const DOMAINES_RAPPORT = [
   "CNAPS",
   "Sous-traitance",
@@ -129,8 +135,53 @@ export const DOMAINES_RAPPORT = [
   "Temps de travail",
   "SST / Inspection du travail",
   "Organisation",
-  "Fiscal (à intégrer au modèle 07)",
 ] as const;
 
 /** Réunion de restitution (06 §11) : 45 à 60 minutes. */
 export const RESTITUTION_MINUTES = { min: 45, max: 60 } as const;
+
+/**
+ * L'ordre du jour minuté de la restitution (06 §11), recopié tel quel.
+ * Il n'était nulle part : l'étape 15 se contentait de quatre conseils réécrits, dont un
+ * qui inventait un nombre de constats à présenter.
+ */
+export const ORDRE_DU_JOUR_RESTITUTION = [
+  { minutes: 5, quoi: "Rappeler le périmètre et les limites de l'audit." },
+  { minutes: 10, quoi: "Présenter les points forts et le niveau global de maîtrise." },
+  { minutes: 20, quoi: "Traiter uniquement les écarts critiques et majeurs." },
+  { minutes: 10, quoi: "Valider responsables et échéances du plan d'actions." },
+  { minutes: 5, quoi: "Décider des sujets à faire vérifier par avocat, expert-comptable ou autre spécialiste." },
+  { minutes: 5, quoi: "Fixer, si le client le souhaite, une revue de suivi." },
+] as const;
+
+/**
+ * Tailles d'échantillon par tranche d'effectif (06 §5), mot pour mot.
+ *
+ * `min`/`max` ne servent qu'à mettre en évidence la tranche du client : la première
+ * n'est pas bornée parce que le pack ne chiffre pas « très petite entreprise ». Lui
+ * inventer un seuil serait exactement le défaut qu'on traque.
+ */
+export const TRANCHES_ECHANTILLON = [
+  { libelle: "Très petite entreprise", cible: "environ 5 dossiers salariés si l'effectif le permet", min: null, max: null },
+  { libelle: "10 à 49 salariés", cible: "8 à 12 dossiers", min: 10, max: 49 },
+  { libelle: "50 à 199 salariés", cible: "12 à 20 dossiers", min: 50, max: 199 },
+  { libelle: "200 salariés et plus", cible: "au moins 20 dossiers, puis augmenter selon le risque, le nombre de sites et les anomalies détectées", min: 200, max: null },
+] as const;
+
+/**
+ * Les huit profils que la procédure §5 impose d'inclure « dans tous les cas ».
+ * L'écran n'en reprenait que quatre, et y avait ajouté un critère de choix de site que
+ * le pack n'écrit nulle part. Ceux qui manquaient sont ceux qui portent le risque : le
+ * CDD (requalification), les heures supplémentaires (travail dissimulé), le départ
+ * récent, le salarié par sous-traitant (solidarité financière).
+ */
+export const PROFILS_ECHANTILLON = [
+  "Un nouvel embauché",
+  "Un CDD si présent",
+  "Un temps partiel si présent",
+  "Un travailleur de nuit",
+  "Un agent avec beaucoup d'heures supplémentaires",
+  "Un agent ayant changé de site",
+  "Un départ récent",
+  "Au moins un salarié par sous-traitant testé",
+] as const;

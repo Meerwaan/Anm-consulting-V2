@@ -180,7 +180,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
         ) : null}
 
         {etape && (etape.kind === "echantillon" || etape.kind === "restitution") ? (
-          <EtapeGuidee kind={etape.kind} />
+          <EtapeGuidee kind={etape.kind} effectif={mission.organisation?.headcount ?? null} />
         ) : null}
 
         {etape?.kind === "plan_actions" ? (

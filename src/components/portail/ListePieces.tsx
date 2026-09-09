@@ -1,13 +1,22 @@
 import type { EtatValidite, ValiditePiece } from "@/lib/types";
 import { definirDateDocument, demanderPiecesManquantes } from "@/app/admin/actions";
 
+/**
+ * « Sans objet » disait « Reçue », en vert, pour toute pièce dépourvue de durée de
+ * péremption — soit 29 modèles sur 37. Sur la mission Secu 91, 23 pièces jamais reçues
+ * s'affichaient ainsi et l'en-tête annonçait 4 manquantes au lieu de 27.
+ * « Sans objet » ne veut dire qu'une chose : ce document ne s'applique pas à cette
+ * entreprise (seuil d'effectif). Ne pas avoir de date de péremption n'est pas une
+ * dispense de réception.
+ */
 const ETAT: Record<EtatValidite, { texte: string; couleur: string }> = {
-  perimee:         { texte: "Périmée",     couleur: "var(--anm-critique)" },
-  bientot_perimee: { texte: "Bientôt",     couleur: "var(--anm-majeur)" },
+  perimee:         { texte: "Périmée",       couleur: "var(--anm-critique)" },
+  bientot_perimee: { texte: "Bientôt",       couleur: "var(--anm-majeur)" },
   date_manquante:  { texte: "Date à saisir", couleur: "var(--anm-majeur)" },
-  non_recue:       { texte: "Manquante",   couleur: "var(--anm-critique)" },
-  valide:          { texte: "À jour",      couleur: "var(--anm-mineur)" },
-  sans_objet:      { texte: "Reçue",       couleur: "var(--anm-mineur)" },
+  non_recue:       { texte: "Manquante",     couleur: "var(--anm-critique)" },
+  valide:          { texte: "À jour",        couleur: "var(--anm-mineur)" },
+  recue:           { texte: "Reçue",         couleur: "var(--anm-mineur)" },
+  sans_objet:      { texte: "Sans objet",    couleur: "var(--anm-muted)" },
 };
 
 const jour = (d: string | null): string => (d ? new Date(d).toLocaleDateString("fr-FR") : "");

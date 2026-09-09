@@ -161,7 +161,9 @@ export const lireRapprochements = async (missionId: string): Promise<LigneRappro
   const supabase = await createClient();
   const { data } = await supabase
     .from("mission_reconciliation_status")
-    .select("id, kind, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
+    .select("id, kind, site, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
+    .order("site", { nullsFirst: true })
+    .order("periode", { nullsFirst: true })
     .eq("mission_id", missionId);
   return (data as LigneRapprochement[] | null) ?? [];
 };

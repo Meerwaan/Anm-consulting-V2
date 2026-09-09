@@ -101,8 +101,13 @@ export interface PieceMission {
 }
 
 /** État de validité d'une pièce (vue mission_documents_validite). */
+/**
+ * « sans_objet » = ce document ne s'applique pas à cette entreprise (seuil d'effectif).
+ * « recue » = reçu, sans durée de validité à surveiller. Les deux étaient confondus, et
+ * une pièce jamais reçue s'affichait « Reçue » en vert.
+ */
 export type EtatValidite =
-  | "sans_objet" | "non_recue" | "date_manquante" | "valide" | "bientot_perimee" | "perimee";
+  | "sans_objet" | "non_recue" | "recue" | "date_manquante" | "valide" | "bientot_perimee" | "perimee";
 
 export interface ValiditePiece {
   id: string;
@@ -122,6 +127,8 @@ export interface ValiditePiece {
 export interface LigneRapprochement {
   id: string;
   kind: string;
+  /** Le site client sur lequel porte le croisement (06 §7). */
+  site: string | null;
   periode: string | null;
   valeur_a: number | null;
   valeur_b: number | null;

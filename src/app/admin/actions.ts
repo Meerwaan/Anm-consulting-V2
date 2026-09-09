@@ -270,28 +270,65 @@ export const enregistrerRapprochement = async (formData: FormData): Promise<void
   const missionId = String(formData.get("missionId"));
   const kind = String(formData.get("kind"));
   const ordre = String(formData.get("ordre") ?? "10");
+  const ligneId = String(formData.get("ligneId") ?? "").trim();
   const nombre = (n: FormDataEntryValue | null): number | null => {
     const v = String(n ?? "").replace(",", ".").trim();
     return v === "" || Number.isNaN(Number(v)) ? null : Number(v);
   };
 
   const { data: utilisateur } = await supabase.auth.getUser();
-  await supabase.from("mission_reconciliations").upsert(
-    {
-      mission_id: missionId,
-      kind,
-      periode: String(formData.get("periode") ?? "").trim() || null,
-      valeur_a: nombre(formData.get("valeurA")),
-      valeur_b: nombre(formData.get("valeurB")),
-      tolerance_pct: nombre(formData.get("tolerance")) ?? 0,
-      note: String(formData.get("note") ?? "").trim() || null,
-      updated_at: new Date().toISOString(),
-      updated_by: utilisateur.user?.id ?? null,
-    },
-    { onConflict: "mission_id,kind" },
-  );
+  const valeurs = {
+    // La procédure §7 dit « prendre un site client et un mois représentatif » : un
+    // croisement sans site ni période ne dit pas sur quoi il a porté, et le rapport ne
+    // peut pas le reprendre.
+    site: String(formData.get("site") ?? "").trim() || null,
+    periode: String(formData.get("periode") ?? "").trim() || null,
+    valeur_a: nombre(formData.get("valeurA")),
+    valeur_b: nombre(formData.get("valeurB")),
+    tolerance_pct: nombre(formData.get("tolerance")) ?? 0,
+    note: String(formData.get("note") ?? "").trim() || null,
+    updated_at: new Date().toISOString(),
+    updated_by: utilisateur.user?.id ?? null,
+  };
+
+  /**
+   * Mise à jour par identifiant de ligne, insertion sinon.
+   *
+   * L'ancienne version faisait un upsert sur (mission, type de croisement) : saisir un
+   * second site écrasait silencieusement les chiffres du premier, alors que la méthode
+   * demande justement d'élargir quand une anomalie sérieuse apparaît.
+   */
+  const { error } = ligneId
+    ? await supabase
+        .from("mission_reconciliations")
+        .update(valeurs)
+        .eq("id", ligneId)
+        .eq("mission_id", missionId)
+    : await supabase
+        .from("mission_reconciliations")
+        .insert({ mission_id: missionId, kind, ...valeurs });
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  retour(missionId, ordre, error
+    ? { erreur: error.message.includes("portee_uniq")
+        ? "Ce croisement existe déjà pour ce site et cette période — modifie la ligne existante."
+        : error.message }
+    : { ok: ligneId ? "Croisement mis à jour." : "Croisement ajouté." });
+};
+
+/** Étape 10 — retirer un croisement saisi par erreur. */
+export const supprimerRapprochement = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+  const missionId = String(formData.get("missionId"));
+  const ordre = String(formData.get("ordre") ?? "10");
+  const { error } = await supabase
+    .from("mission_reconciliations")
+    .delete()
+    .eq("id", String(formData.get("ligneId")))
+    .eq("mission_id", missionId);
+  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  retour(missionId, ordre, error ? { erreur: error.message } : { ok: "Croisement supprimé." });
 };
 
 /**
