@@ -53,9 +53,13 @@ const PlanActions = ({ missionId, ordre, actions, constats }: Props) => {
               Générer les {restants} actions manquantes
             </button>
           </form>
+        ) : sansResponsable > 0 || sansDate > 0 ? (
+          <p className="font-mono text-xs uppercase tracking-widest text-[var(--anm-majeur)]">
+            Reste à affecter
+          </p>
         ) : (
           <p className="font-mono text-xs uppercase tracking-widest text-[var(--anm-mineur)]">
-            Chaque constat a son action
+            Plan complet
           </p>
         )}
       </div>

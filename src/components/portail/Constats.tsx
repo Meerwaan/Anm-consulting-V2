@@ -171,9 +171,18 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
     </form>
   );
 
-  const enTete = (c: Constat) => (
+  /**
+   * Bandeau d'identification. Le titre n'y figure que si le formulaire est replié :
+   * ouvert, c'est le champ « Titre » qui le porte, et l'afficher deux fois donne
+   * l'impression de deux constats.
+   */
+  const enTete = (c: Constat, replieAuDepart = false) => (
     <span className="flex flex-1 flex-wrap items-baseline justify-between gap-2">
-      <span className="flex-1 font-medium">{c.title}</span>
+      {replieAuDepart ? (
+        <span className="flex-1 font-medium group-open:hidden">{c.title}</span>
+      ) : (
+        <span className="flex-1" aria-hidden />
+      )}
       <span className="font-mono text-[0.66rem] text-[var(--anm-muted)]">
         {c.code_point ?? "—"} · {c.domain}
       </span>
@@ -214,7 +223,7 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           <div className="mt-3 flex flex-col gap-4">
             {aFinir.map(({ c, manques }) => (
               <div key={c.id}>
-                <div className="mb-1 flex px-1 text-sm">{enTete(c)}</div>
+                <div className="mb-1 flex px-1 text-sm">{enTete(c, false)}</div>
                 {formulaire(c, manques, true)}
               </div>
             ))}
@@ -229,10 +238,10 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
           </p>
           <div className="mt-1 flex flex-col">
             {prets.map(({ c, manques }) => (
-              <details key={c.id} className="border-b border-[var(--anm-hairline)] last:border-b-0">
+              <details key={c.id} className="group border-b border-[var(--anm-hairline)] last:border-b-0">
                 <summary className="flex cursor-pointer list-none items-baseline gap-2 py-2.5 text-sm marker:content-none">
-                  <span aria-hidden className="mt-1 text-[var(--anm-muted)]">›</span>
-                  {enTete(c)}
+                  <span aria-hidden className="mt-1 text-[var(--anm-muted)] group-open:rotate-90">›</span>
+                  {enTete(c, true)}
                 </summary>
                 <div className="pb-3">{formulaire(c, manques, false)}</div>
               </details>

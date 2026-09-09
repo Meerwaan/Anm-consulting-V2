@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { exigerRole } from "@/lib/supabase/session";
 import type { ResultatPoint, StatutEtape, TypeMission } from "@/lib/types";
 import { textesDuDomaine, type DomaineAudit } from "@/content/textes";
+import { axeParDefaut } from "@/content/vision";
 
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
@@ -351,7 +352,7 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
       reference_checked: "a_verifier",
       recommendation: null,
       priority: PRIORITE_PAR_CRITICITE[criticite] ?? "P3",
-      nature: resultat?.status === "partiel" ? "amelioration" : "risque_controle",
+      nature: axeParDefaut(resultat?.status, criticite),
       status: "ouvert",
       visible_to_client: false,
     })

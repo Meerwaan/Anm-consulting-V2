@@ -1,7 +1,7 @@
 import type { ActionPlan, Constat } from "@/lib/types";
 import type { EnTeteMission } from "@/lib/portail/mission";
 import { SECTIONS_RAPPORT } from "@/content/methode";
-import { AXES_RAPPORT } from "@/content/vision";
+import { AXES_RAPPORT, axeIncoherent } from "@/content/vision";
 
 const COULEUR: Record<string, string> = {
   critique: "var(--anm-critique)",
@@ -38,6 +38,11 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
   if (sansResp > 0) bloquants.push(`${sansResp} action(s) sans responsable (étape 13)`);
   const sansDate = actions.filter((a) => !a.due_on).length;
   if (sansDate > 0) bloquants.push(`${sansDate} action(s) sans échéance (étape 13)`);
+  const malClasses = constats.filter((c) => axeIncoherent(c.nature, c.severity)).length;
+  if (malClasses > 0)
+    bloquants.push(
+      `${malClasses} constat(s) critique ou majeur rangé(s) en axe d'amélioration (étape 11)`,
+    );
 
   return (
     <section>
@@ -48,7 +53,7 @@ const ApercuRapport = ({ mission, constats, actions }: Props) => {
       </p>
 
       {bloquants.length > 0 ? (
-        <div className="mt-4 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
+        <div className="mt-4 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-sable)] px-3 py-2 text-sm">
           <p className="font-medium">Il reste à régler avant de sortir le rapport :</p>
           <ul className="mt-1 flex flex-col gap-0.5">
             {bloquants.map((b) => <li key={b}>— {b}</li>)}

@@ -1,5 +1,6 @@
 import type { Constat } from "@/lib/types";
 import { definirPlaceDansRapport } from "@/app/admin/actions";
+import { axeIncoherent } from "@/content/vision";
 
 const NIVEAUX: { valeur: string; label: string; traitement: string; couleur: string }[] = [
   { valeur: "critique", label: "Critique", traitement: "P1 · immédiat", couleur: "var(--anm-critique)" },
@@ -29,6 +30,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
   const rangsUtilises = top.map((c) => c.report_rank);
   const doublons = rangsUtilises.filter((r, i) => rangsUtilises.indexOf(r) !== i);
   const incomplets = constats.filter((c) => c.reference_checked !== "oui").length;
+  const malClasses = constats.filter((c) => axeIncoherent(c.nature, c.severity));
 
   if (constats.length === 0) {
     return (
@@ -64,8 +66,13 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
               </b>
               <span className="mt-1 block text-sm font-medium">{n.label}</span>
               <span className="block font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-muted)]">
-                {misEnAvant > 0 ? `${misEnAvant} en avant · ` : ""}{n.traitement}
+                {n.traitement}
               </span>
+              {misEnAvant > 0 ? (
+                <span className="mt-0.5 block font-mono text-[0.64rem] uppercase tracking-wide" style={{ color: n.couleur }}>
+                  dont {misEnAvant} en avant
+                </span>
+              ) : null}
             </div>
           );
         })}
@@ -77,10 +84,25 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
         </p>
       ) : null}
       {incomplets > 0 ? (
-        <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
+        <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-sable)] px-3 py-2 text-sm">
           {incomplets} constat{incomplets > 1 ? "s" : ""} sans référence vérifiée — à régler à
           l&apos;étape 11 avant de sortir le rapport.
         </p>
+      ) : null}
+
+      {malClasses.length > 0 ? (
+        <div className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-sable)] px-3 py-2 text-sm">
+          <p>
+            {malClasses.length} constat{malClasses.length > 1 ? "s" : ""} coté
+            {malClasses.length > 1 ? "s" : ""} critique ou majeur figure
+            {malClasses.length > 1 ? "nt" : ""} en axe d&apos;amélioration : à ce niveau
+            l&apos;écart expose l&apos;entreprise devant un contrôleur, il se lit dans la
+            colonne des risques. À rebasculer à l&apos;étape 11 si ce n&apos;est pas voulu.
+          </p>
+          <ul className="mt-1 flex flex-col gap-0.5 text-[var(--anm-muted)]">
+            {malClasses.map((c) => <li key={c.id}>— {c.title}</li>)}
+          </ul>
+        </div>
       ) : null}
 
       <p className="mt-7 border-b border-[var(--anm-hairline)] pb-1 font-mono text-[0.68rem] uppercase tracking-widest text-[var(--anm-muted)]">
