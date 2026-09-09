@@ -18,7 +18,8 @@ import ApercuRapport from "@/components/portail/ApercuRapport";
 import { OFFRES } from "@/content/offres";
 import {
   lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
-  lireNotes, lireObjectifEtape, lireRapprochements, lireValiditePieces, lirePointsDEtape,
+  lireNotes, lireObjectifEtape, lireRapprochements, lireReponsesEntretien,
+  lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -32,15 +33,17 @@ export default async function EtapePage({ params, searchParams }: Params) {
   const { id, ordre } = await params;
   const { ok, erreur } = await searchParams;
 
-  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions] = await Promise.all([
-    lireMission(id),
-    lireEtapes(id),
-    lireHorsEtape(id),
-    lireValiditePieces(id),
-    lireRapprochements(id),
-    lireConstats(id),
-    lireActions(id),
-  ]);
+  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien] =
+    await Promise.all([
+      lireMission(id),
+      lireEtapes(id),
+      lireHorsEtape(id),
+      lireValiditePieces(id),
+      lireRapprochements(id),
+      lireConstats(id),
+      lireActions(id),
+      lireReponsesEntretien(id),
+    ]);
   if (!mission || etapes.length === 0) notFound();
 
   const estHorsEtape = ordre === "hors-etape";
@@ -162,7 +165,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
           <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
         ) : null}
 
-        {etape?.kind === "entretien" ? <FicheCadrage mission={mission} /> : null}
+        {etape?.kind === "entretien" ? <FicheCadrage mission={mission} reponses={entretien} /> : null}
 
         {etape?.kind === "perimetre" ? <FichePerimetre mission={mission} /> : null}
 

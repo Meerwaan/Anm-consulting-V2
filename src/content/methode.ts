@@ -185,3 +185,34 @@ export const PROFILS_ECHANTILLON = [
   "Un départ récent",
   "Au moins un salarié par sous-traitant testé",
 ] as const;
+
+/**
+ * Le questionnaire d'entretien du dirigeant (06 §4), recopié mot pour mot.
+ *
+ * Il n'existait nulle part dans le portail : l'étape 01 ne demandait que six champs
+ * administratifs. Or le pack en fait le pivot de la mission — les réponses sur la
+ * vérification des titres CNAPS, sur le document qui fait foi pour les heures, sur qui
+ * rapproche planning et paie, orientent l'échantillon de l'étape 05 et les contrôles
+ * croisés de l'étape 10. Sans lui, la consultante mène l'entretien de mémoire ou sur
+ * papier, hors de l'outil, et rien n'en revient.
+ *
+ * Le `code` est stable : il sert de clé en base (mission_entretien_reponses). Ne jamais
+ * le renuméroter, seulement en ajouter.
+ */
+export const QUESTIONNAIRE_DIRIGEANT = [
+  { code: "activite", theme: "Activité", question: "Quelles activités de sécurité privée exercez-vous réellement aujourd'hui ? Lesquelles sont sous-traitées ?" },
+  { code: "organisation", theme: "Organisation", question: "Qui décide des embauches, affectations, remplacements urgents et validations de paie ?" },
+  { code: "cnaps_titre", theme: "CNAPS", question: "Comment vérifiez-vous un titre CNAPS avant l'embauche puis avant l'affectation ?" },
+  { code: "cnaps_echeances", theme: "CNAPS", question: "Comment suivez-vous les dates d'expiration des cartes et agréments ?" },
+  { code: "st_selection", theme: "Sous-traitance", question: "Dans quels cas sous-traitez-vous ? Comment sélectionnez-vous et contrôlez-vous vos sous-traitants ?" },
+  { code: "st_second_rang", theme: "Sous-traitance", question: "Existe-t-il de la sous-traitance de second rang ? Comment en êtes-vous informé ?" },
+  { code: "social_controle", theme: "Social", question: "Qui contrôle les DPAE, contrats, classifications et avenants ?" },
+  { code: "temps_foi", theme: "Temps", question: "Quel document fait foi pour les heures réellement travaillées ?" },
+  { code: "temps_remplacement", theme: "Temps", question: "Comment gérez-vous un remplacement de dernière minute sans dépasser les limites de temps/repos ?" },
+  { code: "paie_rapprochement", theme: "Paie", question: "Qui rapproche planning, variables de paie et bulletin avant validation ?" },
+  { code: "paie_elements", theme: "Paie", question: "Quelles primes, paniers, frais et indemnités sont versés ? Sur quelle base ?" },
+  { code: "clients_hors_cadre", theme: "Clients", question: "Un client a-t-il déjà demandé à un agent une mission hors du cadre prévu ? Comment cela est-il géré ?" },
+  { code: "sst_risques", theme: "SST", question: "Quels sont vos trois principaux risques professionnels ? Comment sont-ils suivis dans le DUERP ?" },
+  { code: "controles_passes", theme: "Contrôles", question: "Avez-vous déjà reçu une observation CNAPS, URSSAF ou Inspection du travail ? A-t-elle été corrigée durablement ?" },
+  { code: "pilotage", theme: "Pilotage", question: "Quels points de conformité vous inquiètent aujourd'hui ?" },
+] as const;

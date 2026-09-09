@@ -139,6 +139,13 @@ export interface LigneRapprochement {
   statut: "a_saisir" | "coherent" | "ecart";
 }
 
+/** Une réponse au questionnaire d'entretien du dirigeant (06 §4). */
+export interface ReponseEntretien {
+  question_code: string;
+  reponse: string | null;
+  preuve: string | null;
+}
+
 export type StatutConstat = "ouvert" | "en_analyse" | "valide" | "clos";
 export type NatureConstat = "risque_controle" | "amelioration";
 export type Priorite = "P1" | "P2" | "P3" | "P4";

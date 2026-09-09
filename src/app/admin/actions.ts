@@ -869,3 +869,35 @@ export const realignerAction = async (formData: FormData): Promise<void> => {
         },
   );
 };
+
+/**
+ * Étape 01 — enregistrer une réponse du questionnaire d'entretien du dirigeant (06 §4).
+ *
+ * Le pack fait de cet entretien le pivot de la mission : ce qu'il répond sur la
+ * vérification des titres, sur le document qui fait foi pour les heures ou sur la
+ * sous-traitance de second rang oriente l'échantillon et les contrôles croisés. Le
+ * questionnaire n'existait nulle part — il se menait de mémoire, hors de l'outil.
+ */
+export const enregistrerReponseEntretien = async (formData: FormData): Promise<void> => {
+  await exigerRole("consultant");
+  const supabase = await createClient();
+
+  const missionId = String(formData.get("missionId"));
+  const code = String(formData.get("questionCode"));
+  const { data: utilisateur } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from("mission_entretien_reponses").upsert(
+    {
+      mission_id: missionId,
+      question_code: code,
+      reponse: String(formData.get("reponse") ?? "").trim() || null,
+      preuve: String(formData.get("preuve") ?? "").trim() || null,
+      updated_at: new Date().toISOString(),
+      updated_by: utilisateur.user?.id ?? null,
+    },
+    { onConflict: "mission_id,question_code" },
+  );
+
+  revalidatePath(`${chemin(missionId)}/etapes/1`);
+  retour(missionId, "1", error ? { erreur: error.message } : { ok: "Réponse enregistrée." });
+};

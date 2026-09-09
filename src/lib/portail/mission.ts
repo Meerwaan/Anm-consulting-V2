@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
   ActionPlan, AvancementEtape, Constat, LigneRapprochement, Mission, PointDeControle,
-  ResultatDePoint, ValiditePiece,
+  ReponseEntretien, ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
 export interface EnTeteMission extends Mission {
@@ -200,4 +200,14 @@ export const lireActions = async (missionId: string): Promise<ActionPlan[]> => {
     ...a,
     constat: a.constat?.title ?? null,
   }));
+};
+
+/** Réponses au questionnaire d'entretien du dirigeant (06 §4). */
+export const lireReponsesEntretien = async (missionId: string): Promise<ReponseEntretien[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_entretien_reponses")
+    .select("question_code, reponse, preuve")
+    .eq("mission_id", missionId);
+  return (data as ReponseEntretien[] | null) ?? [];
 };
