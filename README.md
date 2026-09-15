@@ -45,7 +45,9 @@ au typage ni au lint : l'écriture part avec une valeur invalide et la base la r
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
 ## Structure
-- `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact, ressources)
+- `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact) · `actions.ts` enregistre les leads (formulaire de contact, checklist CNAPS, liste d'attente formation) dans `leads`
+- `src/components/vitrine/` — composants de la vitrine : `Nav`, `Footer`, `FicheConstat` (objet signature, animée dans le hero), `Etapes` (les 15 étapes, trait qui se dessine au scroll), `PortailApercu` (aperçu du portail client), `Estimateur` (devis indicatif via `chiffrer()`), `FormulaireContact`, `LeadMagnet`, `FAQ`, `Sections` (piliers, tarifs, abonnements, règle d'or, livrables, ligne de crête, bandeau final). Animations avec `motion/react`, icônes `@phosphor-icons/react`.
+- `src/content/vitrine.ts` — textes de la vitrine (ton direct et terrain, décision 09). **Tout ce qui est entre crochets est un placeholder à faire compléter par la consultante** (nom, bio, parcours, photo, email, téléphone). `src/content/formation.ts` — catalogue de formation repris de Notion (26 modules, 9 parcours, tarifs à définir).
 - `src/app/(auth)/connexion/` — connexion par lien magique · `src/app/auth/confirm/` et `src/app/auth/deconnexion/` — retour du lien et déconnexion (voir [`docs/AUTHENTIFICATION.md`](docs/AUTHENTIFICATION.md))
 - `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
 - `src/app/admin/` — espace de travail de la consultante : liste des missions, puis l'écran d'une mission **organisé par étape de la méthode** (voir [`docs/ECRAN_DE_TRAVAIL.md`](docs/ECRAN_DE_TRAVAIL.md))
