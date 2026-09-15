@@ -31,8 +31,11 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
       : { error: { message: "lien incomplet" } };
 
   if (error) {
+    // La cause exacte n'est jamais montrée à l'utilisateur (elle parle de jetons), mais
+    // elle est tracée : sans elle, un échec de connexion est indébogable.
+    console.error("[auth/confirm] échec", { message: error.message, avecTokenHash: Boolean(tokenHash), avecCode: Boolean(code) });
     const url = new URL("/connexion", origin);
-    url.searchParams.set("erreur", "lien");
+    url.searchParams.set("erreur", /expir/i.test(error.message) ? "expire" : "lien");
     return NextResponse.redirect(url);
   }
 

@@ -77,7 +77,7 @@ values ('dirigeant@societe.fr', 'client',
         'Prénom Nom');
 ```
 
-### 4. Recommandé — gabarit d'email
+### 4. OBLIGATOIRE en pratique — gabarit d'email
 
 Supabase → Authentication → Email Templates → *Magic Link*, remplacer le lien par :
 
@@ -85,8 +85,31 @@ Supabase → Authentication → Email Templates → *Magic Link*, remplacer le l
 {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email
 ```
 
-Le lien devient ouvrable depuis n'importe quel navigateur (utile si elle demande le lien
-sur son ordinateur et l'ouvre sur son téléphone).
+Le lien devient ouvrable depuis **n'importe quel navigateur**.
+
+Sans ce changement, le gabarit par défaut utilise le flux PKCE : le lien n'est valable que
+dans le navigateur **qui l'a demandé**, parce que la clé de vérification est un cookie posé
+à ce moment-là. Demander le lien dans un navigateur et l'ouvrir dans un autre — ou dans
+l'application mail — échoue, et le lien est consommé au passage : il faut en redemander un.
+
+C'est exactement ce qui s'est produit le 09/09 : jeton validé côté Supabase, `last_sign_in_at`
+inchangé, session jamais créée. Le cas se reproduira chez chaque client tant que le gabarit
+n'est pas changé — un dirigeant ouvrira le lien depuis son téléphone.
+
+### Diagnostiquer un échec de connexion
+
+```sql
+select email, last_sign_in_at, recovery_sent_at,
+       (recovery_token is not null and recovery_token <> '') as jeton_en_attente
+from auth.users;
+```
+
+- `jeton_en_attente` vrai → le lien n'a pas encore été cliqué.
+- jeton vide **et** `last_sign_in_at` non mis à jour → le lien a été cliqué, mais l'échange
+  a échoué côté application : navigateur différent, ou lien déjà utilisé.
+- `last_sign_in_at` à jour → la connexion a réussi ; le problème est ailleurs.
+
+La cause exacte est aussi tracée dans les journaux du serveur Next (`[auth/confirm] échec`).
 
 ## Où le contrôle se fait
 

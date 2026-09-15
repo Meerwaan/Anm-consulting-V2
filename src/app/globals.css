@@ -2,44 +2,245 @@
 
 /* Direction artistique validée le 07/09/2026 : « Précision » + fiche de constat.
    Typographies : Instrument Serif (titres, chiffres) · Archivo (texte, UI) · IBM Plex Mono (références, labels).
-   Les anciens alias --anm-navy / --anm-blue sont conservés pour ne rien casser et pointent vers la palette validée. */
-:root {
-  --anm-bg: #f6f7f5;        /* fond */
-  --anm-paper: #fbfbf9;     /* papier / cartes */
-  --anm-ink: #0e1f1c;       /* encre */
-  --anm-green: #0f3d35;     /* vert profond (accent unique) */
-  --anm-mint: #dcefe5;      /* menthe */
-  --anm-hairline: #d3dad6;  /* filets */
-  --anm-muted: #5f6b67;     /* gris texte */
+   Les polices sont chargées par next/font dans src/app/layout.tsx et exposées en variables CSS. */
+
+@theme {
+  /* Palette — noms français pour ne pas entrer en collision avec les couleurs par défaut de Tailwind */
+  --color-fond: #f6f7f5;
+  --color-papier: #fbfbf9;
+  --color-encre: #0e1f1c;
+  --color-encre-2: #33403c;
+  --color-vert: #0f3d35;
+  --color-vert-2: #1c5a4f;
+  --color-menthe: #dcefe5;
+  --color-menthe-2: #eef6f1;
+  --color-sable: #f5ecdd;
+  --color-filet: #d3dad6;
+  --color-filet-2: #e6eae7;
+  --color-gris: #5f6b67;
+  --color-brume: #9fb3ac;
+  --color-brume-2: #b9c7c1;
+  --color-nuit: #2c4a43;
 
   /* Sémantique de criticité (01 Bible §2) */
+  --color-critique: #8a1f1b;
+  --color-critique-l: #f6dedc;
+  --color-majeur: #8a5a12;
+  --color-majeur-l: #f7e9d0;
+  --color-modere: #6b6a15;
+  --color-modere-l: #f1f0cf;
+  --color-mineur: #1f5a3a;
+  --color-mineur-l: #dcefe5;
+
+  --font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-archivo), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-carte: 0 1px 2px rgba(14, 31, 28, 0.04), 0 8px 24px -12px rgba(14, 31, 28, 0.12);
+  --shadow-flottant: 0 2px 4px rgba(14, 31, 28, 0.04), 0 24px 48px -20px rgba(14, 31, 28, 0.22);
+}
+
+/* Alias hérités : le portail et les pages légales lisent encore ces variables. */
+:root {
+  --anm-bg: #f6f7f5;
+  --anm-paper: #fbfbf9;
+  --anm-ink: #0e1f1c;
+  --anm-green: #0f3d35;
+  --anm-mint: #dcefe5;
+  --anm-sable: #f5ecdd;
+  --anm-hairline: #d3dad6;
+  --anm-muted: #5f6b67;
   --anm-critique: #8a1f1b;
   --anm-majeur: #8a5a12;
   --anm-modere: #6b6a15;
   --anm-mineur: #1f5a3a;
-
-  /* Alias hérités du scaffold */
   --anm-navy: var(--anm-ink);
   --anm-blue: var(--anm-green);
   --anm-gold: var(--anm-majeur);
+  --font-ui: var(--font-sans);
+}
 
-  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
-  --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  font-family: var(--font-ui);
-  color: var(--anm-ink);
-  background: var(--anm-bg);
+  font-family: var(--font-sans);
+  color: var(--color-encre);
+  background: var(--color-fond);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
-.font-mono {
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--color-menthe);
+  color: var(--color-encre);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-vert);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Grain papier, fixe et hors interaction : donne la matière sans repeindre au scroll. */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* Libellés mono : références, index de section, étiquettes de fiche. */
+.etiquette {
   font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-gris);
+}
+
+/* Ligne de lecture sous les liens de navigation et les boutons « lien ». */
+.souligne {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 0.5s var(--ease-expo);
+}
+.souligne:hover,
+.souligne:focus-visible,
+.souligne[aria-current="page"] {
+  background-size: 100% 1px;
+}
+
+/* Bandeau défilant des organismes de contrôle. */
+@keyframes defilement {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.defilement {
+  animation: defilement 48s linear infinite;
+}
+.defilement:hover {
+  animation-play-state: paused;
+}
+
+/* Curseur clignotant de la fiche de constat en cours de rédaction. */
+@keyframes clignote {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.curseur::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 0.9em;
+  margin-left: 2px;
+  vertical-align: -0.1em;
+  background: currentColor;
+  animation: clignote 1s steps(1) infinite;
+}
+
+/* Champs de formulaire : une ligne, pas de boîte. */
+.champ {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-encre);
+  padding: 0.7rem 0;
+  font-size: 1rem;
+  color: var(--color-encre);
+  border-radius: 0;
+  transition: border-color 0.3s var(--ease-expo), box-shadow 0.3s var(--ease-expo);
+}
+.champ::placeholder {
+  color: var(--color-gris);
+}
+.champ:focus {
+  outline: none;
+  border-bottom-color: var(--color-vert);
+  box-shadow: 0 1px 0 0 var(--color-vert);
+}
+.champ:user-invalid {
+  border-bottom-color: var(--color-critique);
+}
+select.champ {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230e1f1c' stroke-width='1.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+  padding-right: 1.5rem;
+}
+input[type="range"].curseur-plage {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--color-filet);
+  border-radius: 999px;
+  outline: none;
+}
+input[type="range"].curseur-plage::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-vert);
+  border: 3px solid var(--color-papier);
+  box-shadow: 0 0 0 1px var(--color-vert);
+  cursor: pointer;
+  transition: transform 0.3s var(--ease-expo);
+}
+input[type="range"].curseur-plage::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+input[type="range"].curseur-plage::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color-vert);
+  border: 3px solid var(--color-papier);
+  box-shadow: 0 0 0 1px var(--color-vert);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .defilement,
+  .curseur::after {
+    animation: none;
+  }
 }

@@ -107,3 +107,24 @@ export const AXES_RAPPORT = [
     definition: "Organisation, traçabilité, procédures, temps du dirigeant : ce qui rend l'entreprise plus solide et plus simple à piloter.",
   },
 ] as const;
+
+/**
+ * Axe proposé à l'ouverture d'un constat.
+ *
+ * Un point seulement partiel relève en principe de l'amélioration — mais pas quand il est
+ * coté critique ou majeur : à ce niveau, l'écart expose l'entreprise devant un contrôleur,
+ * quelle que soit la part de conformité déjà en place. Le classer en « amélioration »
+ * l'enterrerait dans la seconde colonne du compte rendu. La consultante garde le dernier
+ * mot : le champ reste modifiable à l'étape 11.
+ */
+export const axeParDefaut = (
+  statutPoint: string | null | undefined,
+  criticite: string,
+): "risque_controle" | "amelioration" =>
+  statutPoint === "partiel" && criticite !== "critique" && criticite !== "majeur"
+    ? "amelioration"
+    : "risque_controle";
+
+/** Un constat critique ou majeur rangé en amélioration : incohérence à signaler, pas à corriger d'office. */
+export const axeIncoherent = (nature: string, criticite: string): boolean =>
+  nature === "amelioration" && (criticite === "critique" || criticite === "majeur");

@@ -16,7 +16,7 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <article className="mx-auto max-w-[68ch] space-y-8">
+    <article className="mx-auto max-w-[68ch] space-y-8 px-5 py-16 md:py-24">
       <header className="space-y-3 border-b border-[var(--anm-hairline)] pb-6">
         <h1 className="text-3xl text-[var(--anm-ink)]">{titre}</h1>
         {chapeau ? <p className="text-[var(--anm-muted)]">{chapeau}</p> : null}

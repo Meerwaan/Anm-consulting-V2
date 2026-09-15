@@ -8,28 +8,44 @@ import BlocNotes from "@/components/portail/BlocNotes";
 import BarreEtape from "@/components/portail/BarreEtape";
 import TextesApplicables from "@/components/portail/TextesApplicables";
 import Rapprochements from "@/components/portail/Rapprochements";
+import HeuresParAgent from "@/components/portail/HeuresParAgent";
+import Constats from "@/components/portail/Constats";
+import PlanActions from "@/components/portail/PlanActions";
+import ClassementRisques from "@/components/portail/ClassementRisques";
+import FicheCadrage from "@/components/portail/FicheCadrage";
+import FichePerimetre from "@/components/portail/FichePerimetre";
+import EtapeGuidee from "@/components/portail/EtapeGuidee";
+import ApercuRapport from "@/components/portail/ApercuRapport";
 import { OFFRES } from "@/content/offres";
 import {
-  lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission, lireNotes,
-  lireObjectifEtape, lireRapprochements, lireValiditePieces, lirePointsDEtape,
+  lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
+  lireHeuresAgents, lireNotes, lireObjectifEtape, lireRapprochements, lireReponsesEntretien,
+  lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
 export const metadata: Metadata = { robots: { index: false } };
 
 interface Params {
   params: Promise<{ id: string; ordre: string }>;
+  searchParams: Promise<{ ok?: string; erreur?: string }>;
 }
 
-export default async function EtapePage({ params }: Params) {
+export default async function EtapePage({ params, searchParams }: Params) {
   const { id, ordre } = await params;
+  const { ok, erreur } = await searchParams;
 
-  const [mission, etapes, horsEtape, pieces, rapprochements] = await Promise.all([
-    lireMission(id),
-    lireEtapes(id),
-    lireHorsEtape(id),
-    lireValiditePieces(id),
-    lireRapprochements(id),
-  ]);
+  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien, heures] =
+    await Promise.all([
+      lireMission(id),
+      lireEtapes(id),
+      lireHorsEtape(id),
+      lireValiditePieces(id),
+      lireRapprochements(id),
+      lireConstats(id),
+      lireActions(id),
+      lireReponsesEntretien(id),
+      lireHeuresAgents(id),
+    ]);
   if (!mission || etapes.length === 0) notFound();
 
   const estHorsEtape = ordre === "hors-etape";
@@ -83,6 +99,10 @@ export default async function EtapePage({ params }: Params) {
               </dd>
             </div>
             <div className="flex justify-between gap-2">
+              <dt className="text-[var(--anm-muted)]">Constats</dt>
+              <dd className="font-mono tabular-nums">{constats.length}</dd>
+            </div>
+            <div className="flex justify-between gap-2">
               <dt className="text-[var(--anm-muted)]">Pièces périmées</dt>
               <dd className="font-mono tabular-nums" style={{ color: perimees > 0 ? "var(--anm-majeur)" : "var(--anm-mineur)" }}>
                 {perimees}
@@ -100,6 +120,25 @@ export default async function EtapePage({ params }: Params) {
       </aside>
 
       <div className="flex flex-col gap-9">
+        {/* Toute écriture répond : enregistré, ou pourquoi ça a échoué. Jamais rien en silence. */}
+        {erreur ? (
+          <p
+            role="alert"
+            className="border-l-2 border-[var(--anm-critique)] bg-[var(--anm-paper)] px-3 py-2 text-sm"
+            style={{ color: "var(--anm-critique)" }}
+          >
+            L&apos;enregistrement a échoué : {erreur}
+          </p>
+        ) : null}
+        {ok ? (
+          <p
+            role="status"
+            className="border-l-2 border-[var(--anm-green)] bg-[var(--anm-mint)] px-3 py-2 text-sm"
+          >
+            {ok}
+          </p>
+        ) : null}
+
         {etape ? (
           <BarreEtape missionId={id} ordre={ordre} etape={etape} objectif={objectif} />
         ) : (
@@ -118,22 +157,46 @@ export default async function EtapePage({ params }: Params) {
 
         {domaines.length > 0 ? <TextesApplicables domaines={domaines} /> : null}
 
-        {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} /> : null}
+        {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} constats={constats} /> : null}
 
         {etape?.kind === "collecte" ? (
           <ListePieces missionId={id} ordre={ordre} pieces={pieces} />
         ) : null}
 
         {etape?.kind === "rapprochement" ? (
-          <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
+          <>
+            <Rapprochements missionId={id} ordre={ordre} lignes={rapprochements} />
+            {/* La section 7 du rapport se remplit ici, pas à la main dans Word. */}
+            <HeuresParAgent missionId={id} lignes={heures} />
+          </>
         ) : null}
 
-        {etape && points.length === 0 && etape.kind !== "collecte" && etape.kind !== "rapprochement" ? (
-          <section className="rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
-            Cette étape n&apos;a pas de point de contrôle : elle se travaille en notes, en entretien ou
-            en document. Les pièces déposées par le client restent accessibles depuis l&apos;étape 03.
-          </section>
+        {etape?.kind === "entretien" ? <FicheCadrage mission={mission} reponses={entretien} /> : null}
+
+        {etape?.kind === "perimetre" ? <FichePerimetre mission={mission} /> : null}
+
+        {/* 11 on écrit les constats, 12 on les regarde classés : deux moments, deux écrans. */}
+        {etape?.kind === "qualification" && etape.sort_order === 11 ? (
+          <Constats missionId={id} ordre={ordre} constats={constats} />
         ) : null}
+
+        {etape?.kind === "qualification" && etape.sort_order !== 11 ? (
+          <ClassementRisques missionId={id} constats={constats} />
+        ) : null}
+
+        {etape?.kind === "rapport" ? (
+          <ApercuRapport mission={mission} constats={constats} actions={actions} heures={heures} />
+        ) : null}
+
+        {etape && (etape.kind === "echantillon" || etape.kind === "restitution") ? (
+          <EtapeGuidee kind={etape.kind} effectif={mission.organisation?.headcount ?? null} />
+        ) : null}
+
+        {etape?.kind === "plan_actions" ? (
+          <PlanActions missionId={id} ordre={ordre} actions={actions} constats={constats} />
+        ) : null}
+
+
 
         {etape ? <BlocNotes missionId={id} stepId={etape.step_id} ordre={ordre} notes={notes} /> : null}
       </div>

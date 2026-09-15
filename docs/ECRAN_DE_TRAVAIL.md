@@ -83,9 +83,332 @@ un constat, c'est la consultante qui le qualifie.
 | Sous-traitants actifs ↔ attestations à jour | 0 % | Chaque manquant = solidarité financière |
 | Effectif en paie ↔ effectif en DSN | 0 % | Le cas d'école du contrôle URSSAF |
 
+## Du point de contrôle au constat, puis au plan d'actions
+
+C'est le dernier gros poste de saisie qui restait. Sur une mission 360°, 184 points :
+retaper à la main chaque écart dans le rapport prenait la fin de mission.
+
+**Étapes de contrôle (6, 7, 8, 9)** — un point marqué en écart affiche « Rédiger le
+constat ». Le constat s'ouvre déjà rempli avec ce que le référentiel sait :
+
+| Champ | Pré-rempli depuis |
+|---|---|
+| Titre | Thème et sous-thème du point |
+| Le fait | La note de saisie si elle existe, sinon la trame du pack + la question du point |
+| La preuve | La colonne « preuves à examiner » du référentiel |
+| La référence | Les textes **principaux** du domaine (`textes.ts`), marqués « à vérifier » |
+| Criticité | La gravité retenue à la saisie, sinon le risque initial du point |
+| Priorité | Déduite de la criticité : Critique → P1, Majeur → P2, Modéré → P3, Mineur → P4 |
+| Axe | `partiel` → amélioration · `non_conforme` → risque de contrôle |
+
+Elle ne rédige que ce qui est propre au dossier.
+
+**Étapes 11 et 12 (qualification)** — tous les constats, dans l'ordre de la règle d'or :
+fait, preuve, **risque encouru**, référence vérifiée, action et délai, puis criticité et axe.
+
+### La règle d'or, en entier
+
+`FAIT → PREUVE → RISQUE → RÉFÉRENCE VÉRIFIÉE → ACTION → DÉLAI` (01 Bible §1). La fiche n'en
+portait que cinq maillons : **le risque encouru n'existait ni comme champ ni comme colonne**,
+alors que le sous-titre de l'étape 11 le promettait et que la formule type (01 annexe 2)
+l'écrit mot pour mot. Corrigé en migration 0021.
+
+Une criticité n'est pas un risque. « Critique » dit à la consultante dans quel ordre traiter ;
+ça ne dit pas au dirigeant qu'il encourt une requalification en travail dissimulé, un
+redressement ou un retrait d'autorisation. C'est cette phrase-là qu'il retient et qui justifie
+la mission — et c'est celle que le pack demande d'écrire.
+
+Le champ reste **factuel et prudent** : la formule affichée en filigrane est « Cette situation
+peut exposer l'entreprise à …, sous réserve de confirmation de la règle applicable ». Le
+portail ne qualifie pas juridiquement ; il décrit une exposition et renvoie la qualification à
+l'avocat ou à l'expert-comptable (règle de conception 1).
+
+La chaîne est affichée en haut de l'étape 11 : c'est elle, maillon par maillon, que reprend le
+contrôle de complétude.
+
+### L'escalade — le maillon qui protège la consultante
+
+Le Manuel de terrain énumère **six** éléments de constat : Fait, Preuve, Risque, Référence,
+Action, **Escalade** — « avocat, expert-comptable ou autre spécialiste lorsque le sujet
+dépasse votre périmètre ». Chaque fiche de la Bible et du Manuel porte une section « Quand
+escalader ». Le modèle 07 §9 demande les sujets à faire valider. Le corrigé du cas 01 en fait
+un tableau entier.
+
+Dans le portail, « avocat » et « expert-comptable » n'apparaissaient **que sur la vitrine**.
+Aucun constat ne pouvait porter cette décision — alors que c'est la frontière de responsabilité
+de la consultante et le cœur de son positionnement : « je ne remplace ni l'avocat ni
+l'expert-comptable ».
+
+Chaque constat porte désormais un spécialiste (les six que nomme le pack, plus « aucune ») et
+une ligne d'explication. L'étape 14 en tire la section « Sujets à faire valider par un
+spécialiste », groupée par métier. Migration 0023.
+
+**Question ouverte pour Sofia** : l'escalade doit-elle être obligatoire sur un constat critique
+ou majeur avant publication ? Elle n'est aujourd'hui pas bloquante — une décision non prise
+s'affiche « à trancher ».
+
+### Les délais du plan sont ceux du pack
+
+`P1 immédiat · P2 sous 30 jours · P3 sous 90 jours · P4 amélioration continue` — la procédure
+§10, le Manuel de terrain et le modèle 07 §3 disent la même chose, mot pour mot.
+
+Le code posait **P1 à 7 jours** et **P4 à 180 jours**. Deux chiffres inventés. « Immédiat »
+n'est pas « sous une semaine » : un P1, c'est un titre manquant, du travail dissimulé ou un
+risque santé-sécurité grave — écrire J+7 sur le plan remis au dirigeant lui accorde une semaine
+que la méthode ne lui donne pas. Et « amélioration continue » n'a pas de date : en inventer une
+fabrique une échéance que personne n'a décidée et qui déclenchera des relances. Une action P4
+naît donc **sans échéance**, et son absence n'est pas comptée comme un oubli.
+
+### Les tolérances des contrôles croisés repassent à zéro
+
+La procédure §7 dit : « **investiguer tout écart** — erreur de saisie, remplacement, heure non
+payée, heure non déclarée, double facturation, sous-traitant différent ». Le pack ne donne
+aucun seuil, nulle part.
+
+Le code posait 5 % entre planning et pointage, 1 % entre pointage et paie, 10 % entre paie et
+facturation. Mes chiffres. Sur un site à 1 000 heures, 5 % laissaient passer 40 heures sans que
+personne ne les regarde — et c'est exactement le terrain du travail dissimulé. Tolérances à
+zéro par défaut ; la consultante peut les relever mission par mission, mais c'est alors une
+décision prise, pas un réglage hérité.
+
+### Ce qui reste à faire est visible sans rien ouvrir
+
+Un constat n'est **fini** que quand la chaîne du pack est complète : le fait (pas la trame
+pré-remplie), la preuve, la référence, sa vérification, la recommandation. L'écran s'en sert :
+
+- en-tête de section : « 3 à finir · 4 prêts · 2 pour le client » ;
+- les constats **à finir** sont ouverts, avec la liste de ce qui manque sous le formulaire ;
+- les constats **prêts** se replient sur une ligne, dépliables si besoin.
+
+Elle ne fait plus défiler vingt formulaires identiques pour retrouver lesquels sont finis.
+Sur les étapes de contrôle, un point qui porte un constat affiche « constat à finir » ou
+« constat prêt », en lien direct vers l'étape 11.
+
+### Le verrou
+
+**Un constat ne part au client que s'il est COMPLET** : le fait, la preuve, la référence,
+sa vérification, la recommandation. Vérifier la seule référence ne suffisait pas — un
+constat a réellement été publié avec la trame « [fait précis à compléter] » dedans. La
+chaîne du pack est indivisible, le verrou l'est aussi.
+
+Et rien n'échoue en silence : si la publication est demandée sur un constat incomplet,
+l'écran répond « enregistré, mais NON publié : il manque la preuve, la recommandation ».
+Chaque écriture confirme ce qu'elle a fait.
+
+**Les champs ne sont jamais pré-remplis d'une trame à trous.** Un encadré qui paraît plein
+mais compte comme vide fait chercher un champ manquant qui n'existe pas. Ce que dit le
+référentiel — le point vérifié, les preuves à examiner — s'affiche **sous** le champ, en
+gris ; le champ, lui, est vide avec un exemple en filigrane.
+
+Un point de contrôle ne peut porter qu'**un** constat par mission (index unique, migration
+0014) : deux clics rapprochés sur « Rédiger le constat » ne créent plus de jumeaux, ce que
+la garde applicative seule laissait passer.
+
+### Ce qui n'est pas dans la grille
+
+Les 208 points couvrent ce qu'on sait chercher. Un audit sur site fait remonter autre
+chose : une pratique, une organisation, un propos du dirigeant. En bas de l'étape 11,
+**« écrire un constat qui ne vient d'aucun point de contrôle »** ouvre un constat vide,
+soumis exactement aux mêmes exigences que les autres. Sans cette porte, ce constat-là
+finit sur un carnet et n'entre jamais au rapport. Il s'affiche « hors grille » là où les
+autres portent leur code de point.
+
+### Défaire
+
+Un clic sur le mauvais point crée un constat qui fausse ensuite tous les compteurs des
+étapes 12, 13 et 14. **« Supprimer ce constat »**, replié sous chaque formulaire, efface
+le constat et l'action générée depuis lui, et rend le point de contrôle disponible. Deux
+gestes volontaires, pas de confirmation par fenêtre : l'écran fonctionne sans JavaScript.
+
+### Ce que la base garde en plus
+
+- `reference_checked_on` — le pack exige une référence « vérifiée **et datée** ». La date
+  se pose seule au moment où elle coche, et repart si elle décoche **ou si elle change le
+  texte de la référence** : une date qui survit au texte qu'elle datait ferait dire à
+  l'écran « vérifiée le 8 septembre » pour un article jamais ouvert.
+- `updated_at` — quand le constat a été retouché pour la dernière fois, affiché sous le
+  formulaire. Utile en reprenant une mission une semaine plus tard.
+- `status` — passe à `valide` quand la chaîne est complète. Il restait à `ouvert` pour
+  tout le monde, donc il mentait.
+- La place dans la synthèse est **unique en base** (migration 0019). Si elle est prise,
+  l'étape 12 **échange** les deux constats au lieu de refuser : elle vient de dire lequel
+  passe devant, l'obliger à défaire l'autre d'abord serait absurde.
+
+### Le nombre de constats mis en avant appartient à la mission
+
+Le rang était plafonné à 5, repris du modèle 07 §5 qui dessine cinq blocs « Constat
+prioritaire n°1 » à « n°5 ». **Ce n'est pas une règle** : c'est le nombre de blocs qui
+tiennent dans le gabarit Word, comme le plan d'actions y tient sur dix lignes et le tableau
+de rapprochement sur cinq. Personne n'a jamais soutenu qu'un plan d'actions s'arrête à dix
+actions.
+
+Le pack se contredit d'ailleurs lui-même : section 4, le message clé au dirigeant demande
+« les **3** principaux risques » ; section 5, cinq blocs. Deux nombres dans le même
+document — c'est la preuve que le nombre est illustratif.
+
+Plafond retiré (migration 0022). Il reste le plancher (une place commence à 1) et
+l'unicité. **Zéro est un résultat légitime** : un client bien tenu n'a pas de constat qui
+doit ouvrir son rapport. L'étape 14 ne le compte comme bloquant que si la mission porte au
+moins un écart critique ou majeur — sinon la synthèse s'ouvrirait sur rien pendant que le
+dirigeant est exposé.
+
+### Deux opérations indivisibles
+
+L'échange de rang et la suppression touchent chacun plusieurs lignes. Écrits en trois
+requêtes depuis l'action serveur, une coupure entre deux laissait la base à moitié
+modifiée — un rang de synthèse perdu, ou une action effacée alors que son constat existe
+toujours — pendant que l'écran annonçait un succès qu'il n'avait pas vérifié.
+
+Ils passent désormais par deux fonctions Postgres (migration 0020), exécutées dans une
+seule transaction : `definir_rang_constat` et `supprimer_constat`. Elles sont en
+`security invoker`, donc les politiques RLS s'appliquent comme si la consultante écrivait
+elle-même. Le message affiché est celui que rend la fonction : il décrit ce qui s'est
+réellement passé, pas ce que l'écran espérait.
+
+### Une seule règle de complétude
+
+« Ce constat est-il fini ? » se calculait à quatre endroits : l'étape 11, le tableau des
+points, l'action serveur et l'étape 14. La quatrième copie ne testait que la référence :
+un constat sans fait ni preuve, mais avec la case cochée, ne bloquait pas la sortie du
+rapport et déclenchait « tout est en place » — l'inverse de ce que disait l'étape 11.
+
+La règle vit maintenant dans `src/content/constat.ts` (`cequiManque`), avec la table des
+criticités, celle des domaines et les priorités. Les écrans et les actions serveur
+l'importent. Ce fichier n'est **pas** un module `use server` : un fichier d'actions
+serveur ne peut exporter que des fonctions asynchrones, et y laisser une table de
+constantes casse `next build` sans que `tsc` ne dise rien.
+
+**Étape 13 (plan d'actions)** — un bouton génère une action par constat qui n'en a pas
+encore, avec l'échéance conseillée : P1 à 7 jours, P2 à 30, P3 à 90, P4 à 180. Le client
+coche ensuite ce qu'il a fait et la consultante est notifiée (décision 07).
+
+Si la criticité d'un constat change **après** la génération, l'action garde son ancienne
+priorité et le plan promet 180 jours pour un écart devenu critique. L'étape 13 le signale
+et propose de réaligner la priorité. Elle ne touche pas à l'échéance : celle-là a pu être
+négociée avec le dirigeant en restitution, la réécrire effacerait un engagement pris.
+
+### L'espace client n'est pas ouvert
+
+La case dit **« prêt à montrer au client »**, pas « publié ». C'est un choix de séquence
+assumé : l'écran de la consultante d'abord, l'espace client ensuite. Tant qu'il n'existe
+pas, écrire « publié » ferait croire à un envoi qui n'a pas lieu.
+
+## La chaîne complète, du point de contrôle au rapport
+
+| Étape | Ce qu'on y décide | Ce que ça alimente |
+|---|---|---|
+| 6-9 | Point conforme ou en écart | Ouvre un constat pré-rempli |
+| **11** | On écrit le constat : fait, preuve, risque encouru, référence, recommandation, criticité, axe | La criticité fixe la priorité de l'action |
+| **12** | Le rang 1 à 5 des constats **mis en avant** | L'ouverture de la synthèse dirigeant |
+| **13** | **Qui fait quoi, pour quand** : responsable, échéance, statut. Actions libres possibles | Le plan remis au client |
+| **14** | Rien — on vérifie l'assemblage et ce qui bloque encore | Le PDF (à construire) |
+| 15 | La restitution | La proposition de suivi |
+
+Chaque étape décide quelque chose que la suivante utilise. Aucune ne répète la précédente.
+
+### 12 — classement et mise en avant
+
+**Le rapport contient tous les constats.** C'est un dossier complet : rien ne s'en exclut.
+Un constat relevé puis écarté du dossier serait un constat que le dirigeant ne verrait
+jamais — exactement ce qu'un audit doit empêcher.
+
+L'étape 12 ne choisit donc pas ce qui entre, seulement ce qui est **mis en avant** : le rang
+1 à 5 des constats que le dirigeant lit en premier (« les 5 constats prioritaires » du
+modèle 07). Le reste suit, classé par criticité. L'écran signale deux rangs identiques et
+les constats dont la référence n'est pas vérifiée.
+
+### 13 — un plan réellement planifiable
+
+Une action générée depuis un constat n'a ni responsable ni date : ce sont les deux choses
+qui se négocient en restitution. Elles se saisissent donc ici, avec le statut et un
+commentaire. On peut aussi ajouter une action qui ne vient d'aucun constat — une procédure
+à écrire, un classement à reprendre : tout ne naît pas d'un écart.
+
+L'en-tête compte ce qui manque : « 8 actions · 3 sans responsable · 2 sans date ».
+
+### 14 — la vérification avant génération
+
+Assemble ce qui a été décidé et liste ce qui bloque : aucun constat retenu, aucun rang
+attribué, une référence non vérifiée, une action sans responsable ou sans date. Rien ne se
+ressaisit.
+
 ## Reste à construire
 
-- Transformer un point en écart directement en constat qualifié (fait / preuve / risque /
-  référence pré-remplis depuis le référentiel) — le prochain gain de temps important.
 - Dépôt de pièce côté client et fil d'échange.
 - Job d'envoi Resend sur la vue `document_requests_a_relancer`.
+
+## Ce que l'audit croisé code / pack a trouvé (09/09)
+
+Un essaim de 37 agents a croisé le portail avec les sept documents du pack sur sept
+dimensions — chaîne du constat, échantillonnage, structure du rapport, phases et
+restitution, pièces et entretien, contrôles croisés et visite de site, règles
+professionnelles. **30 écarts remontés, 19 réfutés par des sceptiques chargés de les
+démolir, 11 confirmés.** Le taux de réfutation est le chiffre important : deux
+accusations sur trois ne tenaient pas devant le code.
+
+### Une pièce jamais reçue s'affichait « Reçue »
+
+`mission_documents_validite` testait `validite_nature = 'indefinie'` **avant**
+`received <> 'oui'`. Les 29 modèles sur 37 sans durée de péremption — registre du
+personnel, DPAE, contrats, bulletins, plannings, pointages — basculaient en
+« sans_objet », que `ListePieces.tsx` affiche en vert avec le mot « Reçue ». Sur la
+mission Secu 91 : **23 pièces dans cet état, jamais reçues, et l'en-tête annonçait 4
+manquantes au lieu de 27**. La phase de collecte du pack ne fonctionnait que pour huit
+documents sur trente-sept.
+
+« Sans objet » ne veut plus dire qu'une chose : ce document ne s'applique pas à cette
+entreprise (seuil d'effectif). Un état `recue` distinct dit « reçu, rien à surveiller ».
+
+### Le deuxième site écrasait le premier
+
+`mission_reconciliations` n'acceptait qu'une ligne par `(mission, kind)`. La procédure §7
+dit « prendre un site client et un mois représentatif » et le §5 demande d'élargir quand
+une anomalie sérieuse apparaît : saisir un second site remplaçait silencieusement les
+chiffres du premier. Colonne `site`, unicité sur `(mission, kind, période, site)`, et
+l'écran porte autant de lignes que la mission en demande.
+
+### La section 7 du rapport n'était pas produisible
+
+Le modèle 07 impose un tableau **par salarié** : Salarié | Période | Planning | Pointage |
+Payé | Facturé | Écart. Le portail ne stockait que deux totaux par type de croisement :
+la section devait se retaper à la main dans Word, agent par agent, à partir de chiffres
+qu'il avait déjà. `mission_heures_agent` (migration 0026) porte la table du rapport, avec
+les trois écarts calculés et aucune tolérance — la procédure §7 dit « investiguer tout
+écart ».
+
+### Le questionnaire d'entretien du dirigeant
+
+Quinze questions dans le pack (§4), zéro dans le portail : l'étape 01 ne demandait que six
+champs administratifs. Deux agents indépendants, sur deux dimensions différentes, ont
+trouvé le même manque. Ces réponses orientent l'échantillon de l'étape 05 et les contrôles
+croisés de l'étape 10 — « quel document fait foi pour les heures ? » décide de ce qu'on
+croise. Migration 0025 ; la colonne « preuve à demander » du pack est là.
+
+### L'échantillonnage
+
+Les quatre tranches chiffrées du §5 n'étaient nulle part alors que l'effectif est saisi à
+l'étape 02. Les huit profils obligatoires étaient réduits à quatre, et ceux qui sautaient
+portent le risque : le CDD, l'agent en heures supplémentaires, le départ récent, le
+salarié par sous-traitant. L'écran y avait ajouté « au moins un site à effectif tournant
+et un site isolé » — un critère que le pack n'écrit nulle part.
+
+On **affiche** la règle du pack et on met en évidence la tranche du client ; on ne calcule
+pas un nombre à sa place, et on ne borne pas « très petite entreprise », que le pack ne
+chiffre pas.
+
+### Trois autres
+
+L'ordre du jour minuté de la restitution (§11, six blocs) n'était nulle part. Les pièces
+que le pack ne demande que « si applicable » étaient toutes créées obligatoires — une
+société de huit agents se voyait réclamer des PV de CSE. Et `DOMAINES_RAPPORT` ajoutait un
+septième domaine « Fiscal (à intégrer au modèle 07) » à une section qui en compte six : ce
+libellé de note interne serait parti comme titre de sous-section dans un document client.
+
+### La leçon
+
+Sur les onze écarts confirmés, **six étaient des valeurs inventées** — un chiffre, un
+seuil, un critère, un plafond que le portail imposait sans qu'aucune phrase du pack ne le
+justifie. C'est la famille de défaut la plus dangereuse ici, parce qu'elle ne se voit pas :
+l'écran a l'air d'appliquer une méthode, et personne ne sait que ce n'est pas la sienne.
+La question à poser devant chaque compteur reste : **est-ce sa règle, ou est-ce ce qui
+rentrait dans le Word ?**

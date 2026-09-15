@@ -1,5 +1,8 @@
+import Link from "next/link";
 import type { LignePoint } from "@/lib/portail/mission";
-import { definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
+import type { Constat } from "@/lib/types";
+import { creerConstatDepuisPoint, definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
+import { constatComplet } from "@/content/constat";
 
 const LIBELLE: Record<string, string> = {
   conforme: "Conforme",
@@ -22,6 +25,8 @@ interface Props {
   missionId: string;
   ordre: string;
   points: LignePoint[];
+  /** Constats de la mission : dit si celui d'un point est fini ou reste à écrire. */
+  constats: Constat[];
 }
 
 /**
@@ -30,7 +35,14 @@ interface Props {
  * vérifier : sur une mission 360°, l'essentiel est conforme, et le temps de la
  * consultante doit aller aux écarts, pas à la saisie de la normalité.
  */
-const TableauPoints = ({ missionId, ordre, points }: Props) => {
+const TableauPoints = ({ missionId, ordre, points, constats }: Props) => {
+  // La règle vient du référentiel partagé : recopiée ici, elle finissait par diverger
+  // de celle de l'étape 11, et deux écrans répondaient différemment à « est-il fini ? ».
+  const etatDuConstat = new Map(
+    constats
+      .filter((c) => c.control_point_id != null)
+      .map((c) => [c.control_point_id as number, constatComplet(c) ? "prêt" : "à finir"]),
+  );
   const restants = points.filter((p) => !p.resultat || p.resultat.status === "a_verifier");
 
   return (
@@ -102,7 +114,7 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                     </span>
                   </td>
                   <td className="py-3">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       {CHOIX.map((choix) => (
                         <form key={choix} action={definirResultatPoint}>
                           <input type="hidden" name="missionId" value={missionId} />
@@ -123,6 +135,33 @@ const TableauPoints = ({ missionId, ordre, points }: Props) => {
                           </button>
                         </form>
                       ))}
+                      {(statut === "non_conforme" || statut === "partiel") && !p.resultat?.finding_id ? (
+                        <form action={creerConstatDepuisPoint}>
+                          <input type="hidden" name="missionId" value={missionId} />
+                          <input type="hidden" name="ordre" value={ordre} />
+                          <input type="hidden" name="pointId" value={p.id} />
+                          <button
+                            type="submit"
+                            className="rounded bg-[var(--anm-green)] px-2 py-1 text-xs font-medium text-[var(--anm-paper)]"
+                          >
+                            Rédiger le constat
+                          </button>
+                        </form>
+                      ) : null}
+                      {p.resultat?.finding_id ? (
+                        <Link
+                          href={`/admin/missions/${missionId}/etapes/11`}
+                          className="font-mono text-[0.64rem] uppercase tracking-wide underline decoration-[var(--anm-hairline)] underline-offset-2"
+                          style={{
+                            color:
+                              etatDuConstat.get(p.id) === "prêt"
+                                ? "var(--anm-mineur)"
+                                : "var(--anm-majeur)",
+                          }}
+                        >
+                          constat {etatDuConstat.get(p.id) ?? "à finir"}
+                        </Link>
+                      ) : null}
                     </div>
                   </td>
                 </tr>

@@ -31,11 +31,23 @@ supabase/migrations/0010_textes_applicables.sql       # référentiel des codes 
 supabase/migrations/0011_categorie_sous_traitance.sql  # catégorie de pièces manquante
 supabase/migrations/0012_validite_pieces_et_rapprochements.sql  # durée de validité des pièces, échéances, contrôles croisés
 supabase/migrations/0013_echeances_correctifs.sql     # statut à la création + seuil d'effectif dans le déclencheur
+supabase/migrations/0014_un_constat_par_point.sql     # un seul constat par point de contrôle et par mission
+supabase/migrations/0015_constats_nettoyage_trame.sql  # retire la trame à trous et dépublie les constats incomplets
+supabase/migrations/0016_rang_rapport.sql             # rang 1-5 des constats prioritaires du rapport
+supabase/migrations/0017_vues_hors_portee_anonyme.sql  # retire les vues de la surface API anonyme
+supabase/migrations/0018_tout_au_rapport.sql          # le rapport contient tous les constats
 ```
+Avant toute PR touchant le portail : `python3 scripts/audit_coherence.py` — vérifie que chaque
+champ lu par une action serveur est bien envoyé par un formulaire, et que chaque valeur proposée
+dans un menu existe dans l'énumération correspondante. C'est la famille de bugs qui ne se voit ni
+au typage ni au lint : l'écriture part avec une valeur invalide et la base la refuse sans un mot.
+
 Les seeds se régénèrent depuis les xlsx du pack : `python3 scripts/seed_control_points.py <dossier du pack>`.
 
 ## Structure
-- `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact, ressources)
+- `src/app/(marketing)/` — vitrine publique (accueil, audit, formation, abonnement, à propos, contact) · `actions.ts` enregistre les leads (formulaire de contact, checklist CNAPS, liste d'attente formation) dans `leads`
+- `src/components/vitrine/` — composants de la vitrine : `Nav`, `Footer`, `FicheConstat` (objet signature, animée dans le hero), `Etapes` (les 15 étapes, trait qui se dessine au scroll), `PortailApercu` (aperçu du portail client), `Estimateur` (devis indicatif via `chiffrer()`), `FormulaireContact`, `LeadMagnet`, `FAQ`, `Sections` (piliers, tarifs, abonnements, règle d'or, livrables, ligne de crête, bandeau final). Animations avec `motion/react`, icônes `@phosphor-icons/react`.
+- `src/content/vitrine.ts` — textes de la vitrine (ton direct et terrain, décision 09). **Tout ce qui est entre crochets est un placeholder à faire compléter par la consultante** (nom, bio, parcours, photo, email, téléphone). `src/content/formation.ts` — catalogue de formation repris de Notion (26 modules, 9 parcours, tarifs à définir).
 - `src/app/(auth)/connexion/` — connexion par lien magique · `src/app/auth/confirm/` et `src/app/auth/deconnexion/` — retour du lien et déconnexion (voir [`docs/AUTHENTIFICATION.md`](docs/AUTHENTIFICATION.md))
 - `src/app/app/` — portail client : mission 360°, constats publiés, plan d'actions, pièces, échéances, formation (phase 4)
 - `src/app/admin/` — espace de travail de la consultante : liste des missions, puis l'écran d'une mission **organisé par étape de la méthode** (voir [`docs/ECRAN_DE_TRAVAIL.md`](docs/ECRAN_DE_TRAVAIL.md))

@@ -46,7 +46,9 @@ export interface Mission {
   control_body: string | null;
   control_deadline: string | null;
   intervention_on: string | null;
+  restitution_on: string | null;
   scope: string | null;
+  initial_hotspots: string | null;
   org_id: string;
 }
 
@@ -82,6 +84,7 @@ export interface ResultatDePoint {
   status: ResultatPoint;
   severity: Criticite | null;
   note: string | null;
+  finding_id: string | null;
 }
 
 export interface PieceMission {
@@ -98,8 +101,13 @@ export interface PieceMission {
 }
 
 /** État de validité d'une pièce (vue mission_documents_validite). */
+/**
+ * « sans_objet » = ce document ne s'applique pas à cette entreprise (seuil d'effectif).
+ * « recue » = reçu, sans durée de validité à surveiller. Les deux étaient confondus, et
+ * une pièce jamais reçue s'affichait « Reçue » en vert.
+ */
 export type EtatValidite =
-  | "sans_objet" | "non_recue" | "date_manquante" | "valide" | "bientot_perimee" | "perimee";
+  | "sans_objet" | "non_recue" | "recue" | "date_manquante" | "valide" | "bientot_perimee" | "perimee";
 
 export interface ValiditePiece {
   id: string;
@@ -119,6 +127,8 @@ export interface ValiditePiece {
 export interface LigneRapprochement {
   id: string;
   kind: string;
+  /** Le site client sur lequel porte le croisement (06 §7). */
+  site: string | null;
   periode: string | null;
   valeur_a: number | null;
   valeur_b: number | null;
@@ -127,4 +137,84 @@ export interface LigneRapprochement {
   ecart: number | null;
   ecart_pct: number | null;
   statut: "a_saisir" | "coherent" | "ecart";
+}
+
+/** Une réponse au questionnaire d'entretien du dirigeant (06 §4). */
+export interface ReponseEntretien {
+  question_code: string;
+  reponse: string | null;
+  preuve: string | null;
+}
+
+export type StatutConstat = "ouvert" | "en_analyse" | "valide" | "clos";
+export type NatureConstat = "risque_controle" | "amelioration";
+export type Priorite = "P1" | "P2" | "P3" | "P4";
+
+export interface Constat {
+  id: string;
+  control_point_id: number | null;
+  domain: Domaine;
+  title: string;
+  fact: string;
+  evidence: string | null;
+  /** Ce que la situation expose, sous réserve de confirmation de la règle applicable. */
+  risk: string | null;
+  severity: Criticite;
+  reference: string | null;
+  reference_checked: "oui" | "non" | "na" | "a_verifier";
+  /** Jour où la référence a été ouverte dans le texte — le pack l'exige datée. */
+  reference_checked_on: string | null;
+  recommendation: string | null;
+  priority: Priorite;
+  nature: NatureConstat;
+  status: StatutConstat;
+  visible_to_client: boolean;
+  in_report: boolean;
+  /** Le spécialiste à saisir quand le sujet dépasse le périmètre. NULL = pas encore tranché. */
+  escalation: string | null;
+  escalation_note: string | null;
+  /** Place dans la synthèse dirigeant. Sans plafond ; NULL = pas mis en avant. */
+  report_rank: number | null;
+  updated_at: string;
+  /** Rappels du référentiel, affichés sous les champs pour guider la rédaction. */
+  code_point?: string | null;
+  question_point?: string | null;
+  preuve_attendue?: string | null;
+}
+
+export type StatutAction = "a_faire" | "en_cours" | "clos" | "accepte";
+
+export interface ActionPlan {
+  id: string;
+  finding_id: string | null;
+  domain: Domaine;
+  title: string;
+  client_owner: string | null;
+  due_on: string | null;
+  priority: Priorite;
+  status: StatutAction;
+  comment: string | null;
+  /** Titre du constat d'origine, quand l'action en vient. */
+  constat?: string | null;
+}
+
+/**
+ * Une ligne de la section 7 du rapport (07 §7) : la reconstitution d'une prestation
+ * pour un agent, sur un site et une période, à partir de quatre sources indépendantes.
+ */
+export interface HeuresAgent {
+  id: string;
+  salarie: string;
+  site: string | null;
+  periode: string | null;
+  planning: number | null;
+  pointage: number | null;
+  paye: number | null;
+  facture: number | null;
+  conclusion: string | null;
+  ecart_planning_pointage: number | null;
+  ecart_pointage_paye: number | null;
+  ecart_paye_facture: number | null;
+  a_investiguer: boolean;
+  incomplet: boolean;
 }

@@ -1,11 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
-  AvancementEtape, LigneRapprochement, Mission, PointDeControle,
-  ResultatDePoint, ValiditePiece,
+  ActionPlan, AvancementEtape, Constat, LigneRapprochement, Mission, PointDeControle,
+  HeuresAgent, ReponseEntretien, ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
 export interface EnTeteMission extends Mission {
-  organisation: { id: string; name: string; headcount: number | null; establishments: number | null } | null;
+  organisation: {
+    id: string; name: string; headcount: number | null;
+    establishments: number | null; client_sites: number | null; activities: string[] | null;
+  } | null;
 }
 
 export interface HorsEtape {
@@ -20,7 +23,7 @@ export const lireMission = async (missionId: string): Promise<EnTeteMission | nu
   const { data } = await supabase
     .from("missions")
     .select(
-      "id, reference, type, status, opened_on, control_in_progress, control_body, control_deadline, intervention_on, scope, org_id, organisation:organizations (id, name, headcount, establishments)",
+      "id, reference, type, status, opened_on, control_in_progress, control_body, control_deadline, intervention_on, restitution_on, scope, initial_hotspots, org_id, organisation:organizations (id, name, headcount, establishments, client_sites, activities)",
     )
     .eq("id", missionId)
     .maybeSingle();
@@ -87,7 +90,7 @@ export const lirePointsDEtape = async (
       .order("code"),
     supabase
       .from("mission_control_results")
-      .select("control_point_id, status, severity, note")
+      .select("control_point_id, status, severity, note, finding_id")
       .eq("mission_id", missionId),
   ]);
 
@@ -158,7 +161,65 @@ export const lireRapprochements = async (missionId: string): Promise<LigneRappro
   const supabase = await createClient();
   const { data } = await supabase
     .from("mission_reconciliation_status")
-    .select("id, kind, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
+    .select("id, kind, site, periode, valeur_a, valeur_b, tolerance_pct, note, ecart, ecart_pct, statut")
+    .order("site", { nullsFirst: true })
+    .order("periode", { nullsFirst: true })
     .eq("mission_id", missionId);
   return (data as LigneRapprochement[] | null) ?? [];
+};
+
+/** Constats de la mission, du plus grave au moins grave. */
+export const lireConstats = async (missionId: string): Promise<Constat[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("findings")
+    .select("id, control_point_id, domain, title, fact, evidence, risk, severity, reference, reference_checked, reference_checked_on, recommendation, priority, nature, status, visible_to_client, in_report, escalation, escalation_note, report_rank, updated_at, point:control_points (code, question, evidence)")
+    .eq("mission_id", missionId)
+    .order("priority")
+    .order("created_at");
+  type Jointure = Constat & { point: { code: string; question: string; evidence: string | null } | null };
+  return ((data as Jointure[] | null) ?? []).map((c) => ({
+    ...c,
+    code_point: c.point?.code ?? null,
+    question_point: c.point?.question ?? null,
+    preuve_attendue: c.point?.evidence ?? null,
+  }));
+};
+
+/** Plan d'actions de la mission. */
+export const lireActions = async (missionId: string): Promise<ActionPlan[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("actions")
+    .select("id, finding_id, domain, title, client_owner, due_on, priority, status, comment, constat:findings (title)")
+    .eq("mission_id", missionId)
+    .order("priority")
+    .order("due_on", { nullsFirst: false });
+  type Jointure = ActionPlan & { constat: { title: string } | null };
+  return ((data as Jointure[] | null) ?? []).map((a) => ({
+    ...a,
+    constat: a.constat?.title ?? null,
+  }));
+};
+
+/** Réponses au questionnaire d'entretien du dirigeant (06 §4). */
+export const lireReponsesEntretien = async (missionId: string): Promise<ReponseEntretien[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_entretien_reponses")
+    .select("question_code, reponse, preuve")
+    .eq("mission_id", missionId);
+  return (data as ReponseEntretien[] | null) ?? [];
+};
+
+/** Section 7 du rapport : les heures reconstituées agent par agent (07 §7). */
+export const lireHeuresAgents = async (missionId: string): Promise<HeuresAgent[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_heures_agent_ecarts")
+    .select("id, salarie, site, periode, planning, pointage, paye, facture, conclusion, ecart_planning_pointage, ecart_pointage_paye, ecart_paye_facture, a_investiguer, incomplet")
+    .eq("mission_id", missionId)
+    .order("site", { nullsFirst: true })
+    .order("salarie");
+  return (data as HeuresAgent[] | null) ?? [];
 };
