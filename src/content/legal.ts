@@ -69,7 +69,7 @@ export const SOUS_TRAITANTS = [
     nom: "Supabase",
     role: "Base de données, authentification et stockage des pièces",
     pays: "Union européenne (région Paris, eu-west-3)",
-    garantie: "Données hébergées dans l'UE",
+    garantie: "Données hébergées dans l’UE",
   },
   {
     nom: "Resend",
@@ -79,7 +79,7 @@ export const SOUS_TRAITANTS = [
   },
   {
     nom: "Stripe",
-    role: "Paiement des formations et de l'abonnement (à activer en phase 4)",
+    role: "Paiement des formations et de l’abonnement (à activer en phase 4)",
     pays: "Irlande / États-Unis",
     garantie: "Clauses contractuelles types",
   },
@@ -97,29 +97,29 @@ export const TRAITEMENTS = [
       "Répondre aux demandes reçues par le formulaire de contact et envoyer la checklist CNAPS demandée.",
     donnees: "Nom, email, société, effectif, message.",
     baseLegale:
-      "Intérêt légitime (prospection entre professionnels), et consentement pour l'envoi de la checklist.",
+      "Intérêt légitime (prospection entre professionnels), et consentement pour l’envoi de la checklist.",
     conservation:
-      "3 ans à compter du dernier contact resté sans suite (durée recommandée par la CNIL en prospection).",
+      "3 ans à compter du dernier contact resté sans suite (durée recommandée par la CNIL en prospection).",
   },
   {
     id: "comptes",
     nom: "Comptes du portail client",
-    finalite: "Donner à chaque client l'accès au suivi de sa mission.",
+    finalite: "Donner à chaque client l’accès au suivi de sa mission.",
     donnees: "Email, nom, fonction, organisation de rattachement, journaux de connexion.",
     baseLegale: "Exécution du contrat de mission.",
-    conservation: "Durée de la relation contractuelle, puis 5 ans (prescription de droit commun).",
+    conservation: "Durée de la relation contractuelle, puis 5 ans (prescription de droit commun).",
   },
   {
     id: "missions",
-    nom: "Dossiers de mission d'audit",
+    nom: "Dossiers de mission d’audit",
     finalite:
-      "Conduire l'audit : pièces remises par le client, constats, plan d'actions, rapport.",
+      "Conduire l’audit : pièces remises par le client, constats, plan d’actions, rapport.",
     donnees:
       "Pièces transmises par le client, qui contiennent des données relatives à SES salariés (identité, cartes professionnelles, plannings, bulletins de paie, suivi de santé).",
     baseLegale:
       "Exécution du contrat de mission. Sur les données des salariés du client, ANM Consulting agit comme SOUS-TRAITANT du client, qui reste responsable de traitement.",
     conservation:
-      "Durée de la mission, puis archivage 5 ans à des fins de preuve. Suppression ou restitution sur demande du client.",
+      "Durée de la mission, puis archivage 5 ans à des fins de preuve. Suppression ou restitution sur demande du client.",
   },
   {
     id: "formation",
@@ -128,7 +128,7 @@ export const TRAITEMENTS = [
     donnees: "Identité, progression, résultats de quiz, horodatage des connexions.",
     baseLegale: "Exécution du contrat et obligation légale (organisme de formation).",
     conservation:
-      "Conservation longue imposée par la réglementation de la formation professionnelle : ne pas purger sans vérifier la durée applicable.",
+      "Conservation longue imposée par la réglementation de la formation professionnelle : ne pas purger sans vérifier la durée applicable.",
   },
 ] as const;
 
@@ -143,10 +143,10 @@ export const TRAITEMENTS = [
 export const COOKIES = [
   {
     nom: "Cookie de session Supabase",
-    finalite: "Maintenir la connexion d'un utilisateur au portail.",
+    finalite: "Maintenir la connexion d’un utilisateur au portail.",
     duree: "Durée de la session, révoqué à la déconnexion.",
     consentementRequis: false,
-    motifExemption: "Traceur strictement nécessaire à l'authentification (exempté par la CNIL).",
+    motifExemption: "Traceur strictement nécessaire à l’authentification (exempté par la CNIL).",
   },
 ] as const;
 

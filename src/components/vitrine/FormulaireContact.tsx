@@ -30,8 +30,8 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
     return (
       <div className="rounded-[5px] border border-vert bg-menthe-2 p-8" role="status" aria-live="polite">
         <CheckCircle size={32} weight="fill" className="text-vert" />
-        <p className="mt-4 font-display text-[1.6rem] leading-tight text-encre">Merci, c&apos;est bien reçu.</p>
-        <p className="mt-2 text-[15px] leading-relaxed text-encre-2">{etat.message}</p>
+        <p className="mt-4 font-display text-t3 text-encre">Merci, c’est bien reçu.</p>
+        <p className="mt-2 text-corps text-encre-2">{etat.message}</p>
       </div>
     );
   }
@@ -49,17 +49,17 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
       </div>
 
       {offre ? (
-        <p className="rounded-[3px] border-l-2 border-vert bg-menthe-2 px-4 py-3 text-[14px] text-encre">
+        <p className="rounded-[3px] border border-vert/40 bg-menthe-2 px-4 py-3 text-corps text-encre">
           Demande pour <strong>{offre.nom}</strong> · {offre.fourchette}
           {prefill.effectif ? ` · ${prefill.effectif} salariés` : ""}
           {prefill.sites ? ` · ${prefill.sites} site${Number(prefill.sites) > 1 ? "s" : ""}` : ""}
-          {prefill.urgence ? " · contrôle sous 7 jours" : ""}
+          {prefill.urgence ? " · contrôle sous 7 jours" : ""}
         </p>
       ) : null}
 
       <div className="grid gap-7 sm:grid-cols-2">
         <Champ label="Nom et prénom" name="nom" autoComplete="name" required placeholder="Prénom Nom" />
-        <Champ label="Société" name="societe" autoComplete="organization" placeholder="Nom de l'entreprise" />
+        <Champ label="Société" name="societe" autoComplete="organization" placeholder="Nom de l’entreprise" />
         <Champ label="Email professionnel" name="email" type="email" autoComplete="email" required placeholder="vous@entreprise.fr" />
         <Champ label="Téléphone" name="telephone" type="tel" autoComplete="tel" placeholder="06 …" />
         <Champ label="Effectif" name="effectif" type="number" min={1} placeholder="ex. 45" defaultValue={prefill.effectif} />
@@ -93,7 +93,7 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
       </div>
 
       {etat.erreur ? (
-        <p className="text-[14px] text-critique" role="alert">
+        <p className="text-corps text-critique" role="alert">
           {etat.erreur}
         </p>
       ) : null}
@@ -102,7 +102,7 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
         <Bouton type="submit" taille="lg" disabled={enCours}>
           {enCours ? "Envoi…" : "Demander un premier échange"}
         </Bouton>
-        <p className="max-w-xs text-[12px] leading-relaxed text-gris">
+        <p className="min-w-0 max-w-xs text-note text-gris">
           Vos données servent uniquement à vous répondre. Détail dans la{" "}
           <a href="/confidentialite" className="underline">
             politique de confidentialité

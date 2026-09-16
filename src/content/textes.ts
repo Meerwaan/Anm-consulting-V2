@@ -33,19 +33,19 @@ export const TEXTES: Texte[] = [
     code: "CSI_L6",
     nom: "Code de la sécurité intérieure — Livre VI, Activités privées de sécurité",
     autorite: "Légifrance",
-    portee: "Art. L611-1 à L648-1",
+    portee: "Art. L611-1 à L648-1",
     url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000025503132/LEGISCTA000025506179/",
     usage:
-      "Autorisation d'exercice, agrément des dirigeants, carte professionnelle, conditions d'exercice, sous-traitance en sécurité privée, contrôle du CNAPS.",
+      "Autorisation d’exercice, agrément des dirigeants, carte professionnelle, conditions d’exercice, sous-traitance en sécurité privée, contrôle du CNAPS.",
   },
   {
     code: "CSI_DEONTO",
     nom: "Code de déontologie des activités privées de sécurité",
     autorite: "Légifrance (CSI)",
-    portee: "Art. R631-1 à R631-33",
+    portee: "Art. R631-1 à R631-33",
     url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000025503132/LEGISCTA000029656360/",
     usage:
-      "Devoirs communs, dignité, loyauté, port de la tenue et de la carte, relations avec les clients et les forces de l'ordre. Base disciplinaire des sanctions CNAPS.",
+      "Devoirs communs, dignité, loyauté, port de la tenue et de la carte, relations avec les clients et les forces de l’ordre. Base disciplinaire des sanctions CNAPS.",
   },
   {
     code: "CNAPS_REF",
@@ -54,7 +54,7 @@ export const TEXTES: Texte[] = [
     portee: "Fiches thématiques",
     url: "https://www.cnaps.interieur.gouv.fr/Publications/Fiches-thematiques/Referentiels-de-controle-a-destination-des-professionnels-de-la-securite-privee",
     usage:
-      "Bonnes pratiques attendues par le contrôleur : surveillance/gardiennage, cynophile, manifestations, sous-traitance, travail illégal.",
+      "Bonnes pratiques attendues par le contrôleur : surveillance/gardiennage, cynophile, manifestations, sous-traitance, travail illégal.",
   },
   {
     code: "CNAPS_DRACAR",
@@ -75,27 +75,27 @@ export const TEXTES: Texte[] = [
   },
   {
     code: "CT_DUERP",
-    nom: "Code du travail — Document unique d'évaluation des risques",
+    nom: "Code du travail — Document unique d’évaluation des risques",
     autorite: "Légifrance",
-    portee: "Art. L4121-3 et R4121-1 à R4121-4",
+    portee: "Art. L4121-3 et R4121-1 à R4121-4",
     url: "https://www.legifrance.gouv.fr/codes/id/LEGISCTA000023794014/",
     usage:
-      "Obligation d'évaluer les risques, de les transcrire dans le DUERP et de le mettre à jour. Premier document réclamé en visite d'inspection.",
+      "Obligation d’évaluer les risques, de les transcrire dans le DUERP et de le mettre à jour. Premier document réclamé en visite d’inspection.",
   },
   {
     code: "CT_DISSIM",
     nom: "Code du travail — Travail dissimulé",
     autorite: "Légifrance",
-    portee: "Art. L8221-1 à L8224-6",
+    portee: "Art. L8221-1 à L8224-6",
     url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000006160848/",
     usage:
-      "Dissimulation d'activité et d'emploi salarié, heures non déclarées, sanctions. Terrain commun à l'URSSAF, au CNAPS et à l'inspection.",
+      "Dissimulation d’activité et d’emploi salarié, heures non déclarées, sanctions. Terrain commun à l’URSSAF, au CNAPS et à l’inspection.",
   },
   {
     code: "CT_VIGILANCE",
-    nom: "Code du travail — Obligations et solidarité financière des donneurs d'ordre",
+    nom: "Code du travail — Obligations et solidarité financière des donneurs d’ordre",
     autorite: "Légifrance",
-    portee: "Art. L8222-1 à L8222-7",
+    portee: "Art. L8222-1 à L8222-7",
     url: "https://www.legifrance.gouv.fr/codes/id/LEGIARTI000006904823/2010-12-21/",
     usage:
       "Vérifications à la conclusion et tous les six mois, attestation de vigilance, solidarité financière en cas de travail dissimulé du sous-traitant.",
@@ -122,10 +122,10 @@ export const TEXTES: Texte[] = [
     code: "CSS_CONTROLE",
     nom: "Code de la sécurité sociale — Procédure de contrôle URSSAF",
     autorite: "Légifrance",
-    portee: "Art. R243-59 à R243-60-1",
+    portee: "Art. R243-59 à R243-60-1",
     url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006073189/LEGISCTA000006173356/",
     usage:
-      "Avis de contrôle, déroulement, lettre d'observations, délai de réponse, droits du cotisant. Charte du cotisant contrôlé opposable.",
+      "Avis de contrôle, déroulement, lettre d’observations, délai de réponse, droits du cotisant. Charte du cotisant contrôlé opposable.",
   },
   {
     code: "BOSS",
@@ -134,25 +134,25 @@ export const TEXTES: Texte[] = [
     portee: "Doctrine opposable",
     url: "https://boss.gouv.fr/portail/accueil.html",
     usage:
-      "Doctrine sur l'assiette, les frais professionnels, les avantages et les exonérations. Opposable à l'URSSAF.",
+      "Doctrine sur l’assiette, les frais professionnels, les avantages et les exonérations. Opposable à l’URSSAF.",
   },
   {
     code: "LPF_GARANTIES",
     nom: "Livre des procédures fiscales — Garanties du contribuable vérifié",
     autorite: "Légifrance",
-    portee: "Art. L47 à L52 B",
+    portee: "Art. L47 à L52 B",
     url: "https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006069583/LEGISCTA000006180032/",
     usage:
-      "Avis de vérification, assistance d'un conseil, durée de la vérification sur place, débat oral et contradictoire.",
+      "Avis de vérification, assistance d’un conseil, durée de la vérification sur place, débat oral et contradictoire.",
   },
   {
     code: "LPF_FEC",
     nom: "Livre des procédures fiscales — Fichier des écritures comptables",
     autorite: "Légifrance",
-    portee: "Art. L47 A et A47 A-1",
+    portee: "Art. L47 A et A47 A-1",
     url: "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000037526053",
     usage:
-      "Remise du FEC au format normé dès le début du contrôle. Le premier point de blocage d'une vérification de comptabilité.",
+      "Remise du FEC au format normé dès le début du contrôle. Le premier point de blocage d’une vérification de comptabilité.",
   },
   {
     code: "CGI",
@@ -170,7 +170,7 @@ export const TEXTES: Texte[] = [
     portee: "Doctrine opposable",
     url: "https://bofip.impots.gouv.fr/",
     usage:
-      "Doctrine administrative sur le contrôle, la TVA et les charges. Opposable à l'administration.",
+      "Doctrine administrative sur le contrôle, la TVA et les charges. Opposable à l’administration.",
   },
   {
     code: "C_COM",
@@ -188,7 +188,7 @@ export const TEXTES: Texte[] = [
     portee: "Règlement (UE) 2016/679 et loi 78-17",
     url: "https://www.cnil.fr/fr/reglement-europeen-protection-donnees",
     usage:
-      "Données des agents et des clients, vidéoprotection, géolocalisation, durées de conservation, sous-traitance de données (art. 28).",
+      "Données des agents et des clients, vidéoprotection, géolocalisation, durées de conservation, sous-traitance de données (art. 28).",
   },
 ];
 

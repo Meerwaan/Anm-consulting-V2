@@ -18,7 +18,7 @@ const COULEURS: Record<string, { texte: string; fond: string }> = {
 export function Criticite({ niveau, petit = false }: { niveau: string; petit?: boolean }) {
   const c = COULEURS[niveau] ?? { texte: "text-gris", fond: "bg-filet-2" };
   return (
-    <span className={`inline-flex items-center rounded-full ${c.fond} ${c.texte} ${petit ? "px-2 py-0.5 text-[11px]" : "px-2.5 py-1 text-[12px]"} font-medium`}>
+    <span className={`inline-flex items-center rounded-full ${c.fond} ${c.texte} ${petit ? "px-2 py-0.5 text-etiquette" : "px-2.5 py-1 text-note"} font-medium`}>
       {niveau}
     </span>
   );
@@ -54,7 +54,7 @@ export function FicheConstat({
   return (
     <div className={`relative ${className}`}>
       {/* Doublure : la fiche repose sur un plateau, comme une pièce dans un dossier. */}
-      <div className="absolute -inset-2 -z-10 rounded-[6px] bg-encre/[0.035]" aria-hidden />
+      <div className="absolute -inset-2 -z-10 rounded-[8px] bg-encre/[0.035]" aria-hidden />
       <div className="overflow-hidden rounded-[3px] border border-encre bg-papier shadow-flottant">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3">
           <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export function FicheConstat({
                 }}
               >
                 <dt className="etiquette mb-1.5">{l.cle}</dt>
-                <dd className={`font-display text-[17px] leading-[1.4] text-encre ${l.cle === "Action" ? "italic" : ""}`}>
+                <dd className={`font-display text-chapo leading-[1.4] text-encre ${l.cle === "Action" ? "italic" : ""}`}>
                   <Ligne texte={l.valeur} anime={anime} delai={0.2 + i * 0.55} />
                 </dd>
               </motion.div>

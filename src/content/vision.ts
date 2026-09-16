@@ -9,44 +9,44 @@ export const OBJECTIFS = [
     n: 1,
     titre: "Prévenir les risques",
     texte:
-      "Repérer avant le contrôle ce qu'un contrôleur CNAPS, URSSAF, DGFiP ou Inspection du travail verrait : titres, heures, paie, sous-traitance, facturation.",
+      "Repérer avant le contrôle ce qu’un contrôleur CNAPS, URSSAF, DGFiP ou Inspection du travail verrait : titres, heures, paie, sous-traitance, facturation.",
   },
   {
     n: 2,
     titre: "Créer une organisation",
     texte:
-      "Mettre en place les procédures, les rapprochements périodiques et le classement documentaire qui font qu'on ne redécouvre pas les mêmes écarts à chaque contrôle.",
+      "Mettre en place les procédures, les rapprochements périodiques et le classement documentaire qui font qu’on ne redécouvre pas les mêmes écarts à chaque contrôle.",
   },
   {
     n: 3,
-    titre: "Conseiller là où l'avocat et l'expert-comptable ne peuvent pas aller",
+    titre: "Conseiller là où l’avocat et l’expert-comptable ne peuvent pas aller",
     texte:
-      "Un regard métier de dirigeante de sécurité privée sur la ligne de crête : ce qui est tenable sur le terrain, ce qui ne l'est pas, dans le respect du code de déontologie de la profession.",
+      "Un regard métier de dirigeante de sécurité privée sur la ligne de crête : ce qui est tenable sur le terrain, ce qui ne l’est pas, dans le respect du code de déontologie de la profession.",
   },
   {
     n: 4,
     titre: "Préparer le contrôle pour faciliter le travail des avocats et des experts-comptables",
     texte:
-      "Un dossier terrain structuré, indexé et daté : faits, preuves, écarts qualifiés. Les conseils spécialisés partent d'un dossier propre au lieu de reconstituer les faits.",
+      "Un dossier terrain structuré, indexé et daté : faits, preuves, écarts qualifiés. Les conseils spécialisés partent d’un dossier propre au lieu de reconstituer les faits.",
   },
   {
     n: 5,
     titre: "Libérer le temps du dirigeant",
     texte:
-      "Une organisation qui soulage le brouillon administratif pour que le patron se concentre sur son cœur de métier : ses clients, ses agents, ses sites.",
+      "Une organisation qui soulage le brouillon administratif pour que le patron se concentre sur son cœur de métier : ses clients, ses agents, ses sites.",
   },
 ] as const;
 
 /** Ce qu'elle n'est pas — à afficher sur la vitrine et à rappeler dans chaque rapport. */
 export const LIGNE_DE_CRETE = {
-  phrase: "Je ne remplace ni l'avocat ni l'expert-comptable. Je prépare le terrain, je reconstitue les faits et je structure le dossier.",
+  phrase: "Je ne remplace ni l’avocat ni l’expert-comptable. Je prépare le terrain, je reconstitue les faits et je structure le dossier.",
   exclusions: [
     "Consultation juridique ou fiscale réglementée",
     "Représentation et stratégie contentieuse",
     "Réponse à une proposition de rectification fiscale",
     "Tenue de la paie et de la comptabilité, certification des comptes",
   ],
-  regle: "Toute note ou constat partagé au client reste factuel (fait, preuve, écart) ; la qualification juridique est renvoyée au professionnel compétent.",
+  regle: "Toute note ou constat partagé au client reste factuel (fait, preuve, écart) ; la qualification juridique est renvoyée au professionnel compétent.",
 } as const;
 
 /**
@@ -56,7 +56,7 @@ export const LIGNE_DE_CRETE = {
  * entretien à la restitution) ; les modules restent le classement des pièces et des constats.
  */
 export const PORTAIL_CONSULTANTE = {
-  principe: "Un dossier par client, déroulé selon les 15 étapes de la méthode. À chaque étape, ses points de contrôle, ses pièces et ses notes. Rien ne doit manquer.",
+  principe: "Un dossier par client, déroulé selon les 15 étapes de la méthode. À chaque étape, ses points de contrôle, ses pièces et ses notes. Rien ne doit manquer.",
   modules: ["Mallette Audit 360°", "Module CNAPS", "Module URSSAF / Inspection", "Module Contrôle fiscal DGFiP"],
   parModule: [
     "Points de contrôle du module (statut, gravité, note) — la feuille AUDIT_* remplie",
@@ -66,9 +66,9 @@ export const PORTAIL_CONSULTANTE = {
     "Constats qualifiés, rattachés au module",
   ],
   suivi: [
-    "Les 15 étapes en colonne vertébrale : chacune porte sa nature (entretien, contrôle, rapprochement, rapport…) et son périmètre de points de contrôle",
+    "Les 15 étapes en colonne vertébrale : chacune porte sa nature (entretien, contrôle, rapprochement, rapport…) et son périmètre de points de contrôle",
     "7 phases calendaires (J-10 → J+7) en repère de temps",
-    "Indicateur « rien ne manque » par étape, plus le compteur des points qu'aucune étape ne couvre",
+    "Indicateur « rien ne manque » par étape, plus le compteur des points qu’aucune étape ne couvre",
   ],
 } as const;
 
@@ -82,15 +82,15 @@ export const PORTAIL_CONSULTANTE = {
  */
 export const PORTAIL_CLIENT = {
   pendantAudit: [
-    "Avancement : les 15 étapes et leur statut, la phase en cours",
-    "Pièces demandées, avec dépôt direct et relance automatique tous les 3 jours",
-    "Fil d'échange avec la consultante",
+    "Avancement : les 15 étapes et leur statut, la phase en cours",
+    "Pièces demandées, avec dépôt direct et relance automatique tous les 3 jours",
+    "Fil d’échange avec la consultante",
     "Notification email à chaque demande, relance et message",
   ],
   finAudit: [
-    "Compte rendu en deux axes (risques réels en cas de contrôle / axes d'amélioration) pour le dirigeant, suivi du détail classé par criticité pour l'avocat et l'expert-comptable (décision 05)",
-    "Plan d'actions P1 → P4 avec responsable et échéance ; le client coche lui-même ce qu'il a fait et la consultante est notifiée (décision 07)",
-    "Proposition de suivi conformité (abonnement) : échéances, revues, veille",
+    "Compte rendu en deux axes (risques réels en cas de contrôle / axes d’amélioration) pour le dirigeant, suivi du détail classé par criticité pour l’avocat et l’expert-comptable (décision 05)",
+    "Plan d’actions P1 → P4 avec responsable et échéance ; le client coche lui-même ce qu’il a fait et la consultante est notifiée (décision 07)",
+    "Proposition de suivi conformité (abonnement) : échéances, revues, veille",
   ],
 } as const;
 
@@ -99,12 +99,12 @@ export const AXES_RAPPORT = [
   {
     nature: "risque_controle",
     titre: "Risques réels en cas de contrôle",
-    definition: "Écarts qui exposent l'entreprise face à un contrôleur : à traiter en priorité, preuve à l'appui.",
+    definition: "Écarts qui exposent l’entreprise face à un contrôleur : à traiter en priorité, preuve à l’appui.",
   },
   {
     nature: "amelioration",
-    titre: "Axes d'amélioration",
-    definition: "Organisation, traçabilité, procédures, temps du dirigeant : ce qui rend l'entreprise plus solide et plus simple à piloter.",
+    titre: "Axes d’amélioration",
+    definition: "Organisation, traçabilité, procédures, temps du dirigeant : ce qui rend l’entreprise plus solide et plus simple à piloter.",
   },
 ] as const;
 

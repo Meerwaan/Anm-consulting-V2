@@ -43,7 +43,7 @@ export const SOURCES_OFFICIELLES: SourceOfficielle[] = [
     id: "boss",
     nom: "BOSS — Bulletin officiel de la Sécurité sociale",
     url: "https://boss.gouv.fr/portail/accueil.html",
-    usage: "Doctrine sociale : assiette, frais, avantages, exonérations.",
+    usage: "Doctrine sociale : assiette, frais, avantages, exonérations.",
     pilier: "urssaf_social",
   },
   {

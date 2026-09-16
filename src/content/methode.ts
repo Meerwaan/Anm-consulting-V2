@@ -9,10 +9,10 @@ export const REGLE_OR = ["FAIT", "PREUVE", "RISQUE", "RÉFÉRENCE VÉRIFIÉE", "
 
 /** Formule type de constat (01 annexe 2). */
 export const FORMULE_CONSTAT = {
-  fait: "Sur l'échantillon examiné, [fait précis].",
+  fait: "Sur l’échantillon examiné, [fait précis].",
   preuve: "Ce constat repose sur [documents / dates / site / salarié].",
   risque:
-    "Cette situation peut exposer l'entreprise à [risque], sous réserve de confirmation de la règle applicable.",
+    "Cette situation peut exposer l’entreprise à [risque], sous réserve de confirmation de la règle applicable.",
   action:
     "Il est recommandé de [action], sous la responsabilité de [fonction], avant le [délai].",
 } as const;
@@ -42,7 +42,7 @@ export const PHASES_MISSION: PhaseMission[] = [
     moment: "J-7 à J-3",
     nom: "Collecte documentaire",
     travail:
-      "Demander les pièces et relancer les manquants. Préparer l'échantillon salariés/sites/sous-traitants.",
+      "Demander les pièces et relancer les manquants. Préparer l’échantillon salariés/sites/sous-traitants.",
   },
   {
     ordre: 3,
@@ -56,7 +56,7 @@ export const PHASES_MISSION: PhaseMission[] = [
     moment: "Jour J matin",
     nom: "Entretien + gouvernance",
     travail:
-      "Dirigeant, RH/paie, exploitation. Vérifier processus d'embauche, affectation, remplacement, contrôle interne.",
+      "Dirigeant, RH/paie, exploitation. Vérifier processus d’embauche, affectation, remplacement, contrôle interne.",
   },
   {
     ordre: 5,
@@ -75,25 +75,25 @@ export const PHASES_MISSION: PhaseMission[] = [
     ordre: 7,
     moment: "J+3 à J+7",
     nom: "Rapport",
-    travail: "Synthèse dirigeant, constats, plan d'actions et restitution.",
+    travail: "Synthèse dirigeant, constats, plan d’actions et restitution.",
   },
 ];
 
 /** Les 15 étapes de la méthode (note de cadrage d'origine). Rattachées à une phase calendaire habituelle. */
 export const ETAPES_METHODE: { ordre: number; nom: string; phase: number }[] = [
   { ordre: 1, nom: "Entretien avec le dirigeant", phase: 1 },
-  { ordre: 2, nom: "Définition du périmètre de l'audit", phase: 1 },
+  { ordre: 2, nom: "Définition du périmètre de l’audit", phase: 1 },
   { ordre: 3, nom: "Collecte des documents", phase: 2 },
   { ordre: 4, nom: "Analyse documentaire", phase: 3 },
-  { ordre: 5, nom: "Sélection d'un échantillon de salariés, sites et sous-traitants", phase: 2 },
+  { ordre: 5, nom: "Sélection d’un échantillon de salariés, sites et sous-traitants", phase: 2 },
   { ordre: 6, nom: "Contrôle CNAPS", phase: 5 },
   { ordre: 7, nom: "Contrôle social et URSSAF", phase: 5 },
   { ordre: 8, nom: "Contrôle du temps de travail", phase: 5 },
   { ordre: 9, nom: "Analyse Inspection du travail / santé-sécurité", phase: 5 },
   { ordre: 10, nom: "Rapprochement planning → pointage → paie → facturation", phase: 6 },
   { ordre: 11, nom: "Qualification des constats", phase: 6 },
-  { ordre: 12, nom: "Classement des risques : Critique / Majeur / Modéré / Mineur", phase: 6 },
-  { ordre: 13, nom: "Plan d'actions : P1 immédiat / P2 30 j / P3 90 j / P4 amélioration", phase: 7 },
+  { ordre: 12, nom: "Classement des risques : Critique / Majeur / Modéré / Mineur", phase: 6 },
+  { ordre: 13, nom: "Plan d’actions : P1 immédiat / P2 30 j / P3 90 j / P4 amélioration", phase: 7 },
   { ordre: 14, nom: "Rapport final", phase: 7 },
   { ordre: 15, nom: "Réunion de restitution avec le dirigeant", phase: 7 },
 ];
@@ -116,7 +116,7 @@ export const SECTIONS_RAPPORT = [
   "Constats prioritaires",
   "Analyse par domaine",
   "Contrôle croisé planning → pointage → paie → facturation",
-  "Plan d'actions",
+  "Plan d’actions",
   "Conclusion",
   "Sources officielles vérifiées (datées)",
 ] as const;
@@ -146,10 +146,10 @@ export const RESTITUTION_MINUTES = { min: 45, max: 60 } as const;
  * qui inventait un nombre de constats à présenter.
  */
 export const ORDRE_DU_JOUR_RESTITUTION = [
-  { minutes: 5, quoi: "Rappeler le périmètre et les limites de l'audit." },
+  { minutes: 5, quoi: "Rappeler le périmètre et les limites de l’audit." },
   { minutes: 10, quoi: "Présenter les points forts et le niveau global de maîtrise." },
   { minutes: 20, quoi: "Traiter uniquement les écarts critiques et majeurs." },
-  { minutes: 10, quoi: "Valider responsables et échéances du plan d'actions." },
+  { minutes: 10, quoi: "Valider responsables et échéances du plan d’actions." },
   { minutes: 5, quoi: "Décider des sujets à faire vérifier par avocat, expert-comptable ou autre spécialiste." },
   { minutes: 5, quoi: "Fixer, si le client le souhaite, une revue de suivi." },
 ] as const;
@@ -162,10 +162,10 @@ export const ORDRE_DU_JOUR_RESTITUTION = [
  * inventer un seuil serait exactement le défaut qu'on traque.
  */
 export const TRANCHES_ECHANTILLON = [
-  { libelle: "Très petite entreprise", cible: "environ 5 dossiers salariés si l'effectif le permet", min: null, max: null },
-  { libelle: "10 à 49 salariés", cible: "8 à 12 dossiers", min: 10, max: 49 },
-  { libelle: "50 à 199 salariés", cible: "12 à 20 dossiers", min: 50, max: 199 },
-  { libelle: "200 salariés et plus", cible: "au moins 20 dossiers, puis augmenter selon le risque, le nombre de sites et les anomalies détectées", min: 200, max: null },
+  { libelle: "Très petite entreprise", cible: "environ 5 dossiers salariés si l’effectif le permet", min: null, max: null },
+  { libelle: "10 à 49 salariés", cible: "8 à 12 dossiers", min: 10, max: 49 },
+  { libelle: "50 à 199 salariés", cible: "12 à 20 dossiers", min: 50, max: 199 },
+  { libelle: "200 salariés et plus", cible: "au moins 20 dossiers, puis augmenter selon le risque, le nombre de sites et les anomalies détectées", min: 200, max: null },
 ] as const;
 
 /**
@@ -180,7 +180,7 @@ export const PROFILS_ECHANTILLON = [
   "Un CDD si présent",
   "Un temps partiel si présent",
   "Un travailleur de nuit",
-  "Un agent avec beaucoup d'heures supplémentaires",
+  "Un agent avec beaucoup d’heures supplémentaires",
   "Un agent ayant changé de site",
   "Un départ récent",
   "Au moins un salarié par sous-traitant testé",
@@ -200,19 +200,19 @@ export const PROFILS_ECHANTILLON = [
  * le renuméroter, seulement en ajouter.
  */
 export const QUESTIONNAIRE_DIRIGEANT = [
-  { code: "activite", theme: "Activité", question: "Quelles activités de sécurité privée exercez-vous réellement aujourd'hui ? Lesquelles sont sous-traitées ?" },
-  { code: "organisation", theme: "Organisation", question: "Qui décide des embauches, affectations, remplacements urgents et validations de paie ?" },
-  { code: "cnaps_titre", theme: "CNAPS", question: "Comment vérifiez-vous un titre CNAPS avant l'embauche puis avant l'affectation ?" },
-  { code: "cnaps_echeances", theme: "CNAPS", question: "Comment suivez-vous les dates d'expiration des cartes et agréments ?" },
-  { code: "st_selection", theme: "Sous-traitance", question: "Dans quels cas sous-traitez-vous ? Comment sélectionnez-vous et contrôlez-vous vos sous-traitants ?" },
-  { code: "st_second_rang", theme: "Sous-traitance", question: "Existe-t-il de la sous-traitance de second rang ? Comment en êtes-vous informé ?" },
-  { code: "social_controle", theme: "Social", question: "Qui contrôle les DPAE, contrats, classifications et avenants ?" },
-  { code: "temps_foi", theme: "Temps", question: "Quel document fait foi pour les heures réellement travaillées ?" },
-  { code: "temps_remplacement", theme: "Temps", question: "Comment gérez-vous un remplacement de dernière minute sans dépasser les limites de temps/repos ?" },
-  { code: "paie_rapprochement", theme: "Paie", question: "Qui rapproche planning, variables de paie et bulletin avant validation ?" },
-  { code: "paie_elements", theme: "Paie", question: "Quelles primes, paniers, frais et indemnités sont versés ? Sur quelle base ?" },
-  { code: "clients_hors_cadre", theme: "Clients", question: "Un client a-t-il déjà demandé à un agent une mission hors du cadre prévu ? Comment cela est-il géré ?" },
-  { code: "sst_risques", theme: "SST", question: "Quels sont vos trois principaux risques professionnels ? Comment sont-ils suivis dans le DUERP ?" },
-  { code: "controles_passes", theme: "Contrôles", question: "Avez-vous déjà reçu une observation CNAPS, URSSAF ou Inspection du travail ? A-t-elle été corrigée durablement ?" },
-  { code: "pilotage", theme: "Pilotage", question: "Quels points de conformité vous inquiètent aujourd'hui ?" },
+  { code: "activite", theme: "Activité", question: "Quelles activités de sécurité privée exercez-vous réellement aujourd’hui ? Lesquelles sont sous-traitées ?" },
+  { code: "organisation", theme: "Organisation", question: "Qui décide des embauches, affectations, remplacements urgents et validations de paie ?" },
+  { code: "cnaps_titre", theme: "CNAPS", question: "Comment vérifiez-vous un titre CNAPS avant l’embauche puis avant l’affectation ?" },
+  { code: "cnaps_echeances", theme: "CNAPS", question: "Comment suivez-vous les dates d’expiration des cartes et agréments ?" },
+  { code: "st_selection", theme: "Sous-traitance", question: "Dans quels cas sous-traitez-vous ? Comment sélectionnez-vous et contrôlez-vous vos sous-traitants ?" },
+  { code: "st_second_rang", theme: "Sous-traitance", question: "Existe-t-il de la sous-traitance de second rang ? Comment en êtes-vous informé ?" },
+  { code: "social_controle", theme: "Social", question: "Qui contrôle les DPAE, contrats, classifications et avenants ?" },
+  { code: "temps_foi", theme: "Temps", question: "Quel document fait foi pour les heures réellement travaillées ?" },
+  { code: "temps_remplacement", theme: "Temps", question: "Comment gérez-vous un remplacement de dernière minute sans dépasser les limites de temps/repos ?" },
+  { code: "paie_rapprochement", theme: "Paie", question: "Qui rapproche planning, variables de paie et bulletin avant validation ?" },
+  { code: "paie_elements", theme: "Paie", question: "Quelles primes, paniers, frais et indemnités sont versés ? Sur quelle base ?" },
+  { code: "clients_hors_cadre", theme: "Clients", question: "Un client a-t-il déjà demandé à un agent une mission hors du cadre prévu ? Comment cela est-il géré ?" },
+  { code: "sst_risques", theme: "SST", question: "Quels sont vos trois principaux risques professionnels ? Comment sont-ils suivis dans le DUERP ?" },
+  { code: "controles_passes", theme: "Contrôles", question: "Avez-vous déjà reçu une observation CNAPS, URSSAF ou Inspection du travail ? A-t-elle été corrigée durablement ?" },
+  { code: "pilotage", theme: "Pilotage", question: "Quels points de conformité vous inquiètent aujourd’hui ?" },
 ] as const;

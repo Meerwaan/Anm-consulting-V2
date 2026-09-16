@@ -24,7 +24,7 @@ export function SectionHead({
 }) {
   const couleurEyebrow = sombre ? "text-brume" : "text-gris";
   const couleurSous = sombre ? "text-brume-2" : "text-encre-2";
-  const tailleTitre = taille === "lg" ? "text-[2.6rem] md:text-[3.6rem]" : "text-[2.2rem] md:text-[2.9rem]";
+  const tailleTitre = taille === "lg" ? "text-t1-lg" : "text-t2-lg";
 
   return (
     <Reveal>
@@ -34,20 +34,20 @@ export function SectionHead({
             {index ? <span className="mr-3">{index}</span> : null}
             {eyebrow}
           </p>
-          <h2 className={`${tailleTitre} leading-[1.05] ${sombre ? "text-papier" : "text-encre"}`}>{titre}</h2>
-          {sous && aligne === "un" ? <p className={`max-w-2xl text-[17px] leading-relaxed ${couleurSous}`}>{sous}</p> : null}
+          <h2 className={`${tailleTitre} ${sombre ? "text-papier" : "text-encre"}`}>{titre}</h2>
+          {sous && aligne === "un" ? <p className={`max-w-2xl text-chapo ${couleurSous}`}>{sous}</p> : null}
         </div>
         {sous && aligne === "deux" ? (
-          <p className={`text-[15px] leading-relaxed md:pb-2 ${couleurSous}`}>{sous}</p>
+          <p className={`text-corps md:pb-2 ${couleurSous}`}>{sous}</p>
         ) : null}
       </div>
     </Reveal>
   );
 }
 
-/** Conteneur de page : largeur de lecture, gouttières. */
-export function Conteneur({ children, className = "", large = false }: { children: ReactNode; className?: string; large?: boolean }) {
-  return <div className={`mx-auto w-full ${large ? "max-w-[1320px]" : "max-w-[1200px]"} px-5 md:px-10 ${className}`}>{children}</div>;
+/** Conteneur de page : une seule largeur pour que les bords gauches s’alignent de section en section. `large` est conservé pour compatibilité. */
+export function Conteneur({ children, className = "" }: { children: ReactNode; className?: string; large?: boolean }) {
+  return <div className={`mx-auto w-full max-w-[1240px] px-5 md:px-10 ${className}`}>{children}</div>;
 }
 
 /** Filet horizontal, épais (encre) ou fin (filet). */
