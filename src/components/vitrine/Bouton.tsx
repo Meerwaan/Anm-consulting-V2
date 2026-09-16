@@ -6,7 +6,7 @@ type Variante = "primaire" | "encre" | "fantome" | "lien" | "clair";
 type Taille = "sm" | "md" | "lg";
 
 const base =
-  "group inline-flex items-center gap-3 rounded-full font-medium transition-[transform,background-color,color,border-color,box-shadow] duration-500 ease-expo active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
+  "group inline-flex items-center gap-3 whitespace-nowrap rounded-full font-medium transition-[transform,background-color,color,border-color,box-shadow] duration-500 ease-expo active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60";
 
 const variantes: Record<Variante, string> = {
   primaire: "bg-vert text-papier hover:bg-vert-2 shadow-carte hover:shadow-flottant",
@@ -17,9 +17,9 @@ const variantes: Record<Variante, string> = {
 };
 
 const tailles: Record<Taille, string> = {
-  sm: "px-4 py-2 text-[13px]",
+  sm: "px-4 py-2 text-meta",
   md: "px-5 py-2.5 text-sm",
-  lg: "px-6 py-3 text-[15px]",
+  lg: "px-6 py-3 text-corps",
 };
 
 const cercle: Record<Variante, string> = {

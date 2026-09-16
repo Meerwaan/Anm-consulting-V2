@@ -18,14 +18,14 @@ export default function ConfidentialitePage() {
       <Section titre="Qui est responsable">
         <p>
           {EDITEUR.denomination} est responsable des traitements décrits ci-dessous. Pour toute
-          question ou pour exercer vos droits : {EDITEUR.email}.
+          question ou pour exercer vos droits : {EDITEUR.email}.
         </p>
         <p className="rounded border-l-2 border-[var(--anm-green)] bg-[var(--anm-mint)] px-4 py-3">
-          <strong>Une exception importante.</strong> Pendant une mission d&apos;audit, les pièces
-          que vous nous transmettez contiennent des données concernant <em>vos</em> salariés :
+          <strong>Une exception importante.</strong> Pendant une mission d’audit, les pièces
+          que vous nous transmettez contiennent des données concernant <em>vos</em> salariés :
           cartes professionnelles, plannings, bulletins de paie, suivi de santé. Sur ces données,
           vous restez responsable de traitement et ANM Consulting agit comme sous-traitant, au sens
-          de l&apos;article 28 du RGPD. Cette répartition est formalisée dans un avenant à la lettre
+          de l’article 28 du RGPD. Cette répartition est formalisée dans un avenant à la lettre
           de mission, qui précise nos obligations, la durée de conservation et les conditions de
           restitution ou de suppression.
         </p>
@@ -59,10 +59,10 @@ export default function ConfidentialitePage() {
         </div>
       </Section>
 
-      <Section titre="Qui d'autre y a accès">
+      <Section titre="Qui d’autre y a accès">
         <p>
           Nous ne vendons ni ne louons aucune donnée. Nous faisons appel aux prestataires suivants,
-          strictement pour faire fonctionner le service :
+          strictement pour faire fonctionner le service :
         </p>
         <ul className="space-y-2">
           {SOUS_TRAITANTS.map((s) => (
@@ -75,17 +75,17 @@ export default function ConfidentialitePage() {
           ))}
         </ul>
         <p>
-          La base de données et les pièces déposées sont hébergées dans l&apos;Union européenne
-          (région de Paris). Chaque client ne peut accéder qu&apos;à son propre dossier :
+          La base de données et les pièces déposées sont hébergées dans l’Union européenne
+          (région de Paris). Chaque client ne peut accéder qu’à son propre dossier :
           le cloisonnement est appliqué au niveau de la base elle-même, pas seulement de
-          l&apos;interface.
+          l’interface.
         </p>
       </Section>
 
       <Section titre="Vos droits">
         <p>
-          Vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;effacement, de
-          limitation, d&apos;opposition et de portabilité. Écrivez à {EDITEUR.email} : nous répondons
+          Vous disposez d’un droit d’accès, de rectification, d’effacement, de
+          limitation, d’opposition et de portabilité. Écrivez à {EDITEUR.email} : nous répondons
           sous un mois.
         </p>
         <p>
@@ -102,7 +102,7 @@ export default function ConfidentialitePage() {
           Connexion par lien à usage unique (pas de mot de passe à retenir ni à fuiter), chiffrement
           des échanges, cloisonnement des données par organisation au niveau de la base, et accès
           aux pièces limité aux personnes concernées par la mission. Les notes de travail internes
-          ne sont visibles par un client que lorsqu&apos;elles ont été explicitement publiées.
+          ne sont visibles par un client que lorsqu’elles ont été explicitement publiées.
         </p>
       </Section>
     </LegalPage>

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     template: "%s — ANM Consulting",
   },
   description:
-    "CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : une photographie factuelle de vos risques et un plan d'actions daté, par une dirigeante du secteur depuis vingt ans.",
+    "CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : une photographie factuelle de vos risques et un plan d’actions daté, par une ancienne dirigeante du secteur : vingt et un ans à la tête d’une PME de sécurité privée.",
   openGraph: {
     type: "website",
     locale: "fr_FR",

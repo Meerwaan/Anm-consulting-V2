@@ -80,7 +80,7 @@ export function Nav() {
                   key={l.href}
                   href={l.href}
                   aria-current={actif ? "page" : undefined}
-                  className={`souligne pb-0.5 text-[14px] font-medium transition-colors duration-300 ${actif ? "text-vert" : "text-encre hover:text-vert"}`}
+                  className={`souligne pb-0.5 text-corps font-medium transition-colors duration-300 ${actif ? "text-vert" : "text-encre hover:text-vert"}`}
                 >
                   {l.label}
                 </Link>
@@ -89,7 +89,7 @@ export function Nav() {
           </nav>
 
           <div className="hidden items-center gap-6 md:flex">
-            <Link href="/connexion" className="souligne pb-0.5 text-[14px] text-gris hover:text-encre">
+            <Link href="/connexion" className="souligne pb-0.5 text-corps text-gris hover:text-encre">
               Espace client
             </Link>
             <Bouton href="/contact" taille="sm">
@@ -134,7 +134,7 @@ export function Nav() {
                       href={l.href}
                       aria-current={actif ? "page" : undefined}
                       onClick={() => setOuvert(false)}
-                      className={`block border-b border-filet py-4 font-display text-[2rem] leading-none ${actif ? "text-vert" : "text-encre"}`}
+                      className={`block border-b border-filet py-4 font-display text-t2 ${actif ? "text-vert" : "text-encre"}`}
                     >
                       {l.label}
                     </Link>
@@ -152,7 +152,7 @@ export function Nav() {
               <Bouton href="/contact" taille="lg" className="justify-between">
                 Prendre rendez-vous
               </Bouton>
-              <Link href="/connexion" onClick={() => setOuvert(false)} className="text-center text-[14px] text-gris">
+              <Link href="/connexion" onClick={() => setOuvert(false)} className="text-center text-corps text-gris">
                 Espace client
               </Link>
             </motion.div>
@@ -166,8 +166,8 @@ export function Nav() {
 function Logo({ onClick }: { onClick?: () => void }) {
   return (
     <Link href="/" onClick={onClick} className="flex items-baseline gap-2" aria-label="ANM Consulting, accueil">
-      <span className="font-display text-[26px] leading-none text-encre">ANM</span>
-      <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-gris">Consulting</span>
+      <span className="font-display text-t3 leading-none text-encre">ANM</span>
+      <span className="font-mono text-etiquette uppercase tracking-[0.28em] text-gris">Consulting</span>
     </Link>
   );
 }

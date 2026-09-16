@@ -38,8 +38,8 @@ export const DELAI_PAR_PRIORITE: Record<string, number | null> = {
 /** Le mot du pack, pour l'afficher tel quel. */
 export const TRAITEMENT_PAR_PRIORITE: Record<string, string> = {
   P1: "immédiat",
-  P2: "sous 30 jours",
-  P3: "sous 90 jours",
+  P2: "sous 30 jours",
+  P3: "sous 90 jours",
   P4: "amélioration continue",
 };
 
@@ -56,8 +56,8 @@ export const ESCALADES: { valeur: string; libelle: string }[] = [
 
 export const CRITICITES: { valeur: string; label: string; priorite: string }[] = [
   { valeur: "critique", label: "Critique", priorite: "P1 · immédiat" },
-  { valeur: "majeur", label: "Majeur", priorite: "P2 · 30 jours" },
-  { valeur: "modere", label: "Modéré", priorite: "P3 · 90 jours" },
+  { valeur: "majeur", label: "Majeur", priorite: "P2 · 30 jours" },
+  { valeur: "modere", label: "Modéré", priorite: "P3 · 90 jours" },
   { valeur: "mineur", label: "Mineur", priorite: "P4 · amélioration" },
 ];
 

@@ -23,7 +23,7 @@ export function FAQ({ items }: { items: readonly { question: string; reponse: st
                 aria-controls={`faq-${i}`}
                 className="group flex w-full items-start justify-between gap-6 py-5 text-left"
               >
-                <span className="font-display text-[1.35rem] leading-snug text-encre transition-colors duration-300 group-hover:text-vert md:text-[1.5rem]">
+                <span className="font-display text-t4 text-encre transition-colors duration-300 group-hover:text-vert md:text-t3">
                   {it.question}
                 </span>
                 <span
@@ -47,7 +47,7 @@ export function FAQ({ items }: { items: readonly { question: string; reponse: st
                   transition={{ duration: 0.5, ease: EXPO }}
                   className="overflow-hidden"
                 >
-                  <p className="max-w-2xl pb-6 text-[15px] leading-relaxed text-encre-2">{it.reponse}</p>
+                  <p className="max-w-2xl pb-6 text-corps text-encre-2">{it.reponse}</p>
                 </motion.div>
               ) : null}
             </AnimatePresence>

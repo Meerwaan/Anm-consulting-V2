@@ -12,7 +12,7 @@ export default function MentionsLegalesPage() {
   return (
     <LegalPage
       titre="Mentions légales"
-      chapeau="Informations exigées par l'article 6-III de la loi pour la confiance dans l'économie numérique."
+      chapeau="Informations exigées par l’article 6-III de la loi pour la confiance dans l’économie numérique."
     >
       <Section titre="Éditeur du site">
         <Definitions
@@ -44,17 +44,17 @@ export default function MentionsLegalesPage() {
       {ACTIVITE_REGLEMENTEE.numeroDeclarationActivite ? (
         <Section titre="Activité de formation">
           <p>
-            Déclaration d&apos;activité de formation enregistrée sous le numéro{" "}
+            Déclaration d’activité de formation enregistrée sous le numéro{" "}
             {ACTIVITE_REGLEMENTEE.numeroDeclarationActivite} auprès du préfet de région. Cet
-            enregistrement ne vaut pas agrément de l&apos;État.
+            enregistrement ne vaut pas agrément de l’État.
           </p>
         </Section>
       ) : null}
 
       <Section titre="Nature des prestations">
         <p>
-          ANM Consulting réalise des missions d&apos;audit documentaire et opérationnel, de
-          diagnostic, de prévention et d&apos;accompagnement organisationnel auprès des entreprises
+          ANM Consulting réalise des missions d’audit documentaire et opérationnel, de
+          diagnostic, de prévention et d’accompagnement organisationnel auprès des entreprises
           de sécurité privée.
         </p>
         <p>
@@ -62,8 +62,8 @@ export default function MentionsLegalesPage() {
           une mission comptable, ni une représentation devant une administration ou une
           juridiction. Les rapports remis exposent des constats, des niveaux de risque et des
           recommandations au regard des pièces examinées et des références vérifiées à la date de
-          la mission. Ils ne constituent ni une décision d&apos;une administration, ni une garantie
-          d&apos;absence de contrôle, de redressement ou de sanction. Les questions relevant du
+          la mission. Ils ne constituent ni une décision d’une administration, ni une garantie
+          d’absence de contrôle, de redressement ou de sanction. Les questions relevant du
           conseil juridique ou fiscal réglementé sont orientées vers un avocat ou un
           expert-comptable.
         </p>
@@ -71,7 +71,7 @@ export default function MentionsLegalesPage() {
 
       <Section titre="Propriété intellectuelle">
         <p>
-          Les contenus de ce site — textes, méthodes d&apos;audit, référentiels de points de
+          Les contenus de ce site — textes, méthodes d’audit, référentiels de points de
           contrôle, modèles de rapport, supports de formation — sont protégés. Toute reproduction ou
           réutilisation, même partielle, sans autorisation écrite préalable est interdite.
         </p>
@@ -83,7 +83,7 @@ export default function MentionsLegalesPage() {
           <a className="underline" href="/confidentialite">
             politique de confidentialité
           </a>
-          . L&apos;usage des traceurs est détaillé sur la page{" "}
+          . L’usage des traceurs est détaillé sur la page{" "}
           <a className="underline" href="/cookies">
             cookies
           </a>

@@ -5,10 +5,10 @@ import { useRef } from "react";
 import { ETAPES_METHODE, PHASES_MISSION } from "@/content/methode";
 
 const TEMPS = [
-  { nom: "Cadrage", etapes: [1, 2, 3], texte: "Vous savez ce qui sera regardé avant qu'on commence." },
+  { nom: "Cadrage", etapes: [1, 2, 3], texte: "Vous savez ce qui sera regardé avant qu’on commence." },
   { nom: "Collecte", etapes: [4, 5], texte: "Travail sur copies, jamais sur originaux." },
-  { nom: "Tests", etapes: [6, 7, 8, 9, 10], texte: "Le contrôle croisé : planning, pointage, paie, facturation." },
-  { nom: "Restitution", etapes: [11, 12, 13, 14, 15], texte: "Des constats qualifiés, un plan daté, une réunion d'une heure." },
+  { nom: "Tests", etapes: [6, 7, 8, 9, 10], texte: "Le contrôle croisé : planning, pointage, paie, facturation." },
+  { nom: "Restitution", etapes: [11, 12, 13, 14, 15], texte: "Des constats qualifiés, un plan daté, une réunion d’une heure." },
 ] as const;
 
 /**
@@ -45,9 +45,9 @@ export function Etapes({ sombre = true }: { sombre?: boolean }) {
                 className={`absolute left-[10px] top-[0.55em] size-[11px] rounded-full border-2 ${sombre ? "border-vert-2 bg-encre" : "border-vert bg-fond"} md:left-auto md:right-[-6px]`}
                 aria-hidden
               />
-              <p className={`font-display text-[2.4rem] leading-none ${muet}`}>{["I", "II", "III", "IV"][ti]}</p>
-              <h3 className={`mt-2 font-display text-[1.7rem] leading-tight ${texte}`}>{t.nom}</h3>
-              <p className={`mt-2 text-[14px] leading-relaxed ${doux}`}>{t.texte}</p>
+              <p className={`font-display text-chiffre leading-none ${muet}`}>{["I", "II", "III", "IV"][ti]}</p>
+              <h3 className={`mt-2 font-display text-t3 ${texte}`}>{t.nom}</h3>
+              <p className={`mt-2 text-corps ${doux}`}>{t.texte}</p>
             </div>
             <ol className={`ml-10 divide-y md:ml-12 ${filet}`}>
               {t.etapes.map((n) => {
@@ -55,9 +55,9 @@ export function Etapes({ sombre = true }: { sombre?: boolean }) {
                 const phase = PHASES_MISSION[e.phase - 1];
                 return (
                   <li key={n} className="grid gap-1 py-4 md:grid-cols-[3.5rem_1fr_auto] md:items-baseline md:gap-6">
-                    <span className={`font-mono text-[12px] ${muet}`}>{String(n).padStart(2, "0")}</span>
-                    <span className={`font-display text-[1.25rem] leading-snug ${texte}`}>{e.nom}</span>
-                    <span className={`font-mono text-[11px] uppercase tracking-[0.14em] ${muet}`}>{phase.moment}</span>
+                    <span className={`font-mono text-note ${muet}`}>{String(n).padStart(2, "0")}</span>
+                    <span className={`font-display text-t4 ${texte}`}>{e.nom}</span>
+                    <span className={`font-mono text-etiquette uppercase tracking-[0.14em] ${muet}`}>{phase.moment}</span>
                   </li>
                 );
               })}

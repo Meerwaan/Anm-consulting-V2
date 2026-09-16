@@ -3,7 +3,13 @@
 import { createClient } from "@/lib/supabase/server";
 import type { EtatLead } from "@/lib/vitrine/lead";
 
-const SOURCES = new Set(["contact", "checklist-cnaps", "formation", "abonnement"]);
+const CHECKLISTS: Record<string, string> = {
+  "checklist-cnaps": "CNAPS",
+  "checklist-urssaf": "URSSAF",
+  "checklist-inspection": "Inspection du travail",
+  "checklist-fiscal": "DGFiP",
+};
+const SOURCES = new Set(["contact", "formation", "abonnement", ...Object.keys(CHECKLISTS)]);
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 const texte = (formData: FormData, cle: string, max = 400) =>
@@ -24,17 +30,17 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
   if (!SOURCES.has(source)) return { ok: false, message: null, erreur: "Formulaire inconnu." };
 
   const email = texte(formData, "email", 200).toLowerCase();
-  if (!EMAIL.test(email)) return { ok: false, message: null, erreur: "Cette adresse email n'est pas valide." };
+  if (!EMAIL.test(email)) return { ok: false, message: null, erreur: "Cette adresse email n’est pas valide." };
 
   const succes: EtatLead = {
     ok: true,
     erreur: null,
     message:
       source === "contact"
-        ? "C'est noté. Vous recevez un accusé de réception, puis un appel sous 48 h ouvrées."
-        : source === "checklist-cnaps"
-          ? "C'est noté. La checklist vous sera envoyée par email."
-          : "C'est noté. Vous serez prévenu à l'ouverture.",
+        ? "C’est noté. Vous recevez un accusé de réception, puis un appel sous 48 h ouvrées."
+        : source in CHECKLISTS
+          ? `C’est noté. La checklist ${CHECKLISTS[source]} vous sera envoyée par email.`
+          : "C’est noté. Vous serez prévenu à l’ouverture.",
   };
 
   if (texte(formData, "site_web", 10)) return succes;
@@ -50,11 +56,11 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
   const situation = texte(formData, "situation", 40);
   const offre = texte(formData, "offre", 40);
   const urgence = texte(formData, "urgence", 4);
-  if (telephone) contexte.push(`Téléphone : ${telephone}`);
-  if (sites) contexte.push(`Sites : ${sites}`);
-  if (situation) contexte.push(`Situation : ${situation}`);
-  if (offre) contexte.push(`Offre : ${offre}`);
-  if (urgence) contexte.push("Urgence : contrôle sous 7 jours");
+  if (telephone) contexte.push(`Téléphone : ${telephone}`);
+  if (sites) contexte.push(`Sites : ${sites}`);
+  if (situation) contexte.push(`Situation : ${situation}`);
+  if (offre) contexte.push(`Offre : ${offre}`);
+  if (urgence) contexte.push("Urgence : contrôle sous 7 jours");
   const corps = texte(formData, "message", 3000);
   const message = [corps, contexte.length ? contexte.join(" · ") : ""].filter(Boolean).join("\n\n") || null;
 
@@ -72,7 +78,7 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
     });
     if (error) throw error;
   } catch {
-    return { ok: false, message: null, erreur: "L'envoi a échoué. Réessayez dans un instant, ou écrivez-nous directement." };
+    return { ok: false, message: null, erreur: "L’envoi a échoué. Réessayez dans un instant, ou écrivez-nous directement." };
   }
 
   return succes;

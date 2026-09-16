@@ -8,7 +8,7 @@ import { APRES_CONTACT } from "@/content/vitrine";
 export const metadata: Metadata = {
   title: "Contact — demander un premier échange",
   description:
-    "Trente minutes, sans engagement, pour identifier vos trois principaux risques et décider de la suite. Proposition écrite sous 48 h.",
+    "Trente minutes, sans engagement, pour identifier vos trois principaux risques et décider de la suite. Proposition écrite sous 48 h.",
   alternates: { canonical: "/contact" },
 };
 
@@ -28,35 +28,34 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   return (
     <>
       <section className="relative overflow-hidden">
-        <div className="pointer-events-none absolute -right-40 -top-32 size-[560px] rounded-full bg-menthe/50 blur-3xl" aria-hidden />
         <Conteneur large className="relative grid gap-14 pb-24 pt-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-20 lg:pb-32 lg:pt-20">
           <div className="space-y-8">
             <Reveal y={16}>
               <p className="etiquette">Premier échange</p>
             </Reveal>
             <Reveal delay={0.05}>
-              <h1 className="font-display text-[2.8rem] leading-[1.02] text-encre md:text-[3.8rem]">
+              <h1 className="font-display text-t1 text-encre md:text-t1-lg">
                 Parlons de <em className="text-vert">votre situation.</em>
               </h1>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="max-w-lg text-[16px] leading-relaxed text-encre-2">
+              <p className="max-w-lg text-chapo text-encre-2">
                 Trente minutes, sans engagement, pour identifier vos trois principaux risques et décider de la suite.
-                Aucune promesse de garantie contre un redressement ou une sanction : des faits, une méthode, un plan.
+                Aucune promesse de garantie contre un redressement ou une sanction : des faits, une méthode, un plan.
               </p>
             </Reveal>
 
             <Reveal delay={0.15}>
               <div className="space-y-4">
-                <p className="etiquette">Ce qui se passe ensuite</p>
+                <h2 className="etiquette font-mono font-normal">Ce qui se passe ensuite</h2>
                 <Filet epais />
                 <ol>
                   {APRES_CONTACT.map((a) => (
                     <li key={a.etape} className="grid grid-cols-[3rem_1fr] gap-4 border-b border-filet py-4">
-                      <span className="font-mono text-[12px] text-gris">{a.etape}</span>
+                      <span className="font-mono text-note text-gris">{a.etape}</span>
                       <div className="space-y-1">
-                        <h2 className="font-display text-[1.25rem] leading-snug text-encre">{a.titre}</h2>
-                        <p className="text-[13.5px] leading-relaxed text-encre-2">{a.texte}</p>
+                        <h3 className="font-display text-t4 text-encre">{a.titre}</h3>
+                        <p className="text-meta text-encre-2">{a.texte}</p>
                       </div>
                     </li>
                   ))}
@@ -68,19 +67,19 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
               <Cascade className="grid gap-px overflow-hidden rounded-[5px] border border-filet bg-filet sm:grid-cols-2" pas={0.08}>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Email</p>
-                  <p className="text-[14px] text-encre">{EDITEUR.email}</p>
+                  <p className="text-corps text-encre">{EDITEUR.email}</p>
                 </Element>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Téléphone</p>
-                  <p className="text-[14px] text-encre">{EDITEUR.telephone}</p>
+                  <p className="text-corps text-encre">{EDITEUR.telephone}</p>
                 </Element>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Interventions</p>
-                  <p className="text-[14px] text-encre">France entière, sur site et à distance</p>
+                  <p className="text-corps text-encre">France entière, sur site et à distance</p>
                 </Element>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Délai de réponse</p>
-                  <p className="text-[14px] text-encre">48 h ouvrées, plus vite si un contrôle est annoncé</p>
+                  <p className="text-corps text-encre">48 h ouvrées, plus vite si un contrôle est annoncé</p>
                 </Element>
               </Cascade>
             </Reveal>
@@ -100,8 +99,8 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
           <div className="grid gap-10 md:grid-cols-[1fr_1fr] md:gap-20">
             <SectionHead
               eyebrow="Avocats, experts-comptables, prescripteurs"
-              titre={<>Vous avez un client à orienter ? <em className="text-vert">Travaillons ensemble.</em></>}
-              sous="Reconstitution des faits, structuration du dossier, rapprochements planning-paie-facturation : le travail de terrain qui rend vos consultations plus rapides et mieux fondées. Les questions réglementées, le contentieux et les travaux comptables restent les vôtres."
+              titre={<>Vous avez un client à orienter ? <em className="text-vert">Travaillons ensemble.</em></>}
+              sous="Reconstitution des faits, structuration du dossier, rapprochements planning-paie-facturation : le travail de terrain qui rend vos consultations plus rapides et mieux fondées. Les questions réglementées, le contentieux et les travaux comptables restent les vôtres."
             />
             <Reveal delay={0.1}>
               <ul className="space-y-3 pt-2 md:pt-12">
@@ -111,7 +110,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                   "Une restitution à laquelle vous êtes conviés si le client le souhaite",
                   "Aucune rétrocession, aucune exclusivité",
                 ].map((t) => (
-                  <li key={t} className="flex gap-3 text-[15px] leading-relaxed text-encre-2">
+                  <li key={t} className="flex gap-3 text-corps text-encre-2">
                     <span className="mt-[11px] h-px w-4 shrink-0 bg-vert" aria-hidden />
                     {t}
                   </li>

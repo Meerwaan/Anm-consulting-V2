@@ -18,12 +18,12 @@ export function LegalPage({
   return (
     <article className="mx-auto max-w-[68ch] space-y-8 px-5 py-16 md:py-24">
       <header className="space-y-3 border-b border-[var(--anm-hairline)] pb-6">
-        <h1 className="text-3xl text-[var(--anm-ink)]">{titre}</h1>
+        <h1 className="text-t2 text-[var(--anm-ink)]">{titre}</h1>
         {chapeau ? <p className="text-[var(--anm-muted)]">{chapeau}</p> : null}
       </header>
-      <div className="space-y-8 text-[15px] leading-relaxed">{children}</div>
-      <footer className="border-t border-[var(--anm-hairline)] pt-4 font-mono text-xs text-[var(--anm-muted)]">
-        Dernière mise à jour : {DERNIERE_MISE_A_JOUR}
+      <div className="space-y-8 text-corps">{children}</div>
+      <footer className="border-t border-[var(--anm-hairline)] pt-4 font-mono text-etiquette text-[var(--anm-muted)]">
+        Dernière mise à jour : {DERNIERE_MISE_A_JOUR}
       </footer>
     </article>
   );
@@ -33,7 +33,7 @@ export function LegalPage({
 export function Section({ titre, children }: { titre: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xl text-[var(--anm-ink)]">{titre}</h2>
+      <h2 className="text-t4 text-[var(--anm-ink)]">{titre}</h2>
       {children}
     </section>
   );
@@ -45,7 +45,7 @@ export function Definitions({ items }: { items: { label: string; value: string }
     <dl className="grid grid-cols-[minmax(9rem,auto)_1fr] gap-x-6 gap-y-2">
       {items.map((item) => (
         <div key={item.label} className="contents">
-          <dt className="font-mono text-xs uppercase tracking-wide text-[var(--anm-muted)]">
+          <dt className="font-mono text-etiquette uppercase tracking-wide text-[var(--anm-muted)]">
             {item.label}
           </dt>
           <dd className="text-[var(--anm-ink)]">{item.value}</dd>

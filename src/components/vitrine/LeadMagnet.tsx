@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { CheckCircle } from "@phosphor-icons/react";
 import { envoyerLead } from "@/app/(marketing)/actions";
 import { ETAT_LEAD_INITIAL } from "@/lib/vitrine/lead";
+import type { ChecklistId } from "@/content/vitrine";
 import { Bouton } from "./Bouton";
 
 /** Capture d'email en une ligne. `source` distingue checklist, formation, abonnement. */
@@ -12,17 +13,26 @@ export function LeadMagnet({
   cta,
   sombre = false,
   placeholder = "vous@entreprise.fr",
+  note = "Un email, pas de relance commerciale. Désinscription en un clic.",
+  onSucces,
 }: {
-  source: "checklist-cnaps" | "formation" | "abonnement";
+  source: `checklist-${ChecklistId}` | "formation" | "abonnement";
   cta: string;
   sombre?: boolean;
   placeholder?: string;
+  note?: string;
+  /** Appelé une fois l'envoi confirmé — permet au parent de mémoriser la demande. */
+  onSucces?: () => void;
 }) {
   const [etat, action, enCours] = useActionState(envoyerLead, ETAT_LEAD_INITIAL);
 
+  useEffect(() => {
+    if (etat.ok) onSucces?.();
+  }, [etat.ok, onSucces]);
+
   if (etat.ok) {
     return (
-      <p className={`flex items-start gap-3 text-[15px] leading-relaxed ${sombre ? "text-papier" : "text-encre"}`} role="status" aria-live="polite">
+      <p className={`flex items-start gap-3 text-corps ${sombre ? "text-papier" : "text-encre"}`} role="status" aria-live="polite">
         <CheckCircle size={22} weight="fill" className={`mt-0.5 shrink-0 ${sombre ? "text-menthe" : "text-vert"}`} />
         {etat.message}
       </p>
@@ -57,11 +67,11 @@ export function LeadMagnet({
         </Bouton>
       </div>
       {etat.erreur ? (
-        <p className="text-[13px] text-critique" role="alert">
+        <p className="text-meta text-critique" role="alert">
           {etat.erreur}
         </p>
       ) : (
-        <p className={`text-[12px] ${sombre ? "text-brume" : "text-gris"}`}>Un email, pas de relance commerciale. Désinscription en un clic.</p>
+        <p className={`text-note ${sombre ? "text-brume" : "text-gris"}`}>{note}</p>
       )}
     </form>
   );

@@ -37,13 +37,13 @@ export interface Rapprochement {
 export const RAPPROCHEMENTS: Rapprochement[] = [
   {
     kind: "agents_cnaps_vs_paie",
-    titre: "Agents détenteurs d'une carte professionnelle vs effectif en paie",
+    titre: "Agents détenteurs d’une carte professionnelle vs effectif en paie",
     libelleA: "Agents avec carte valide",
     libelleB: "Agents sur les bulletins",
     unite: "agents",
     toleranceParDefaut: 0,
     pourquoi:
-      "Un agent payé sans carte valide est un exercice illégal. Aucune tolérance : c'est le premier croisement que fait le CNAPS.",
+      "Un agent payé sans carte valide est un exercice illégal. Aucune tolérance : c’est le premier croisement que fait le CNAPS.",
   },
   {
     kind: "heures_planning_vs_pointage",
@@ -53,7 +53,7 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     unite: "heures",
     toleranceParDefaut: 0,
     pourquoi:
-      "Des remplacements et des absences expliquent souvent l'écart — mais c'est l'explication qui doit être trouvée, pas l'écart qui doit être toléré d'avance. Un écart large signale un planning théorique que personne ne tient.",
+      "Des remplacements et des absences expliquent souvent l’écart — mais c’est l’explication qui doit être trouvée, pas l’écart qui doit être toléré d’avance. Un écart large signale un planning théorique que personne ne tient.",
   },
   {
     kind: "heures_pointage_vs_paie",
@@ -63,7 +63,7 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     unite: "heures",
     toleranceParDefaut: 0,
     pourquoi:
-      "Des heures travaillées et non payées, c'est du travail dissimulé (C. trav. art. L8221-5). Terrain commun URSSAF et inspection : aucune heure ne se tolère d'avance.",
+      "Des heures travaillées et non payées, c’est du travail dissimulé (C. trav. art. L8221-5). Terrain commun URSSAF et inspection : aucune heure ne se tolère d’avance.",
   },
   {
     kind: "heures_paie_vs_facturation",
@@ -73,17 +73,17 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     unite: "heures",
     toleranceParDefaut: 0,
     pourquoi:
-      "Facturer plus qu'on ne paie interroge sur la sous-traitance non déclarée ; facturer moins interroge sur la rentabilité et sur la réalité des prestations. La marge sur les heures sous-traitées explique souvent l'écart — c'est cette explication qu'il faut obtenir, pas un seuil qui la dispense.",
+      "Facturer plus qu’on ne paie interroge sur la sous-traitance non déclarée ; facturer moins interroge sur la rentabilité et sur la réalité des prestations. La marge sur les heures sous-traitées explique souvent l’écart — c’est cette explication qu’il faut obtenir, pas un seuil qui la dispense.",
   },
   {
     kind: "sous_traitants_contrats_vs_vigilance",
     titre: "Sous-traitants sous contrat vs attestations de vigilance à jour",
     libelleA: "Sous-traitants actifs",
-    libelleB: "Attestations de moins de 6 mois",
+    libelleB: "Attestations de moins de 6 mois",
     unite: "sous-traitants",
     toleranceParDefaut: 0,
     pourquoi:
-      "Chaque manquant expose le dirigeant à la solidarité financière des dettes du sous-traitant (C. trav. art. L8222-2).",
+      "Chaque manquant expose le dirigeant à la solidarité financière des dettes du sous-traitant (C. trav. art. L8222-2).",
   },
   {
     kind: "effectif_paie_vs_dsn",
@@ -92,6 +92,6 @@ export const RAPPROCHEMENTS: Rapprochement[] = [
     libelleB: "Salariés en DSN",
     unite: "salariés",
     toleranceParDefaut: 0,
-    pourquoi: "Un salarié payé et non déclaré est le cas d'école du contrôle URSSAF.",
+    pourquoi: "Un salarié payé et non déclaré est le cas d’école du contrôle URSSAF.",
   },
 ];

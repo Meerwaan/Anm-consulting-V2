@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { OFFRES, chiffrer, majorationEffectif, majorationSites } from "@/content/offres";
 import { Bouton } from "./Bouton";
 
-const euros = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} € HT`;
+const euros = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} € HT`;
+
+/** Repères sous le curseur d’effectif, placés à leur position réelle (curseur linéaire de 1 à 250). */
+const REPERES_EFFECTIF = [20, 50, 100, 250] as const;
 
 const OFFRES_CHIFFRABLES = OFFRES.filter((o) => o.baseHT !== null && o.id !== "suivi_conformite");
 
@@ -20,16 +23,19 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
   const [urgence, setUrgence] = useState(false);
 
   const offre = OFFRES_CHIFFRABLES.find((o) => o.id === offreId) ?? OFFRES_CHIFFRABLES[0];
-  const devis = useMemo(
-    () => chiffrer({ baseHT: offre.baseHT ?? 0, effectif, sites, urgence }),
-    [offre, effectif, sites, urgence],
-  );
+  const devis = useMemo(() => chiffrer({ baseHT: offre.baseHT ?? 0, effectif, sites, urgence }), [offre, effectif, sites, urgence]);
 
   const lignes = [
     { l: offre.nom, v: devis.base },
-    { l: `Effectif ${effectif} salarié${effectif > 1 ? "s" : ""}`, v: majorationEffectif(effectif) },
-    { l: `${sites} site${sites > 1 ? "s" : ""}${sites > 2 ? " (au-delà de 2)" : ""}`, v: majorationSites(sites) },
-    { l: "Urgence sous 7 jours (+20 %)", v: devis.urgence },
+    {
+      l: `Effectif ${effectif} salarié${effectif > 1 ? "s" : ""}`,
+      v: majorationEffectif(effectif),
+    },
+    {
+      l: `${sites} site${sites > 1 ? "s" : ""}${sites > 2 ? " (au-delà de 2)" : ""}`,
+      v: majorationSites(sites),
+    },
+    { l: "Urgence sous 7 jours (+20 %)", v: devis.urgence },
   ];
 
   const lienContact = `/contact?offre=${offre.id}&effectif=${effectif}&sites=${sites}${urgence ? "&urgence=1" : ""}`;
@@ -56,8 +62,8 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
                     actif ? "border-vert bg-vert text-papier" : "border-filet bg-papier text-encre hover:border-encre"
                   }`}
                 >
-                  <span className="block text-[13px] font-medium leading-tight">{o.nom}</span>
-                  <span className={`mt-0.5 block font-mono text-[11px] ${actif ? "text-papier/70" : "text-gris"}`}>{o.fourchette}</span>
+                  <span className="block text-meta font-medium">{o.nom}</span>
+                  <span className={`mt-0.5 block font-mono text-etiquette ${actif ? "text-papier/70" : "text-gris"}`}>{o.fourchette}</span>
                 </button>
               );
             })}
@@ -69,50 +75,32 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
             <label className="etiquette" htmlFor="estim-effectif">
               Effectif
             </label>
-            <span className="font-display text-[1.5rem] leading-none text-encre">
-              {effectif} <span className="font-sans text-[12px] text-gris">salariés</span>
+            <span className="font-display text-t3 leading-none text-encre">
+              {effectif} <span className="font-sans text-note text-gris">salariés</span>
             </span>
           </div>
-          <input
-            id="estim-effectif"
-            type="range"
-            min={1}
-            max={250}
-            step={1}
-            value={effectif}
-            onChange={(e) => setEffectif(Number(e.target.value))}
-            className="curseur-plage"
-          />
-          <div className="flex justify-between font-mono text-[10px] text-gris">
-            <span>1</span>
-            <span>20</span>
-            <span>50</span>
-            <span>100</span>
-            <span>200+</span>
+          <input id="estim-effectif" type="range" min={1} max={250} step={1} value={effectif} onChange={(e) => setEffectif(Number(e.target.value))} className="curseur-plage" />
+          <div className="relative h-4 font-mono text-etiquette text-gris" aria-hidden>
+            {REPERES_EFFECTIF.map((r) => (
+              <span key={r} className="absolute top-0 -translate-x-1/2 whitespace-nowrap last:-translate-x-full" style={{ left: `${((r - 1) / 249) * 100}%` }}>
+                {r === 250 ? "200+" : r}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:gap-10">
           <div className="space-y-3">
             <div className="flex items-baseline justify-between">
               <label className="etiquette" htmlFor="estim-sites">
                 Sites
               </label>
-              <span className="font-display text-[1.5rem] leading-none text-encre">{sites}</span>
+              <span className="font-display text-t3 leading-none text-encre">{sites}</span>
             </div>
-            <input
-              id="estim-sites"
-              type="range"
-              min={1}
-              max={12}
-              step={1}
-              value={sites}
-              onChange={(e) => setSites(Number(e.target.value))}
-              className="curseur-plage"
-            />
+            <input id="estim-sites" type="range" min={1} max={12} step={1} value={sites} onChange={(e) => setSites(Number(e.target.value))} className="curseur-plage" />
           </div>
           <label className="flex cursor-pointer items-center justify-between gap-3 border-b border-encre pb-2 sm:self-end">
-            <span className="text-[13px] text-encre">Contrôle sous 7 jours</span>
+            <span className="whitespace-nowrap text-meta text-encre">Contrôle sous 7 jours</span>
             <button
               type="button"
               role="switch"
@@ -120,9 +108,7 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
               onClick={() => setUrgence((u) => !u)}
               className={`relative h-6 w-11 rounded-full transition-colors duration-300 ease-expo ${urgence ? "bg-vert" : "bg-filet"}`}
             >
-              <span
-                className={`absolute top-0.5 size-5 rounded-full bg-papier shadow-carte transition-transform duration-300 ease-expo ${urgence ? "translate-x-[22px]" : "translate-x-0.5"}`}
-              />
+              <span className={`absolute top-0.5 size-5 rounded-full bg-papier shadow-carte transition-transform duration-300 ease-expo ${urgence ? "translate-x-[22px]" : "translate-x-0.5"}`} />
             </button>
           </label>
         </div>
@@ -139,15 +125,15 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="font-display text-[3rem] leading-none tabular-nums md:text-[3.4rem]"
+              className="font-display text-chiffre-lg leading-none tabular-nums"
             >
               {Math.round(devis.totalHT).toLocaleString("fr-FR")} €
             </motion.span>
           </AnimatePresence>
-          <span className="font-mono text-[12px] text-brume">HT</span>
+          <span className="font-mono text-note text-brume">HT</span>
         </div>
 
-        <dl className="mt-6 space-y-2.5 border-t border-nuit pt-5 text-[13px]">
+        <dl className="mt-6 space-y-2.5 border-t border-nuit pt-5 text-meta">
           {lignes.map((li) => (
             <div key={li.l} className="flex items-baseline justify-between gap-4">
               <dt className={li.v === 0 ? "text-brume" : "text-brume-2"}>{li.l}</dt>
@@ -156,15 +142,14 @@ export function Estimateur({ compact = false }: { compact?: boolean }) {
           ))}
         </dl>
 
-        <p className="mt-5 text-[12px] leading-relaxed text-brume">
-          Hors frais de déplacement et journées complémentaires (850 € HT). Le montant ferme figure dans la proposition
-          écrite, envoyée sous 48 h après l&apos;appel de cadrage.
+        <p className="mt-5 text-note text-brume">
+          Hors frais de déplacement et journées complémentaires (850 € HT). Le montant ferme figure dans la proposition écrite, envoyée sous 48 h après l’appel de cadrage.
         </p>
 
         {!compact ? (
           <div className="mt-auto pt-6">
             <Bouton href={lienContact} taille="lg" className="w-full justify-between">
-              Recevoir une proposition écrite
+              Recevoir une proposition
             </Bouton>
           </div>
         ) : (

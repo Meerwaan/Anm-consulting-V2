@@ -32,6 +32,38 @@
   --color-mineur: #1f5a3a;
   --color-mineur-l: #dcefe5;
 
+  /* Échelle typographique — une taille par rôle, jamais de valeur arbitraire dans les composants.
+     Corps : etiquette 11 · note 12 · meta 13 · corps 15 · chapo 17.
+     Titres (serif) : t4 22 · t3 28 · t2 36/46 · t1 44/64/72. Chiffres : 40 · 52. */
+  --text-etiquette: 0.6875rem;
+  --text-etiquette--line-height: 1.4;
+  --text-note: 0.75rem;
+  --text-note--line-height: 1.5;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.55;
+  --text-corps: 0.9375rem;
+  --text-corps--line-height: 1.65;
+  --text-chapo: 1.0625rem;
+  --text-chapo--line-height: 1.6;
+  --text-t4: 1.375rem;
+  --text-t4--line-height: 1.25;
+  --text-t3: 1.75rem;
+  --text-t3--line-height: 1.15;
+  --text-t2: 2.25rem;
+  --text-t2--line-height: 1.05;
+  --text-t2-lg: 2.875rem;
+  --text-t2-lg--line-height: 1.04;
+  --text-t1: 2.75rem;
+  --text-t1--line-height: 1.02;
+  --text-t1-lg: 4rem;
+  --text-t1-lg--line-height: 1;
+  --text-t1-xl: 4.5rem;
+  --text-t1-xl--line-height: 0.98;
+  --text-chiffre: 2.5rem;
+  --text-chiffre--line-height: 1;
+  --text-chiffre-lg: 3.25rem;
+  --text-chiffre-lg--line-height: 1;
+
   --font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-archivo), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
