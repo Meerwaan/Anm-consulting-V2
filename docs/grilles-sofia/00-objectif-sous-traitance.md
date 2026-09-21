@@ -17,3 +17,15 @@ Texte de Sofia, recopié tel quel :
 7. **Triple rapprochement** : bons de commande ↔ heures réalisées ↔ facturation, côté client **et** côté sous-traitant (grilles 03 §5-6, 04 §7, 05 §8).
 
 Objectif final : un dossier que ni la DGFiP, ni l'URSSAF, ni l'Inspection du travail ne peut remettre en cause.
+
+## Précision de Sofia sur la faisabilité (21/09/2026, dictée)
+
+> L'URSSAF, elle fait les attestations, elle raisonne en équivalent temps plein. Donc elle va me donner un nombre d'agents. Mais moi, ce qui va me servir, c'est surtout le nombre d'heures. Quand je dis comparer la masse salariale, c'est surtout comparer le nombre d'heures qui apparaissent effectivement sur les fiches de paye. La masse salariale en termes d'argent n'est pas un élément important. On parle de volumétrie horaire et pas de finance. Par contre, on va parler finance quand on va regarder les factures sous-traitantes : flécher les factures sous-traitantes avec le paiement pour être sûr qu'on est bien dans une cohérence et qu'il y a bien une affectation des finances de l'entreprise donneuse d'ordre vers le sous-traitant. Ça, c'est un paramètre de la DGFiP.
+
+Repères cités : le taux horaire vendu, le SMIC horaire.
+
+Conséquences retenues :
+
+- **Tout le rapprochement d'heures se fait en heures, pas en euros.** B = heures figurant sur les bulletins de paie du donneur d'ordre.
+- **L'attestation de vigilance se convertit en heures** : l'effectif déclaré (en équivalent temps plein) × la durée mensuelle d'un temps plein × le nombre de mois = capacité horaire du sous-traitant, comparée aux heures qu'il facture.
+- **Les euros n'interviennent que pour le fléchage DGFiP** : chaque facture de sous-traitant ↔ son paiement, sur un compte au nom du sous-traitant.
