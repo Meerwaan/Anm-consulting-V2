@@ -515,7 +515,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           ) : null}
           <Text style={s.h3} minPresenceAhead={70}>Méthode de calcul</Text>
           <Text style={s.para}>
-            A − B : heures vendues moins heures payées sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance.
+            A − B : heures vendues moins heures payées sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance ; elle est due à la conclusion du contrat de sous-traitance, puis tous les six mois jusqu’à sa fin. Prix de l’heure : montant hors taxe ÷ heures facturées, comparé au coût de revient horaire de référence{r.coutRevient ? ` retenu : ${r.coutRevient}` : ", lorsqu’il est renseigné"}.
           </Text>
           <View style={{ marginTop: 28, borderTopWidth: 0.5, borderTopColor: C.filet, paddingTop: 10 }} wrap={false}>
             <Text style={{ fontFamily: "Instrument Serif", fontSize: 14 }}>{r.mission.auditeur}</Text>

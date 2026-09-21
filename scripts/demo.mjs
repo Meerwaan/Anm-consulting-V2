@@ -40,6 +40,67 @@ const code = (grille, libelle) => {
   throw new Error(`Question introuvable : ${libelle}`);
 };
 
+// 0. Les données ajoutées le 21/09/2026 (identité, salariés, DGFiP) ---------------------------------
+// Coût de revient de référence : valeur fictive, signalée comme telle, pour montrer les alertes.
+const COUT_REVIENT = { cout_revient_horaire: 22, cout_revient_source: "Valeur fictive de démonstration, à remplacer par l’indice publié par la branche" };
+
+// Identité (pièce, fin de validité, autorisation de travail) et, pour les salariés de l'entreprise,
+// embauche, registre et médecine du travail. Anomalies à trouver : titre de séjour expiré (Loïc F.,
+// Nicolas P.), titre bientôt expiré et DPAE tardive (Inès B.), visite dépassée (David S.), salarié
+// absent du registre (Loïc F.), liste des salariés incomplète par rapport à la paie.
+const IDENTITES = {
+  "Mehdi A.": { piece_identite: "cni", piece_fin: "2031-04-12", autorisation_travail: "na" },
+  "Julie R.": { piece_identite: "cni", piece_fin: "2029-11-03", autorisation_travail: "na" },
+  "Yanis T.": { piece_identite: "passeport", piece_fin: "2030-02-20", autorisation_travail: "na" },
+  "Ousmane D.": { piece_identite: "cni", piece_fin: "2032-07-01", autorisation_travail: "na" },
+  "Nicolas P.": { piece_identite: "titre_sejour", piece_fin: "2026-03-31", autorisation_travail: "a_verifier", titre_authentifie: "non" },
+  "Samir K.": { piece_identite: "cni", piece_fin: "2028-09-15", autorisation_travail: "na" },
+  "Claire M.": { piece_identite: "cni", piece_fin: "2031-06-01", autorisation_travail: "na" },
+  "David S.": { piece_identite: "passeport", piece_fin: "2030-05-18", autorisation_travail: "na" },
+  "Inès B.": { piece_identite: "titre_sejour", piece_fin: "2026-10-30", autorisation_travail: "oui", titre_authentifie: "oui" },
+  "Loïc F.": { piece_identite: "titre_sejour", piece_fin: "2026-08-15", autorisation_travail: "oui", titre_authentifie: "non" },
+  "Aïcha N.": { piece_identite: "cni", piece_fin: "2029-01-22", autorisation_travail: "na" },
+};
+const SALARIES = {
+  "Claire M.": { type_contrat: "cdi", date_entree: "2022-03-01", date_dpae: "2022-02-28", contrat_signe: "oui", registre: "oui", visite_medicale: "2024-05-10", visite_prochaine: "2027-05-10" },
+  "David S.": { type_contrat: "cdi", date_entree: "2023-09-04", date_dpae: "2023-09-04", contrat_signe: "oui", registre: "oui", visite_medicale: "2023-10-02", visite_prochaine: "2026-06-02" },
+  "Inès B.": { type_contrat: "cdd", date_entree: "2026-02-02", date_dpae: "2026-02-05", contrat_signe: "oui", registre: "oui" },
+  "Loïc F.": { type_contrat: "cdi", date_entree: "2025-06-02", date_dpae: "2025-05-30", contrat_signe: "non", registre: "non", visite_medicale: "2025-07-01", visite_prochaine: "2028-07-01" },
+  "Aïcha N.": { type_contrat: "cdi_tp", date_entree: "2024-01-08", date_dpae: "2024-01-05", contrat_signe: "oui", registre: "oui", visite_medicale: "2024-02-01", visite_prochaine: "2027-02-01" },
+};
+
+const REPONSES_COMPLEMENT = [
+  ["dgfip", "Numéro d’autorisation CNAPS et mention prévue par le code de la sécurité intérieure", "non", "Absents des factures FA-2601-01 à FA-2606-02."],
+  ["dgfip", "Taux des pénalités de retard et indemnité forfaitaire pour frais de recouvrement", "non", "Aucune des deux mentions."],
+  ["dgfip", "Désignation précise : site, nature de la prestation, heures ou forfait", "oui", null],
+  ["dgfip", "Un contrat écrit et signé pour chaque client", "a_verifier", "Stade municipal : pas de contrat, un simple échange d’e-mails."],
+  ["dgfip", "Un bon de commande pour chaque prestation facturée", "non", "Prestation au stade municipal d’avril facturée sans bon de commande."],
+  ["dgfip", "Clause de révision des prix", "oui", null],
+];
+
+
+// Mode « compléter » : ajoute ces données à une démo existante sans rien effacer ni écraser
+// (ce que Sofia a saisi reste) :  DEMO_COMPLETER=1 node … scripts/demo.mjs
+if (process.env.DEMO_COMPLETER) {
+  const mission = verifier(await db.from("missions").select("id").eq("reference", REF).single(), "mission");
+  const agents = verifier(await db.from("st_agents").select("*").eq("mission_id", mission.id), "agents");
+  let maj = 0;
+  for (const a of agents) {
+    const ajout = { ...(IDENTITES[a.nom] ?? {}), ...(a.sous_traitant_id === null ? SALARIES[a.nom] ?? {} : {}) };
+    const vides = Object.fromEntries(Object.entries(ajout).filter(([k]) => a[k] === null || a[k] === undefined));
+    if (Object.keys(vides).length) {
+      verifier(await db.from("st_agents").update(vides).eq("id", a.id), "agent");
+      maj += 1;
+    }
+  }
+  const { data: p } = await db.from("st_parametres").select("cout_revient_horaire").eq("mission_id", mission.id).maybeSingle();
+  if (p && p.cout_revient_horaire === null) verifier(await db.from("st_parametres").update(COUT_REVIENT).eq("mission_id", mission.id), "paramètres");
+  const lignes = REPONSES_COMPLEMENT.map(([g, l, v, o]) => ({ mission_id: mission.id, grille: g, cible: "mission", item: code(g === "dgfip" ? GRILLE_DGFIP : GRILLE_URSSAF, l), reponse: v, observation: o }));
+  verifier(await db.from("grille_reponses").upsert(lignes, { onConflict: "mission_id,grille,cible,item", ignoreDuplicates: true }), "réponses");
+  console.log(`Démo ${REF} complétée : ${maj} agents, coût de revient ${p?.cout_revient_horaire === null ? "ajouté" : "déjà saisi"}, ${lignes.length} réponses (celles déjà données sont gardées).`);
+  process.exit(0);
+}
+
 // 1. Repartir de zéro --------------------------------------------------------------------
 const anciennes = verifier(await db.from("organizations").select("id").eq("name", NOM), "lecture");
 for (const o of anciennes) {
@@ -68,7 +129,7 @@ const mission = verifier(
   "mission",
 );
 const M = mission.id;
-verifier(await db.from("st_parametres").insert({ mission_id: M, periode_debut: "2026-01-01", periode_fin: "2026-06-01", taux_horaire_vendu: 24.5 }), "paramètres");
+verifier(await db.from("st_parametres").insert({ mission_id: M, periode_debut: "2026-01-01", periode_fin: "2026-06-01", taux_horaire_vendu: 24.5, ...COUT_REVIENT }), "paramètres");
 
 // 3. A — les ventes, et leur facturation ----------------------------------------------------------
 const mois = ["01", "02", "03", "04", "05", "06"];
@@ -161,20 +222,21 @@ paiements.push({ mission_id: M, sous_traitant_id: garde, facture_id: facture("GE
 verifier(await db.from("st_paiements").insert(paiements), "paiements");
 
 // 6. Les agents -----------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 verifier(
   await db.from("st_agents").insert([
-    { mission_id: M, sous_traitant_id: vigilance, nom: "Mehdi A.", carte_numero: "CAR-093-2029-01-11-0001", heures: 151, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui" },
-    { mission_id: M, sous_traitant_id: vigilance, nom: "Julie R.", carte_numero: "CAR-094-2028-06-02-0002", heures: 140, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui" },
-    { mission_id: M, sous_traitant_id: protect, nom: "Yanis T.", carte_numero: "CAR-092-2027-03-15-0003", heures: 180, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui" },
-    { mission_id: M, sous_traitant_id: protect, nom: "Ousmane D.", carte_numero: "CAR-092-2025-12-01-0004", heures: 176, present_documents: "oui", carte_valide: "non", dracar: "non", planning: "oui" },
-    { mission_id: M, sous_traitant_id: protect, nom: "Nicolas P.", carte_numero: null, heures: 168, present_documents: "non", carte_valide: "a_verifier", dracar: "non", planning: "oui" },
-    { mission_id: M, sous_traitant_id: protect, nom: "Samir K.", carte_numero: "CAR-075-2028-09-30-0005", heures: 172, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "non" },
+    { mission_id: M, sous_traitant_id: vigilance, nom: "Mehdi A.", carte_numero: "CAR-093-2029-01-11-0001", heures: 151, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui", ...IDENTITES["Mehdi A."] },
+    { mission_id: M, sous_traitant_id: vigilance, nom: "Julie R.", carte_numero: "CAR-094-2028-06-02-0002", heures: 140, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui", ...IDENTITES["Julie R."] },
+    { mission_id: M, sous_traitant_id: protect, nom: "Yanis T.", carte_numero: "CAR-092-2027-03-15-0003", heures: 180, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "oui", ...IDENTITES["Yanis T."] },
+    { mission_id: M, sous_traitant_id: protect, nom: "Ousmane D.", carte_numero: "CAR-092-2025-12-01-0004", heures: 176, present_documents: "oui", carte_valide: "non", dracar: "non", planning: "oui", ...IDENTITES["Ousmane D."] },
+    { mission_id: M, sous_traitant_id: protect, nom: "Nicolas P.", carte_numero: null, heures: 168, present_documents: "non", carte_valide: "a_verifier", dracar: "non", planning: "oui", ...IDENTITES["Nicolas P."] },
+    { mission_id: M, sous_traitant_id: protect, nom: "Samir K.", carte_numero: "CAR-075-2028-09-30-0005", heures: 172, present_documents: "oui", carte_valide: "oui", dracar: "oui", planning: "non", ...IDENTITES["Samir K."] },
     // Agents de l'entreprise (onglet Dracar Ultimate).
-    { mission_id: M, sous_traitant_id: null, nom: "Claire M.", carte_numero: "CAR-094-2029-02-01-0101", carte_fin: "2029-02-01", dracar: "oui", planning: "oui", affecte_mission: "oui" },
-    { mission_id: M, sous_traitant_id: null, nom: "David S.", carte_numero: "CAR-094-2026-08-31-0102", carte_fin: "2026-08-31", dracar: "oui", planning: "oui", affecte_mission: "oui" },
-    { mission_id: M, sous_traitant_id: null, nom: "Inès B.", carte_numero: "CAR-094-2026-10-10-0103", carte_fin: "2026-10-10", dracar: "oui", planning: "oui", affecte_mission: "oui" },
-    { mission_id: M, sous_traitant_id: null, nom: "Loïc F.", carte_numero: "CAR-094-2028-04-18-0104", carte_fin: "2028-04-18", dracar: "non", planning: "oui", affecte_mission: "a_verifier" },
-    { mission_id: M, sous_traitant_id: null, nom: "Aïcha N.", carte_numero: "CAR-094-2027-11-05-0105", carte_fin: "2027-11-05", dracar: "oui", planning: "oui", affecte_mission: "oui" },
+    { mission_id: M, sous_traitant_id: null, nom: "Claire M.", carte_numero: "CAR-094-2029-02-01-0101", carte_fin: "2029-02-01", dracar: "oui", planning: "oui", affecte_mission: "oui", ...IDENTITES["Claire M."], ...SALARIES["Claire M."] },
+    { mission_id: M, sous_traitant_id: null, nom: "David S.", carte_numero: "CAR-094-2026-08-31-0102", carte_fin: "2026-08-31", dracar: "oui", planning: "oui", affecte_mission: "oui", ...IDENTITES["David S."], ...SALARIES["David S."] },
+    { mission_id: M, sous_traitant_id: null, nom: "Inès B.", carte_numero: "CAR-094-2026-10-10-0103", carte_fin: "2026-10-10", dracar: "oui", planning: "oui", affecte_mission: "oui", ...IDENTITES["Inès B."], ...SALARIES["Inès B."] },
+    { mission_id: M, sous_traitant_id: null, nom: "Loïc F.", carte_numero: "CAR-094-2028-04-18-0104", carte_fin: "2028-04-18", dracar: "non", planning: "oui", affecte_mission: "a_verifier", ...IDENTITES["Loïc F."], ...SALARIES["Loïc F."] },
+    { mission_id: M, sous_traitant_id: null, nom: "Aïcha N.", carte_numero: "CAR-094-2027-11-05-0105", carte_fin: "2027-11-05", dracar: "oui", planning: "oui", affecte_mission: "oui", ...IDENTITES["Aïcha N."], ...SALARIES["Aïcha N."] },
   ]),
   "agents",
 );
@@ -206,6 +268,8 @@ const reponses = [
   ...[["DPAE effectuée avant chaque prise de poste", "oui"], ["Registre unique du personnel à jour", "oui"], ["Toutes les heures réalisées figurent sur les bulletins de paie", "non", "Avril : 300 h au planning ne figurent sur aucun bulletin."], ["Heures réalisées supérieures aux heures payées", "oui", "Avril 2026."], ["Entreprise immatriculée pour l’activité réellement exercée", "oui"], ["DSN déposées chaque mois", "oui"], ["Le client ne choisit, n’évalue ni ne sanctionne les agents", "a_verifier", "Le centre commercial demande parfois le remplacement d’un agent nommément."], ["Donneur d’ordre établissant directement les plannings", "oui", "Plannings de Protect Ouest faits par le chef de site d’Horizon."]].map(([l, v, o = null]) =>
     r("mission", l, v, o, GRILLE_URSSAF, "urssaf"),
   ),
+  // DGFiP : formalisme, contrats, bons de commande.
+  ...REPONSES_COMPLEMENT.map(([g, l, v, o]) => r("mission", l, v, o, g === "dgfip" ? GRILLE_DGFIP : GRILLE_URSSAF, g)),
   // DGFiP : factures.
   ...[["Numérotation continue et chronologique, sans doublon", "non", "FA-2604-02 attribué à deux factures (Logistique Val-de-Marne et Stade municipal)."], ["Taux de TVA correct", "non", "Mars : TVA à 10 % sur la facture Arcades."], ["Chaque facture correspond à une prestation identifiable (sites, dates, agents)", "a_verifier", "PO-2603-B : aucune liste d’agents ni planning joint."], ["Paiement effectué sur un compte au nom du sous-traitant", "non", "Avril : virement Protect Ouest sur un compte au nom d’un tiers."], ["Facture sans prestation identifiable", "oui", "PO-2603-B, 900 h en mars."], ["Paiement vers un compte différent de celui de l’émetteur", "oui"]].map(([l, v, o = null]) =>
     r("mission", l, v, o, GRILLE_DGFIP, "dgfip"),

@@ -18,7 +18,7 @@ import { TAILLE_MAX_OCTETS, nomDeStockage, tailleLisible } from "@/lib/portail/f
 type Resultat = { ok: true; message?: string } | { ok: false; erreur: string };
 
 const aujourdHui = () => new Date().toISOString().slice(0, 10);
-// Rafraîchit toute la mission : l'onglet Pièces comme l'ancienne étape de collecte.
+// Rafraîchit toute la mission : l'étape Pièces comme l'ancienne étape de collecte.
 const rafraichir = (missionId: string) => revalidatePath(`/admin/missions/${missionId}`, "layout");
 
 const pieceDeLaMission = async (missionId: string, documentId: string) => {

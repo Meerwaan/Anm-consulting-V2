@@ -752,16 +752,21 @@ export const analyserSalaries = (agents: Agent[], paie: Paie[], aujourdHui: stri
     }
   }
   // Effectif : la liste des salariés présents dans le mois, rapprochée de l'effectif de la paie.
+  // Une seule alerte, qui cite les mois concernés.
   if (salaries.some((a) => a.date_entree)) {
-    for (const b of paie) {
-      if (b.effectif === null) continue;
-      const debut = `${cleMois(b.mois)}-01`;
-      const fin = ajouterMois(debut, 1);
-      const n = salaries.filter((a) => a.date_entree && a.date_entree < fin && (!a.date_sortie || a.date_sortie >= debut)).length;
-      if (n !== b.effectif) {
-        alertes.push({ code: "effectif_liste_paie", niveau: "a_verifier", grille: "urssaf",
-          texte: `${moisLisible(cleMois(b.mois))} : ${n} salariés présents dans la liste, ${b.effectif} dans la paie. La liste doit être complète pour que le registre et la paie concordent.` });
-      }
+    const ecarts = paie
+      .filter((b) => b.effectif !== null)
+      .map((b) => {
+        const debut = `${cleMois(b.mois)}-01`;
+        const fin = ajouterMois(debut, 1);
+        const n = salaries.filter((a) => a.date_entree && a.date_entree < fin && (!a.date_sortie || a.date_sortie >= debut)).length;
+        return { mois: cleMois(b.mois), liste: n, paie: b.effectif! };
+      })
+      .filter((x) => x.liste !== x.paie);
+    if (ecarts.length) {
+      const detail = ecarts.map((x) => `${moisLisible(x.mois)} : ${x.liste} dans la liste, ${x.paie} dans la paie`).join(" ; ");
+      alertes.push({ code: "effectif_liste_paie", niveau: "a_verifier", grille: "urssaf",
+        texte: `L’effectif de la liste des salariés ne correspond pas à celui de la paie (${detail}). La liste doit reprendre tout le registre du personnel.` });
     }
   }
   return alertes;

@@ -11,7 +11,7 @@ import { enregistrerNonConformite, supprimerNonConformite } from "@/app/admin/mi
  *
  * Chaque anomalie suit la chaîne de Sofia : constat → risque → action corrective →
  * justificatif à produire → responsable → échéance → contrôle de régularisation.
- * C'est aussi l'outil que l'entreprise garde après l'audit (export dans l'onglet Rapport).
+ * C'est aussi l'outil que l'entreprise garde après l'audit (export depuis le plan d'actions).
  */
 
 const STATUTS = [
