@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { DownloadSimple, FilePdf } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, DownloadSimple, FilePdf } from "@phosphor-icons/react/dist/ssr";
 import TexteRapport from "@/components/rapport/TexteRapport";
 import EmettreRapport from "@/components/rapport/EmettreRapport";
 import Link from "next/link";
@@ -47,10 +47,13 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
         {r.manques.length ? (
           <>
             <ul className="flex flex-col divide-y divide-filet border-y border-filet">
-              {r.manques.map((m) => (
-                <li key={m} className="flex gap-3 py-3 text-meta text-encre">
-                  <span className="mt-[7px] size-2 shrink-0 rounded-full bg-majeur" aria-hidden />
-                  {m}
+              {r.aFaire.map((m) => (
+                <li key={m.texte}>
+                  <Link href={`/admin/missions/${id}/${m.lien}`} className="flex min-h-12 items-center gap-3 py-2 text-meta text-encre transition-colors hover:text-vert">
+                    <span className="size-2 shrink-0 rounded-full bg-majeur" aria-hidden />
+                    <span className="flex-1">{m.texte}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-note text-vert">Y aller <ArrowRight size={14} aria-hidden /></span>
+                  </Link>
                 </li>
               ))}
             </ul>

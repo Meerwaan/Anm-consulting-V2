@@ -2,27 +2,31 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
-import { lireMission } from "@/lib/portail/mission";
-import MenuMission from "@/components/portail/MenuMission";
+import { lireMission, lireValiditePieces } from "@/lib/portail/mission";
+import { lireGrilles } from "@/lib/grilles/lecture";
+import { lireDonneesST } from "@/lib/sous-traitance/lecture";
+import { avancementMission } from "@/lib/modules/avancement";
 import CadreMission from "@/components/portail/CadreMission";
 
 /**
- * Une mission : la barre latérale à gauche (le client, puis les étapes de l'audit dans l'ordre),
- * le travail à droite. Demande de Sofia du 21/09/2026.
+ * Une mission : la barre latérale à gauche (le client, puis les étapes de l'audit dans l'ordre,
+ * chacune avec son avancement), le travail à droite. Demande de Sofia du 21/09/2026.
  */
 export default async function LayoutMission({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
   await exigerRole("consultant");
   const { id } = await params;
   const supabase = await createClient();
-  const [mission, sts, ouvertes] = await Promise.all([
+  const [mission, d, g, pieces, versions] = await Promise.all([
     lireMission(id),
-    supabase.from("st_sous_traitants").select("id, raison_sociale, rang").eq("mission_id", id).order("rang").order("raison_sociale"),
-    supabase.from("non_conformites").select("id", { count: "exact", head: true }).eq("mission_id", id).neq("statut", "regularise"),
+    lireDonneesST(id),
+    lireGrilles(id),
+    lireValiditePieces(id),
+    supabase.from("reports").select("version").eq("mission_id", id).order("generated_at", { ascending: false }),
   ]);
   if (!mission) notFound();
 
   const entete = (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <Link href="/admin" className="flex min-h-11 w-fit items-center text-meta text-encre-2 underline-offset-4 hover:text-vert hover:underline">
         ← Toutes les missions
       </Link>
@@ -40,13 +44,9 @@ export default async function LayoutMission({ children, params }: { children: Re
   return (
     <CadreMission
       entete={entete}
-      menu={
-        <MenuMission
-          missionId={id}
-          sousTraitants={((sts.data ?? []) as { id: string; raison_sociale: string; rang: number }[]).map((s) => ({ id: s.id, nom: s.raison_sociale, rang: s.rang }))}
-          actionsOuvertes={ouvertes.count ?? 0}
-        />
-      }
+      missionId={id}
+      sousTraitants={d.sousTraitants.map((s) => ({ id: s.id, nom: s.raison_sociale, rang: s.rang }))}
+      avancement={avancementMission(d, g, pieces, ((versions.data ?? []) as { version: string }[]).map((v) => v.version))}
     >
       {children}
     </CadreMission>
