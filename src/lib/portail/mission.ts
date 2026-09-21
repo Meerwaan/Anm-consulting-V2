@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type {
-  ActionPlan, AvancementEtape, Constat, LigneRapprochement, Mission, PointDeControle,
+  ActionPlan, AvancementEtape, Constat, FichierPiece, LigneRapprochement, Mission, PointDeControle,
   HeuresAgent, ReponseEntretien, ResultatDePoint, ValiditePiece,
 } from "@/lib/types";
 
@@ -150,10 +150,22 @@ export const lireValiditePieces = async (missionId: string): Promise<ValiditePie
   const supabase = await createClient();
   const { data } = await supabase
     .from("mission_documents_validite")
-    .select("id, name, category, required, received, document_date, validite_nature, validite_note, validite_jours, echeance, etat")
+    .select("id, name, category, required, received, received_on, document_date, validite_nature, validite_note, validite_jours, echeance, etat, nb_fichiers, ordre")
     .eq("mission_id", missionId)
-    .order("echeance", { nullsFirst: false });
+    .order("ordre")
+    .order("name");
   return (data as ValiditePiece[] | null) ?? [];
+};
+
+/** Fichiers déposés sur la mission, du plus ancien au plus récent. */
+export const lireFichiersPieces = async (missionId: string): Promise<FichierPiece[]> => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_document_files")
+    .select("id, document_id, file_name, file_size, content_type, uploaded_at")
+    .eq("mission_id", missionId)
+    .order("uploaded_at");
+  return (data as FichierPiece[] | null) ?? [];
 };
 
 /** Contrôles croisés saisis sur la mission. */
