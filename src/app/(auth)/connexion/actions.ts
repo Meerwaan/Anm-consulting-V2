@@ -39,9 +39,19 @@ export const seConnecter = async (_etat: EtatConnexion, formData: FormData): Pro
     if (error?.status === 429) {
       return { erreur: "Trop de tentatives en peu de temps. Attends quelques minutes avant de réessayer.", email };
     }
+    // Supabase ne renvoie « email non confirmé » qu'une fois le mot de passe reconnu :
+    // le dire n'apprend rien à quelqu'un qui ne connaît pas déjà le mot de passe.
+    if (error?.code === "email_not_confirmed") {
+      return { erreur: "Ce compte n’est pas encore activé. Demande à Merwan de l’activer, ton mot de passe est le bon.", email };
+    }
     if (error && error.status && error.status >= 500) {
       console.error("[connexion] échec serveur", { status: error.status, message: error.message });
       return { erreur: "Le service de connexion ne répond pas. Réessaie dans un instant.", email };
+    }
+    // Tout autre refus que les identifiants invalides est tracé : c'est ce qui a manqué
+    // le 21/09 pour voir qu'un compte n'était simplement pas confirmé.
+    if (error?.code && error.code !== "invalid_credentials") {
+      console.error("[connexion] refus", { code: error.code, status: error.status });
     }
     return { erreur: "Adresse ou mot de passe incorrect.", email };
   }

@@ -2,7 +2,11 @@
 //
 //   node --env-file=.env.local scripts/compte.mjs creer <email> "<Prénom Nom>"
 //   node --env-file=.env.local scripts/compte.mjs reinitialiser <email>
+//   node --env-file=.env.local scripts/compte.mjs confirmer <email>
 //
+// `confirmer` active un compte créé à la main dans le dashboard sans « Auto Confirm User » :
+// sans confirmation, Supabase refuse toute connexion, même avec le bon mot de passe.
+// `reinitialiser` confirme aussi l'adresse, pour la même raison.
 // `creer` pose une invitation « consultant » puis crée le compte, déjà confirmé : le trigger
 // handle_new_user lit l'invitation et donne le rôle. `reinitialiser` remplace le mot de passe.
 // Dans les deux cas le mot de passe provisoire s'affiche une seule fois ; la personne le change
@@ -37,7 +41,7 @@ const trouverUtilisateur = async (email) => {
 const [commande, emailBrut, nom] = process.argv.slice(2);
 const email = emailBrut?.trim().toLowerCase();
 if (!commande || !email) {
-  console.error("Usage : creer <email> \"<Prénom Nom>\" | reinitialiser <email>");
+  console.error("Usage : creer <email> \"<Prénom Nom>\" | reinitialiser <email> | confirmer <email>");
   process.exit(1);
 }
 
@@ -69,9 +73,22 @@ if (commande === "creer") {
     process.exit(1);
   }
   const motDePasse = motDePasseProvisoire();
-  const { error } = await admin.auth.admin.updateUserById(u.id, { password: motDePasse });
+  const { error } = await admin.auth.admin.updateUserById(u.id, { password: motDePasse, email_confirm: true });
   if (error) throw error;
   console.log(`Nouveau mot de passe provisoire pour ${email} : ${motDePasse}`);
+} else if (commande === "confirmer") {
+  const u = await trouverUtilisateur(email);
+  if (!u) {
+    console.error(`Aucun compte pour ${email}.`);
+    process.exit(1);
+  }
+  if (u.email_confirmed_at) {
+    console.log(`${email} était déjà confirmé.`);
+  } else {
+    const { error } = await admin.auth.admin.updateUserById(u.id, { email_confirm: true });
+    if (error) throw error;
+    console.log(`${email} est confirmé : la connexion par mot de passe est ouverte. Mot de passe inchangé.`);
+  }
 } else {
   console.error(`Commande inconnue : ${commande}`);
   process.exit(1);
