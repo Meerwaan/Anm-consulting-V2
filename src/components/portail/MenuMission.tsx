@@ -2,131 +2,80 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMenuReduit } from "./CadreMission";
+import { CheckCircle, Circle, CircleHalf } from "@phosphor-icons/react";
+import type { Avancement, CheminEtape } from "@/lib/modules/avancement";
+import { ETAPES, GROUPES, etapeCourante } from "./etapes";
 
 /**
- * La barre latérale d'une mission (demande de Sofia du 21/09/2026 : une barre à gauche plutôt
- * qu'un menu en haut). Les étapes suivent l'ordre d'un audit : réunir les pièces, saisir les
- * données, contrôler (DGFiP, URSSAF, CNAPS, dans l'ordre de sa lettre), puis conclure.
+ * Le menu d'une mission. Chaque étape dit où elle en est : cercle vide (à faire), demi-cercle
+ * (en cours), coche (faite), avec le détail en toutes lettres. Deux formes : la barre complète,
+ * et la colonne de numéros de l'iPad tenu droit (le bouton « Menu » ouvre alors la barre complète).
  */
 
-interface Etape {
-  n: number;
-  chemin: string;
-  libelle: string;
-  detail?: string;
-  /** Actif seulement sur ce chemin exact (la synthèse de la sous-traitance, pas ses sous-pages). */
-  exact?: boolean;
-}
-
-const GROUPES: { titre: string; etapes: Etape[] }[] = [
-  { titre: "Préparer", etapes: [{ n: 1, chemin: "pieces", libelle: "Pièces justificatives" }] },
-  {
-    titre: "Saisir",
-    etapes: [
-      { n: 2, chemin: "sous-traitance/heures", libelle: "Heures de l’entreprise", detail: "Vendues et payées" },
-      { n: 3, chemin: "sous-traitance", libelle: "Sous-traitance", exact: true },
-    ],
-  },
-  {
-    titre: "Contrôler",
-    etapes: [
-      { n: 4, chemin: "dgfip", libelle: "DGFiP", detail: "Factures" },
-      { n: 5, chemin: "urssaf", libelle: "URSSAF", detail: "Travail illégal, salariés" },
-      { n: 6, chemin: "cnaps", libelle: "CNAPS", detail: "Dracar Ultimate" },
-    ],
-  },
-  {
-    titre: "Conclure",
-    etapes: [
-      { n: 7, chemin: "actions", libelle: "Plan d’actions" },
-      { n: 8, chemin: "rapport", libelle: "Rapport" },
-    ],
-  },
-];
-
-const lien = (actif: boolean) =>
-  `flex min-h-11 items-center gap-3 rounded-[5px] px-3 py-2 text-meta transition-colors ${
-    actif ? "bg-menthe font-medium text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
-  }`;
-
-const MenuMission = ({
-  missionId,
-  sousTraitants,
-  actionsOuvertes,
-}: {
+export interface PropsMenu {
   missionId: string;
   sousTraitants: { id: string; nom: string; rang: number }[];
-  actionsOuvertes: number;
-}) => {
-  const chemin = usePathname();
-  const reduit = useMenuReduit();
-  const racine = `/admin/missions/${missionId}`;
-  const estActif = (e: Etape) => {
-    const href = `${racine}/${e.chemin}`;
-    if (e.chemin === "sous-traitance") return chemin === href || (chemin.startsWith(`${href}/`) && !chemin.startsWith(`${href}/heures`));
-    return chemin === href || chemin.startsWith(`${href}/`);
-  };
+  avancement: Record<CheminEtape, Avancement>;
+}
 
-  if (reduit) {
-    return (
-      <nav aria-label="Étapes de la mission">
-        <ul className="flex flex-col gap-1">
-          {GROUPES.flatMap((g) => g.etapes).map((e) => {
-            const actif = estActif(e);
-            return (
-              <li key={e.chemin}>
-                <Link
-                  href={`${racine}/${e.chemin}`}
-                  aria-current={actif ? "page" : undefined}
-                  aria-label={`${e.n}. ${e.libelle}`}
-                  title={e.libelle}
-                  className={`flex size-11 items-center justify-center rounded-[5px] font-mono text-meta tabular-nums transition-colors ${
-                    actif ? "bg-menthe font-medium text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
-                  }`}
-                >
-                  {e.n}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    );
-  }
+const LIBELLE_ETAT = { a_faire: "à faire", en_cours: "en cours", fait: "fait" } as const;
+
+const Marque = ({ etat }: { etat: Avancement["etat"] }) =>
+  etat === "fait" ? (
+    <CheckCircle size={18} weight="fill" className="shrink-0 text-vert" aria-hidden />
+  ) : etat === "en_cours" ? (
+    <CircleHalf size={18} weight="fill" className="shrink-0 text-majeur" aria-hidden />
+  ) : (
+    <Circle size={18} className="shrink-0 text-gris/60" aria-hidden />
+  );
+
+export const MenuComplet = ({ missionId, sousTraitants, avancement }: PropsMenu) => {
+  const chemin = usePathname();
+  const racine = `/admin/missions/${missionId}`;
+  const courante = etapeCourante(chemin, missionId);
 
   return (
-    <nav aria-label="Étapes de la mission" className="flex flex-col gap-5">
+    <nav aria-label="Étapes de la mission" className="flex flex-col gap-3">
       {GROUPES.map((g) => (
-        <div key={g.titre} className="flex flex-col gap-1">
-          <p className="etiquette px-3">{g.titre}</p>
+        <div key={g.titre} className="flex flex-col gap-0.5">
+          <p className="etiquette px-2.5 pb-0.5">{g.titre}</p>
           <ul className="flex flex-col gap-0.5">
             {g.etapes.map((e) => {
-              const actif = estActif(e);
+              const actif = courante?.chemin === e.chemin;
+              const a = avancement[e.chemin];
               return (
                 <li key={e.chemin}>
-                  <Link href={`${racine}/${e.chemin}`} aria-current={actif ? "page" : undefined} className={lien(actif)}>
-                    <span className="w-4 shrink-0 font-mono text-note text-gris tabular-nums">{e.n}</span>
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span>{e.libelle}</span>
-                      {e.detail ? <span className="text-note font-normal text-gris">{e.detail}</span> : null}
+                  <Link
+                    href={`${racine}/${e.chemin}`}
+                    aria-current={actif && chemin === `${racine}/${e.chemin}` ? "page" : undefined}
+                    className={`flex min-h-11 items-center gap-2.5 rounded-[5px] px-2.5 py-1 transition-colors ${
+                      actif ? "bg-menthe text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+                    }`}
+                  >
+                    <span className="w-3.5 shrink-0 font-mono text-note text-gris tabular-nums">{e.n}</span>
+                    <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                      <span className={`text-meta ${actif ? "font-medium" : ""}`}>{e.libelle}</span>
+                      <span className="truncate text-note text-gris">{a.detail}</span>
                     </span>
-                    {e.chemin === "actions" && actionsOuvertes ? (
-                      <span className="rounded-[4px] bg-critique px-1.5 py-0.5 text-note font-medium text-papier tabular-nums" title="Actions ouvertes">
-                        {actionsOuvertes}
-                      </span>
-                    ) : null}
+                    <Marque etat={a.etat} />
+                    <span className="sr-only">, {LIBELLE_ETAT[a.etat]}</span>
                   </Link>
-                  {e.chemin === "sous-traitance" && sousTraitants.length ? (
-                    <ul className="ml-7 mt-0.5 flex flex-col gap-0.5 border-l border-filet pl-2">
+                  {e.chemin === "sous-traitance" && actif && sousTraitants.length ? (
+                    <ul className="ml-[1.4rem] mt-0.5 flex flex-col border-l border-filet pl-1.5">
                       {sousTraitants.map((s) => {
                         const href = `${racine}/sous-traitance/${s.id}`;
                         const ici = chemin === href;
                         return (
                           <li key={s.id}>
-                            <Link href={href} aria-current={ici ? "page" : undefined} className={`${lien(ici)} min-h-10 py-1.5`}>
+                            <Link
+                              href={href}
+                              aria-current={ici ? "page" : undefined}
+                              className={`flex min-h-10 items-center gap-2 rounded-[5px] px-2.5 text-meta transition-colors ${
+                                ici ? "font-medium text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+                              }`}
+                            >
                               <span className="min-w-0 flex-1 truncate">{s.nom}</span>
-                              {s.rang > 1 ? <span className="text-note text-gris">rang {s.rang}</span> : null}
+                              {s.rang > 1 ? <span className="text-note font-normal text-gris">rang {s.rang}</span> : null}
                             </Link>
                           </li>
                         );
@@ -143,4 +92,32 @@ const MenuMission = ({
   );
 };
 
-export default MenuMission;
+/** La colonne de numéros : le numéro de l'étape, et sa marque d'avancement en dessous. */
+export const MenuRail = ({ missionId, avancement }: Pick<PropsMenu, "missionId" | "avancement">) => {
+  const chemin = usePathname();
+  const courante = etapeCourante(chemin, missionId);
+  return (
+    <nav aria-label="Étapes de la mission">
+      <ul className="flex flex-col gap-1">
+        {ETAPES.map((e) => {
+          const actif = courante?.chemin === e.chemin;
+          const a = avancement[e.chemin];
+          return (
+            <li key={e.chemin}>
+              <Link
+                href={`/admin/missions/${missionId}/${e.chemin}`}
+                aria-label={`${e.n}. ${e.libelle}, ${LIBELLE_ETAT[a.etat]}`}
+                className={`flex h-14 w-11 flex-col items-center justify-center gap-1 rounded-[5px] font-mono text-meta tabular-nums transition-colors ${
+                  actif ? "bg-menthe font-medium text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+                }`}
+              >
+                {e.n}
+                <Marque etat={a.etat} />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+};

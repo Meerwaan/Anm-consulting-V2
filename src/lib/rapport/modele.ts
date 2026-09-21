@@ -79,6 +79,8 @@ export interface ModeleRapport {
   documents: string[];
   /** Ce qu'il manque pour une version définitive. Vide = rapport complet. */
   manques: string[];
+  /** Les mêmes points, avec la page où chacun se règle (chemin relatif à la mission). */
+  aFaire: { texte: string; lien: string }[];
 }
 
 const minuscule = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
@@ -247,20 +249,22 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     (Object.keys(propositions) as CleTexte[]).map((k) => [k, g.textes[k] ? { texte: g.textes[k], valide: true } : { texte: propositions[k], valide: false }]),
   ) as ModeleRapport["textes"];
 
-  const manques: string[] = [];
-  if (!d.parametres.periode_debut || !d.parametres.periode_fin) manques.push("La période contrôlée n’est pas renseignée (étape 2, Heures de l’entreprise).");
-  if (ecart.lignes.length === 0) manques.push("Aucune heure vendue ni payée n’est saisie.");
-  if (ecart.moisIncomplets.length) manques.push(`${pluriel(ecart.moisIncomplets.length, "mois")} sans heures vendues ou sans heures payées.`);
-  if (!rapprochement.conclusion) manques.push("La conclusion du rapprochement des heures n’est pas choisie.");
+  const aFaire: { texte: string; lien: string }[] = [];
+  const manque = (texte: string, lien: string) => aFaire.push({ texte, lien });
+  if (!d.parametres.periode_debut || !d.parametres.periode_fin) manque("La période contrôlée n’est pas renseignée (étape 2, Heures de l’entreprise).", "sous-traitance/heures");
+  if (ecart.lignes.length === 0) manque("Aucune heure vendue ni payée n’est saisie.", "sous-traitance/heures");
+  if (ecart.moisIncomplets.length) manque(`${pluriel(ecart.moisIncomplets.length, "mois")} sans heures vendues ou sans heures payées.`, "sous-traitance/heures");
+  if (!rapprochement.conclusion) manque("La conclusion du rapprochement des heures n’est pas choisie.", "sous-traitance#conclusion-rp");
   for (const c of sousTraitants) {
-    if (!c.conclusions["st-conclusion"]) manques.push(`${c.dossier.st.raison_sociale} : conclusion non choisie.`);
-    if (c.repondues < c.totalQuestions) manques.push(`${c.dossier.st.raison_sociale} : ${c.totalQuestions - c.repondues} points de contrôle sans réponse.`);
+    if (!c.conclusions["st-conclusion"]) manque(`${c.dossier.st.raison_sociale} : conclusion non choisie.`, `sous-traitance/${c.dossier.st.id}?vue=conclusion`);
+    if (c.repondues < c.totalQuestions) manque(`${c.dossier.st.raison_sociale} : ${c.totalQuestions - c.repondues} points de contrôle sans réponse.`, `sous-traitance/${c.dossier.st.id}?vue=controle`);
   }
-  if (dracar.renseigne && !dracar.niveau) manques.push("CNAPS : niveau de conformité non choisi.");
-  if (urssaf.renseigne && !rpC("ur-conclusion")?.choix) manques.push("URSSAF : conclusion non choisie.");
-  if (dgfip.renseigne && !rpC("dg-risque")?.choix) manques.push("DGFiP : risque de facture fictive ou de complaisance non apprécié.");
-  for (const k of CLES_TEXTES) if (!textes[k].valide) manques.push(`Texte « ${TITRES_TEXTES[k]} » : proposition de l’outil pas encore relue et validée.`);
+  if (dracar.renseigne && !dracar.niveau) manque("CNAPS : niveau de conformité non choisi.", "cnaps#synthese");
+  if (urssaf.renseigne && !rpC("ur-conclusion")?.choix) manque("URSSAF : conclusion non choisie.", "urssaf#conclusion");
+  if (dgfip.renseigne && !rpC("dg-risque")?.choix) manque("DGFiP : risque de facture fictive ou de complaisance non apprécié.", "dgfip#conclusion");
+  for (const k of CLES_TEXTES) if (!textes[k].valide) manque(`Texte « ${TITRES_TEXTES[k]} » : proposition de l’outil pas encore relue et validée.`, "rapport#textes");
 
+  const manques = aFaire.map((x) => x.texte);
   return {
     mission: m,
     periode: { debut: d.parametres.periode_debut, fin: d.parametres.periode_fin },
@@ -280,6 +284,7 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     textes,
     documents,
     manques,
+    aFaire,
   };
 };
 

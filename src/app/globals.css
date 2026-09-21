@@ -276,3 +276,9 @@ input[type="range"].curseur-plage::-moz-range-thumb {
     animation: none;
   }
 }
+
+/* Un lien vers une partie de page (rapport › « Y aller ») ne colle pas le titre au bord de l'écran. */
+h3[id],
+section[id] {
+  scroll-margin-top: 1.5rem;
+}

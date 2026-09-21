@@ -57,7 +57,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
         <li className="bg-papier">
           <Link href={`/admin/missions/${id}/sous-traitance/heures`} className="flex min-h-20 items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-fond">
             <span className="flex flex-col gap-1">
-              <span className="text-note text-gris">Étape 1</span>
+              <span className="text-note text-gris">D’abord · étape 2 de la mission</span>
               <span className="text-corps font-medium text-encre">Heures de l’entreprise</span>
               <span className="text-meta text-encre-2">
                 {heuresSaisies ? `${d.ventes.length} vente${d.ventes.length > 1 ? "s" : ""} · ${d.paie.length} mois de paie` : "Ventes et paie à saisir"}
@@ -69,7 +69,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
         <li className="bg-papier">
           <a href="#sous-traitants" className="flex min-h-20 items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-fond">
             <span className="flex flex-col gap-1">
-              <span className="text-note text-gris">Étape 2</span>
+              <span className="text-note text-gris">Ensuite · sur cette page</span>
               <span className="text-corps font-medium text-encre">Dossier de chaque sous-traitant</span>
               <span className="text-meta text-encre-2">
                 {d.sousTraitants.length
