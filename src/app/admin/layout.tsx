@@ -5,23 +5,26 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await exigerRole("consultant");
 
   return (
-    <>
-      <header className="border-b border-[var(--anm-hairline)] bg-[var(--anm-paper)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
-          <Link href="/admin" className="font-semibold">
-            ANM Consulting <span className="font-mono text-xs text-[var(--anm-muted)]">espace de travail</span>
+    <div className="min-h-dvh bg-fond">
+      <header className="border-b border-filet bg-papier">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 md:px-8">
+          <Link href="/admin" className="flex min-h-12 items-baseline gap-3 py-3">
+            <span className="font-display text-t4 text-encre">ANM Consulting</span>
+            <span className="hidden text-meta text-gris sm:inline">Espace de travail</span>
           </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-[var(--anm-muted)]">{session.profil?.full_name ?? session.email}</span>
+          <nav className="flex items-center gap-1 text-meta">
+            <Link href="/admin/compte" className="flex min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline">
+              {session.profil?.full_name ?? "Mon compte"}
+            </Link>
             <form action="/auth/deconnexion" method="post">
-              <button type="submit" className="underline hover:text-[var(--anm-green)]">
+              <button type="submit" className="flex min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline">
                 Déconnexion
               </button>
             </form>
-          </div>
+          </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-8">{children}</main>
-    </>
+      <main className="mx-auto max-w-7xl px-5 py-8 md:px-8">{children}</main>
+    </div>
   );
 }

@@ -1,54 +1,56 @@
 "use server";
 
-import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { accueilDuRole } from "@/lib/supabase/session";
+import type { Role } from "@/lib/types";
 
 export interface EtatConnexion {
-  message: string | null;
   erreur: string | null;
+  email: string;
 }
 
 /**
- * Envoie un lien magique.
+ * Connexion par adresse et mot de passe.
  *
- * La réponse est volontairement identique que l'adresse soit connue ou non :
- * un message différent permettrait d'énumérer les comptes existants. Créer un
- * compte ne donne aucun droit — sans invitation, le profil naît « client » sans
- * organisation et la RLS ne renvoie rien (migration 0008).
+ * Le lien magique a été abandonné le 21/09/2026 : sans domaine d'envoi, le serveur
+ * d'email de Supabase ne délivre qu'aux membres de l'équipe du projet, et sur iPad un
+ * lien ouvert depuis l'app Gmail atterrit dans son navigateur intégré, pas dans Safari.
+ * Le mot de passe, retenu par le trousseau iCloud, ne dépend d'aucun email.
+ *
+ * Le message d'échec est le même que l'adresse existe ou non : un message différent
+ * permettrait de savoir quels comptes existent.
  */
-export const envoyerLienMagique = async (
-  _etat: EtatConnexion,
-  formData: FormData,
-): Promise<EtatConnexion> => {
+export const seConnecter = async (_etat: EtatConnexion, formData: FormData): Promise<EtatConnexion> => {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return { message: null, erreur: "Cette adresse email n'est pas valide." };
-  }
+  const motDePasse = String(formData.get("mot_de_passe") ?? "");
 
-  const enTetes = await headers();
-  const origine =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    `https://${enTetes.get("x-forwarded-host") ?? enTetes.get("host") ?? "localhost:3000"}`;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    return { erreur: "Cette adresse email n’est pas valide.", email };
+  }
+  if (!motDePasse) {
+    return { erreur: "Saisis ton mot de passe.", email };
+  }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: `${origine}/auth/confirm` },
-  });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: motDePasse });
 
-  if (error) {
-    // Une limite d'envoi est la seule erreur qu'il est utile de montrer.
-    const trop = error.status === 429;
-    return {
-      message: null,
-      erreur: trop
-        ? "Trop de demandes en peu de temps. Réessaie dans quelques minutes."
-        : "L'envoi a échoué. Réessaie dans un instant.",
-    };
+  if (error || !data.user) {
+    if (error?.status === 429) {
+      return { erreur: "Trop de tentatives en peu de temps. Attends quelques minutes avant de réessayer.", email };
+    }
+    if (error && error.status && error.status >= 500) {
+      console.error("[connexion] échec serveur", { status: error.status, message: error.message });
+      return { erreur: "Le service de connexion ne répond pas. Réessaie dans un instant.", email };
+    }
+    return { erreur: "Adresse ou mot de passe incorrect.", email };
   }
 
-  return {
-    message: `Si un accès existe pour ${email}, le lien de connexion vient d'y être envoyé. Il est valable une heure.`,
-    erreur: null,
-  };
+  const { data: profil } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .maybeSingle<{ role: Role }>();
+
+  redirect(accueilDuRole(profil?.role));
 };
