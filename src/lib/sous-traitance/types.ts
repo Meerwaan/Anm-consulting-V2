@@ -9,6 +9,9 @@ export interface ParametresST {
   taux_horaire_vendu: number | null;
   /** Durée mensuelle d'un temps plein (151,67 h par défaut). */
   heures_mensuelles_etp: number;
+  /** Coût de revient horaire de référence de la branche (€ HT), saisi avec sa source. */
+  cout_revient_horaire?: number | null;
+  cout_revient_source?: string | null;
 }
 
 /** A — une ligne de vente du donneur d'ordre. */
@@ -48,6 +51,9 @@ export interface SousTraitant {
   dirigeant: string | null;
   activite: string | null;
   debut_relation: string | null;
+  /** Conclusion du contrat : point de départ de l'échéancier de vigilance. */
+  date_conclusion_contrat: string | null;
+  date_fin_contrat: string | null;
   contrat_ref: string | null;
   montant_contrat_ht: number | null;
   rang: 1 | 2;
@@ -111,5 +117,19 @@ export interface Agent {
   planning: Verif | null;
   carte_fin: string | null;
   affecte_mission: Verif | null;
+  /** Identité (Sofia, 21/09/2026) : pièce, fin de validité, autorisation de travail. */
+  piece_identite?: "cni" | "passeport" | "titre_sejour" | "autre" | null;
+  piece_fin?: string | null;
+  autorisation_travail?: Verif | null;
+  titre_authentifie?: Verif | null;
+  /** Salariés de l'entreprise auditée (module URSSAF). */
+  type_contrat?: string | null;
+  date_entree?: string | null;
+  date_sortie?: string | null;
+  date_dpae?: string | null;
+  contrat_signe?: Verif | null;
+  registre?: Verif | null;
+  visite_medicale?: string | null;
+  visite_prochaine?: string | null;
   note: string | null;
 }

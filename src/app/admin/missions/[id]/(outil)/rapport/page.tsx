@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { DownloadSimple, FilePdf } from "@phosphor-icons/react/dist/ssr";
 import TexteRapport from "@/components/rapport/TexteRapport";
 import EmettreRapport from "@/components/rapport/EmettreRapport";
-import SuiviActions from "@/components/grilles/SuiviActions";
+import Link from "next/link";
 import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 import { chargerRapport } from "@/lib/rapport/charger";
@@ -36,8 +36,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
       <div className="flex flex-col gap-3">
         <h2 className="font-display text-t3 text-encre">Rapport</h2>
         <p className="max-w-2xl text-corps text-encre-2">
-          Le rapport se construit tout seul à partir de ce que tu as saisi et conclu. Ici, tu relis les textes, tu suis les actions
-          correctives, et tu émets la version qui part chez le client.
+          Le rapport se construit tout seul à partir de ce que tu as saisi et conclu. Ici, tu relis les textes et tu émets la version qui part chez le client.
         </p>
       </div>
 
@@ -112,31 +111,14 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
         ))}
       </section>
 
-      <section id="actions" aria-labelledby="titre-actions" className="flex scroll-mt-6 flex-col gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h3 id="titre-actions" className="font-display text-t4 text-encre">
-              Suivi des anomalies et actions correctives
-              {actionsOuvertes ? <span className="text-critique"> · {actionsOuvertes} ouverte{actionsOuvertes > 1 ? "s" : ""}</span> : null}
-            </h3>
-            <p className="mt-1 max-w-2xl text-meta text-encre-2">
-              Constat, risque, action corrective, justificatif, responsable, échéance, contrôle de régularisation. L’entreprise garde ce
-              tableau après l’audit.
-            </p>
-          </div>
-          <a
-            href={`/admin/missions/${id}/rapport/suivi`}
-            className="flex min-h-11 items-center gap-2 rounded-[5px] border border-filet px-4 text-meta text-encre-2 transition-colors hover:border-vert hover:text-vert"
-          >
-            <DownloadSimple size={16} aria-hidden /> Exporter pour Excel
-          </a>
-        </div>
-        <span id="non-conformites" />
-        <SuiviActions
-          missionId={id}
-          actions={g.nonConformites}
-          sousTraitants={r.sousTraitants.map((c) => ({ id: c.dossier.st.id, nom: c.dossier.st.raison_sociale }))}
-        />
+      <section aria-labelledby="titre-actions" className="flex flex-col gap-3">
+        <h3 id="titre-actions" className="font-display text-t4 text-encre">Plan d’actions</h3>
+        <p className="max-w-2xl text-meta text-encre-2">
+          {r.nonConformites.length
+            ? `${r.nonConformites.length} action${r.nonConformites.length > 1 ? "s" : ""} au rapport, dont ${actionsOuvertes} ouverte${actionsOuvertes > 1 ? "s" : ""}. `
+            : "Aucune action pour l’instant. "}
+          <Link href={`/admin/missions/${id}/actions`} className="text-vert underline underline-offset-4">Ouvrir le plan d’actions</Link>
+        </p>
       </section>
     </div>
   );

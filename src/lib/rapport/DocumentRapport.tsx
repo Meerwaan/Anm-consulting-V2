@@ -2,7 +2,7 @@ import path from "node:path";
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { fmtDate, fmtEuros, fmtHeures, fmtMois, fmtNombre, fmtPct } from "@/lib/sous-traitance/format";
 import { GRILLE_SOUS_TRAITANT } from "@/content/grilles";
-import { TITRES_TEXTES, type ModeleRapport } from "./modele";
+import { TITRES_TEXTES, type ChapitreModule, type ModeleRapport, type PointDefavorable } from "./modele";
 
 /**
  * Le rapport PDF, produit côté serveur : identique sur iPad, ordinateur et papier.
@@ -131,6 +131,60 @@ const Choix = ({ titre, valeur }: { titre: string; valeur: string | null }) => (
 
 const libelleReponse = (r: string, alerte: boolean) => (alerte ? "Constaté" : r === "non" ? "Non" : "À vérifier");
 
+const Points = ({ points }: { points: PointDefavorable[] }) =>
+  points.length === 0 ? (
+    <Text style={s.para}>Aucun point défavorable parmi ceux renseignés.</Text>
+  ) : (
+    <>
+      {points.map((p, i) => (
+        <View key={i} style={{ flexDirection: "row", borderBottomWidth: 0.5, borderBottomColor: C.filet, paddingVertical: 4 }} wrap={false}>
+          <Text style={{ width: 62, fontWeight: 500, color: p.reponse === "a_verifier" ? C.majeur : C.critique }}>{libelleReponse(p.reponse, p.alerte)}</Text>
+          <View style={{ flex: 1 }}>
+            <Text>{p.libelle} <Text style={{ color: C.gris }}>· {p.section}</Text></Text>
+            {p.observation ? <Text style={{ color: C.encre2 }}>{p.observation}</Text> : null}
+          </View>
+        </View>
+      ))}
+    </>
+  );
+
+const Module = ({ n, titre, intro, m, avant }: { n: string; titre: string; intro: string; m: ChapitreModule; avant?: React.ReactNode }) => (
+  <View break>
+    <Text style={s.etiquette}>{n}</Text>
+    <Text style={s.h2}>{titre}</Text>
+    <Text style={s.para}>{intro}</Text>
+    <Chiffres
+      items={[
+        { t: "Points contrôlés", v: `${m.bilan.controles} / ${m.bilan.total}` },
+        { t: "Conformes", v: String(m.bilan.conformes) },
+        { t: "Non-conformités", v: String(m.bilan.nonConformes), c: m.bilan.nonConformes ? C.critique : undefined },
+      ]}
+    />
+    {avant}
+    {m.alertes.length ? (
+      <>
+        <Text style={s.h3} minPresenceAhead={70}>Ce qui ressort des chiffres</Text>
+        <Alertes alertes={m.alertes} />
+      </>
+    ) : null}
+    <Text style={s.h3} minPresenceAhead={70}>Points défavorables ou à vérifier</Text>
+    <Points points={m.points} />
+    <Text style={s.h3} minPresenceAhead={70}>Conclusions</Text>
+    {m.conclusions.map((c) => (
+      <Choix key={c.titre} titre={c.titre} valeur={c.valeur} />
+    ))}
+    {m.synthese ? <><Text style={s.h3} minPresenceAhead={70}>Synthèse de l’auditrice</Text><Paragraphes texte={m.synthese} /></> : null}
+  </View>
+);
+
+const STATUT_ECHEANCE: Record<string, { t: string; c: string }> = {
+  fournie: { t: "à jour", c: C.mineur },
+  tardive: { t: "fournie en retard", c: C.majeur },
+  manquante: { t: "manquante", c: C.critique },
+  prochaine: { t: "prochaine échéance", c: C.encre },
+  a_venir: { t: "à venir", c: C.gris },
+};
+
 // ——— Le document ——————————————————————————————————————————————————————————————
 
 export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport; version: string; dateEmission: string }) => {
@@ -139,7 +193,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
   const entete = `${r.mission.client} · Rapport de contrôle`;
 
   return (
-    <Document title={`Rapport de contrôle — ${r.mission.client}`} author={`${r.mission.auditeur} — ANM Consulting`} language="fr">
+    <Document title={`Rapport de contrôle, ${r.mission.client}`} author={`${r.mission.auditeur}, ANM Consulting`} language="fr">
       {/* Page de garde */}
       <Page size="A4" style={[s.page, { paddingTop: 80 }]}>
         {brouillon ? <Text style={s.filigrane} fixed>Version de travail</Text> : null}
@@ -148,7 +202,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
         <Text style={[s.etiquette, { marginTop: 4 }]}>Audit et préparation aux contrôles · sécurité privée</Text>
         <View style={{ marginTop: 170 }}>
           <Text style={s.etiquette}>Rapport de contrôle</Text>
-          <Text style={[s.h1, { marginTop: 12 }]}>Sous-traitance, heures et vigilance</Text>
+          <Text style={[s.h1, { marginTop: 12 }]}>Sous-traitance, URSSAF, DGFiP et CNAPS</Text>
           <Text style={[s.h1, { color: C.vert, fontStyle: "italic", marginTop: 4 }]}>{r.mission.client}</Text>
         </View>
         <View style={{ marginTop: 40, borderTopWidth: 1.2, borderTopColor: C.encre }}>
@@ -258,11 +312,28 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
               />
               <Chiffres items={[{ t: "Heures facturées", v: fmtHeures(x.totalHeures) }, { t: "Facturé TTC", v: fmtEuros(x.totalTTC || x.totalHT) }, { t: "Payé", v: fmtEuros(x.totalPaye) }]} />
 
+              {x.echeancier ? (
+                <>
+                  <Text style={s.h3} minPresenceAhead={70}>Échéancier de vigilance</Text>
+                  <Text style={s.petit}>
+                    Contrat conclu le {fmtDate(x.echeancier.debut)}{x.echeancier.fin ? `, jusqu’au ${fmtDate(x.echeancier.fin)}` : ", sans date de fin"} : une attestation de moins de 6 mois est due à chaque échéance.
+                  </Text>
+                  <Tableau
+                    colonnes={[{ t: "Échéance", w: "30%" }, { t: "Situation", w: "35%" }, { t: "Attestation retenue", w: "35%" }]}
+                    lignes={x.echeancier.echeances.map((e) => [
+                      fmtDate(e.date),
+                      { t: STATUT_ECHEANCE[e.statut].t, c: STATUT_ECHEANCE[e.statut].c, b: e.statut === "manquante" },
+                      e.attestation?.date_delivrance ? `du ${fmtDate(e.attestation.date_delivrance)}` : "—",
+                    ])}
+                  />
+                </>
+              ) : null}
+
               {x.mois.length ? (
                 <>
                   <Text style={s.h3} minPresenceAhead={70}>Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?</Text>
                   <Tableau
-                    colonnes={[{ t: "Mois", w: "16%" }, { t: "Facturées", w: "14%" }, { t: "Attestation", w: "18%" }, { t: "Effectif", w: "11%" }, { t: "Capacité", w: "14%" }, { t: "Utilisée", w: "12%" }, { t: "Plafond SMIC", w: "15%" }]}
+                    colonnes={[{ t: "Mois", w: "16%" }, { t: "Facturées", w: "14%" }, { t: "Attestation", w: "18%" }, { t: "Effectif", w: "11%" }, { t: "Disponibles", w: "14%" }, { t: "Utilisée", w: "12%" }, { t: "Plafond SMIC", w: "15%" }]}
                     alignDroite={[1, 3, 4, 5, 6]}
                     lignes={x.mois.map((m) => [
                       fmtMois(m.mois),
@@ -325,10 +396,38 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           );
         })}
 
-        {/* 5. Dracar Ultimate */}
+        {/* 5. URSSAF */}
+        <Module
+          n="5"
+          titre="URSSAF · Travail dissimulé, prêt illicite, marchandage"
+          intro="L’entreprise contrôlée pour elle-même : dissimulation d’emploi salarié, dissimulation d’activité, recours à des travailleurs présentés comme indépendants, prêt illicite de main-d’œuvre et marchandage. Les sous-traitants le sont chacun dans leur chapitre."
+          m={r.urssaf}
+          avant={r.sousTraitants.length ? (
+            <Tableau
+              colonnes={[{ t: "Sous-traitant", w: "24%" }, { t: "Travail dissimulé", w: "19%" }, { t: "Prêt illicite", w: "19%" }, { t: "Marchandage", w: "19%" }, { t: "Vigilance", w: "19%" }]}
+              lignes={r.sousTraitants.map((c) => [
+                { t: c.dossier.st.raison_sociale, b: true },
+                c.conclusions["st-td"] ?? "Non conclu",
+                c.conclusions["st-pi"] ?? "Non conclu",
+                c.conclusions["st-ma"] ?? "Non conclu",
+                c.conclusions["st-vigilance"] ?? "Non conclu",
+              ])}
+            />
+          ) : null}
+        />
+
+        {/* 6. DGFiP */}
+        <Module
+          n="6"
+          titre="DGFiP · Factures fictives et de complaisance"
+          intro="Chaque facture, émise aux clients ou reçue d’un sous-traitant, doit reposer sur une commande, une prestation réellement réalisée et un paiement au bon destinataire. Les écarts de ventes, de TVA et de paiements relevés plus haut en font partie."
+          m={r.dgfip}
+        />
+
+        {/* 7. CNAPS */}
         {r.dracar.renseigne || r.alertesCartes.length ? (
           <View break>
-            <Text style={s.etiquette}>5</Text>
+            <Text style={s.etiquette}>7</Text>
             <Text style={s.h2}>CNAPS · Dracar Ultimate</Text>
             <Chiffres
               items={[
@@ -363,9 +462,9 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           </View>
         ) : null}
 
-        {/* 6. Plan d'actions */}
+        {/* 8. Plan d'actions */}
         <View break>
-          <Text style={s.etiquette}>6</Text>
+          <Text style={s.etiquette}>8</Text>
           <Text style={s.h2}>Plan d’actions correctives</Text>
           <Text style={s.para}>Chaque anomalie : constat, risque, action corrective, justificatif à produire, responsable, échéance, contrôle de régularisation.</Text>
           {r.nonConformites.length === 0 ? (
@@ -401,9 +500,9 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           )}
         </View>
 
-        {/* 7. Conclusion et limites */}
+        {/* 9. Conclusion et limites */}
         <View break>
-          <Text style={s.etiquette}>7</Text>
+          <Text style={s.etiquette}>9</Text>
           <Text style={s.h2}>{TITRES_TEXTES.conclusion}</Text>
           <Paragraphes texte={r.textes.conclusion.texte} />
           <Text style={s.h3} minPresenceAhead={70}>{TITRES_TEXTES.limites}</Text>
@@ -416,7 +515,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           ) : null}
           <Text style={s.h3} minPresenceAhead={70}>Méthode de calcul</Text>
           <Text style={s.para}>
-            A − B : heures vendues moins heures payées sur les bulletins, mois par mois. Capacité d’un sous-traitant : effectif de l’attestation de vigilance en équivalent temps plein × heures mensuelles d’un temps plein. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance.
+            A − B : heures vendues moins heures payées sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance.
           </Text>
           <View style={{ marginTop: 28, borderTopWidth: 0.5, borderTopColor: C.filet, paddingTop: 10 }} wrap={false}>
             <Text style={{ fontFamily: "Instrument Serif", fontSize: 14 }}>{r.mission.auditeur}</Text>

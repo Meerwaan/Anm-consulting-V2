@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import FicheIdentite from "@/components/sous-traitance/FicheIdentite";
 import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
+import EcheancierVigilance from "@/components/sous-traitance/EcheancierVigilance";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
 import { SEUIL_VIGILANCE_HT, analyserSousTraitant } from "@/lib/sous-traitance/calculs";
 import { versLigneInitiale } from "@/lib/sous-traitance/tables";
@@ -51,6 +52,7 @@ export default async function DossierSousTraitantPage({
   const st = d.sousTraitants.find((s) => s.id === stId);
   if (!st) notFound();
   const x = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents);
+  const agentsST = d.agents.filter((a) => a.sous_traitant_id === st.id);
   const donneur = st.donneur_id ? d.sousTraitants.find((s) => s.id === st.donneur_id) : null;
   const facturesST = d.factures.filter((f) => f.sous_traitant_id === st.id);
   const optionsFactures = facturesST.map((f) => ({
@@ -142,7 +144,7 @@ export default async function DossierSousTraitantPage({
         <Titre
           n="Calcul"
           id="faisabilite"
-          sous={`Capacité = effectif de l’attestation × ${fmtNombre(d.parametres.heures_mensuelles_etp)} h. Plafond SMIC = rémunérations déclarées ÷ SMIC horaire. Des heures facturées au-delà ne peuvent pas être produites par les seuls salariés déclarés.`}
+          sous={`Heures disponibles = salariés en équivalent temps plein sur l’attestation de vigilance × ${fmtNombre(d.parametres.heures_mensuelles_etp)} h : c’est le nombre d’heures réelles dont disposait le sous-traitant pour répondre aux commandes. Des heures facturées au-delà ne peuvent pas être produites par ses seuls salariés déclarés. Plafond SMIC (indicatif) = rémunérations déclarées ÷ SMIC horaire.`}
         >
           Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?
         </Titre>
@@ -157,7 +159,7 @@ export default async function DossierSousTraitantPage({
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Heures facturées</th>
                   <th scope="col" className="py-2 pr-3 font-medium">Attestation</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Effectif</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">Capacité</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">Heures disponibles</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Utilisée</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">h / salarié</th>
                   <th scope="col" className="py-2 text-right font-medium">Plafond SMIC</th>
@@ -260,6 +262,7 @@ export default async function DossierSousTraitantPage({
         >
           Attestations de vigilance
         </Titre>
+        <EcheancierVigilance e={x.echeancier} />
         <TableauSaisie
           missionId={id}
           table="st_attestations"
@@ -314,6 +317,22 @@ export default async function DossierSousTraitantPage({
           titreVide="Aucun agent contrôlé."
           libelleAjout="Ajouter un agent"
         />
+        {agentsST.length ? (
+          <div className="flex flex-col gap-3">
+            <h4 className="text-corps font-medium text-encre">Identité et titre de travail</h4>
+            <p className="-mt-2 max-w-2xl text-meta text-encre-2">
+              Carte d’identité, passeport ou titre de séjour : sa fin de validité, et pour un titre de séjour, l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen).
+            </p>
+            <TableauSaisie
+              missionId={id}
+              table="identite_st"
+              sousTraitantId={st.id}
+              lignes={agentsST.map((a) => versLigneInitiale("identite_st", a as unknown as Record<string, unknown>))}
+              libelles={Object.fromEntries(agentsST.map((a) => [a.id, a.nom ?? "Agent sans nom"]))}
+              titreVide=""
+            />
+          </div>
+        ) : null}
       </section>
 
         </>
@@ -353,7 +372,7 @@ export default async function DossierSousTraitantPage({
         />
         <p className="text-meta text-encre-2">
           Une non-conformité à formaliser (nature, action corrective, délai) ?{" "}
-          <Link href={`/admin/missions/${id}/rapport#non-conformites`} className="font-medium text-vert underline underline-offset-4">
+          <Link href={`/admin/missions/${id}/actions`} className="font-medium text-vert underline underline-offset-4">
             Elle se note dans l’onglet Rapport.
           </Link>
         </p>

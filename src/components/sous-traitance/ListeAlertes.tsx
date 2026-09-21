@@ -40,7 +40,7 @@ const ListeAlertes = ({
             </span>
           </p>
           {missionId ? (
-            <CreerAction missionId={missionId} sousTraitantId={sousTraitantId} code={a.code} texte={a.texte} dejaCreee={existants.has(a.texte)} />
+            <CreerAction missionId={missionId} sousTraitantId={a.sousTraitantId ?? sousTraitantId} code={a.code} texte={a.texte} dejaCreee={existants.has(a.texte)} />
           ) : null}
         </li>
       ))}

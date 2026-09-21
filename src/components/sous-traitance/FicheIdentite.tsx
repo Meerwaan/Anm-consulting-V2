@@ -14,6 +14,8 @@ const CHAMPS = [
   { cle: "adresse", libelle: "Adresse", type: "text", large: true },
   { cle: "debut_relation", libelle: "Début de la relation", type: "date" },
   { cle: "contrat_ref", libelle: "Contrat n°", type: "text" },
+  { cle: "date_conclusion_contrat", libelle: "Contrat conclu le", type: "date" },
+  { cle: "date_fin_contrat", libelle: "Fin du contrat", type: "date" },
   { cle: "montant_contrat_ht", libelle: "Montant du contrat (€ HT)", type: "text", mode: "decimal" },
 ] as const;
 

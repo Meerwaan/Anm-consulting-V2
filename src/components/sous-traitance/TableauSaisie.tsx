@@ -81,6 +81,26 @@ const Cellule = ({
       </select>
     );
   }
+  if (colonne.type === "choix") {
+    return (
+      <select
+        aria-label={etiquette}
+        value={valeur}
+        onChange={(e) => {
+          onChange(e.target.value);
+          onValider();
+        }}
+        className={base}
+      >
+        <option value="">—</option>
+        {(colonne.options ?? []).map((o) => (
+          <option key={o.v} value={o.v}>
+            {o.l}
+          </option>
+        ))}
+      </select>
+    );
+  }
   if (colonne.type === "facture") {
     return (
       <select
@@ -233,7 +253,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
     );
   };
 
-  const largeurTotale = def.colonnes.reduce((t, c) => t + c.largeur, 0) + (complement ? 12 : 5);
+  const largeurTotale = def.colonnes.reduce((t, c) => t + c.largeur, 0) + (complement ? (def.largeurLigne ?? 12) : 5);
 
   return (
     <div className="grid min-w-0 gap-3">
@@ -246,7 +266,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
               <tr>
                 {complement ? (
                   <th scope="col" className="px-1 pb-1 text-left align-bottom text-note font-medium text-encre-2" style={{ minWidth: "9rem" }}>
-                    Vente
+                    {def.titreLigne ?? "Vente"}
                   </th>
                 ) : null}
                 {def.colonnes.map((c) => (
