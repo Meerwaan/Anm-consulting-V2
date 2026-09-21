@@ -194,7 +194,6 @@ export const demanderPiecesManquantes = async (formData: FormData): Promise<void
   const supabase = await createClient();
 
   const missionId = String(formData.get("missionId"));
-  const ordre = String(formData.get("ordre") ?? "3");
   const { data: utilisateur } = await supabase.auth.getUser();
 
   const [{ data: pieces }, { data: demandes }] = await Promise.all([
@@ -233,7 +232,7 @@ export const demanderPiecesManquantes = async (formData: FormData): Promise<void
     .update({ requested_on: new Date().toISOString().slice(0, 10) })
     .in("id", aDemander.map((p) => p.id));
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /**
@@ -246,7 +245,6 @@ export const definirDateDocument = async (formData: FormData): Promise<void> => 
 
   const missionId = String(formData.get("missionId"));
   const documentId = String(formData.get("documentId"));
-  const ordre = String(formData.get("ordre") ?? "3");
   const champ = String(formData.get("champ")) === "expire_le" ? "expire_le" : "document_date";
   const valeur = String(formData.get("valeur") ?? "").trim() || null;
 
@@ -267,7 +265,7 @@ export const definirDateDocument = async (formData: FormData): Promise<void> => 
       .neq("received", "oui");
   }
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /**

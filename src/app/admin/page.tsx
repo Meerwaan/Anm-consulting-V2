@@ -63,7 +63,7 @@ export default async function AdminPage() {
                     </td>
                     <td className="py-2.5 pr-4 font-mono text-xs text-[var(--anm-muted)]">{m.opened_on}</td>
                     <td className="py-2.5 text-right">
-                      <Link href={`/admin/missions/${m.id}/etapes/1`} className="underline hover:text-[var(--anm-green)]">
+                      <Link href={`/admin/missions/${m.id}`} className="underline hover:text-[var(--anm-green)]">
                         Ouvrir
                       </Link>
                     </td>

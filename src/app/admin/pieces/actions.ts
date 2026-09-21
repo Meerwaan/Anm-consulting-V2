@@ -18,7 +18,8 @@ import { TAILLE_MAX_OCTETS, nomDeStockage, tailleLisible } from "@/lib/portail/f
 type Resultat = { ok: true; message?: string } | { ok: false; erreur: string };
 
 const aujourdHui = () => new Date().toISOString().slice(0, 10);
-const cheminEtape = (missionId: string, ordre: string) => `/admin/missions/${missionId}/etapes/${ordre}`;
+// Rafraîchit toute la mission : l'onglet Pièces comme l'ancienne étape de collecte.
+const rafraichir = (missionId: string) => revalidatePath(`/admin/missions/${missionId}`, "layout");
 
 const pieceDeLaMission = async (missionId: string, documentId: string) => {
   const supabase = await createClient();
@@ -101,7 +102,7 @@ export const enregistrerFichier = async (entree: {
     .eq("mission_id", entree.missionId)
     .neq("received", "oui");
 
-  revalidatePath(cheminEtape(entree.missionId, entree.ordre));
+  rafraichir(entree.missionId);
   return { ok: true };
 };
 
@@ -144,7 +145,7 @@ export const supprimerFichier = async (entree: {
     message += " La pièce n’a plus de fichier : elle repasse en manquante.";
   }
 
-  revalidatePath(cheminEtape(entree.missionId, entree.ordre));
+  rafraichir(entree.missionId);
   return { ok: true, message };
 };
 
@@ -181,6 +182,6 @@ export const changerStatutPiece = async (entree: {
     .eq("mission_id", entree.missionId);
   if (error) return { ok: false, erreur: "Le statut n’a pas été enregistré. Réessaie." };
 
-  revalidatePath(cheminEtape(entree.missionId, entree.ordre));
+  rafraichir(entree.missionId);
   return { ok: true };
 };
