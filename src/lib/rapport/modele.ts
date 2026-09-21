@@ -11,7 +11,7 @@ import { bilanGrille, type BilanGrille } from "@/lib/modules/analyse";
 import type { DonneesGrilles, NonConformite } from "@/lib/grilles/lecture";
 import { analyserCartes, analyserEntreprise, analyserFacturation, analyserIdentites, analyserSalaries, analyserSousTraitant, boucler, calculerEcart, type Alerte, type Bouclage, type DossierSousTraitant, type EcartHeures } from "@/lib/sous-traitance/calculs";
 import type { DonneesST } from "@/lib/sous-traitance/lecture";
-import { fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
+import { fmtEuros, fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
 
 export const CLES_TEXTES = ["contexte", "synthese", "conclusion", "limites"] as const;
 export type CleTexte = (typeof CLES_TEXTES)[number];
@@ -72,6 +72,8 @@ export interface ModeleRapport {
   dracar: { renseigne: boolean; controles: number; conformes: number; nonConformes: number; aVerifier: number; points: PointDefavorable[]; niveau: string | null; actions: string | null; delai: string | null };
   urssaf: ChapitreModule;
   dgfip: ChapitreModule;
+  /** Coût de revient horaire de référence et sa source, tels que saisis. */
+  coutRevient: string | null;
   nonConformites: (NonConformite & { libelleNature: string; sousTraitant: string | null })[];
   textes: Record<CleTexte, { texte: string; valide: boolean }>;
   documents: string[];
@@ -246,7 +248,7 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
   ) as ModeleRapport["textes"];
 
   const manques: string[] = [];
-  if (!d.parametres.periode_debut || !d.parametres.periode_fin) manques.push("La période contrôlée n’est pas renseignée (Sous-traitance › Heures de l’entreprise).");
+  if (!d.parametres.periode_debut || !d.parametres.periode_fin) manques.push("La période contrôlée n’est pas renseignée (étape 2, Heures de l’entreprise).");
   if (ecart.lignes.length === 0) manques.push("Aucune heure vendue ni payée n’est saisie.");
   if (ecart.moisIncomplets.length) manques.push(`${pluriel(ecart.moisIncomplets.length, "mois")} sans heures vendues ou sans heures payées.`);
   if (!rapprochement.conclusion) manques.push("La conclusion du rapprochement des heures n’est pas choisie.");
@@ -271,6 +273,9 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     dracar,
     urssaf,
     dgfip,
+    coutRevient: d.parametres.cout_revient_horaire
+      ? `${fmtEuros(d.parametres.cout_revient_horaire)} HT${d.parametres.cout_revient_source ? ` (${d.parametres.cout_revient_source})` : ""}`
+      : null,
     nonConformites,
     textes,
     documents,

@@ -17,7 +17,9 @@ const CadreMission = ({ entete, menu, children }: { entete: React.ReactNode; men
   const [reduit, setReduit] = useState(false);
   useEffect(() => {
     try {
-      setReduit(localStorage.getItem(CLE) === "1");
+      const choix = localStorage.getItem(CLE);
+      // Sans choix enregistré, l'iPad tenu en portrait démarre avec la barre réduite.
+      setReduit(choix === null ? window.innerWidth < 1024 : choix === "1");
     } catch {}
   }, []);
   const basculer = () => {
@@ -33,10 +35,10 @@ const CadreMission = ({ entete, menu, children }: { entete: React.ReactNode; men
     <Reduit.Provider value={reduit}>
       <div
         className={`flex flex-col gap-8 md:grid md:items-start ${
-          reduit ? "md:grid-cols-[3.25rem_minmax(0,1fr)] md:gap-6" : "md:grid-cols-[13rem_minmax(0,1fr)] md:gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10"
+          reduit ? "md:grid-cols-[2.875rem_minmax(0,1fr)] md:gap-4" : "md:grid-cols-[13rem_minmax(0,1fr)] md:gap-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-10"
         }`}
       >
-        <aside className="flex flex-col gap-6 md:sticky md:top-6 md:max-h-[calc(100dvh-3rem)] md:overflow-y-auto md:border-r md:border-filet md:pr-3">
+        <aside className={`flex flex-col gap-6 md:sticky md:top-6 md:max-h-[calc(100dvh-3rem)] md:overflow-y-auto md:border-r md:border-filet ${reduit ? "md:pr-0.5" : "md:pr-3"}`}>
           <button
             type="button"
             onClick={basculer}

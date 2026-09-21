@@ -20,11 +20,11 @@ interface Etape {
 }
 
 const GROUPES: { titre: string; etapes: Etape[] }[] = [
-  { titre: "Préparer", etapes: [{ n: 1, chemin: "pieces", libelle: "Pièces du dossier" }] },
+  { titre: "Préparer", etapes: [{ n: 1, chemin: "pieces", libelle: "Pièces justificatives" }] },
   {
     titre: "Saisir",
     etapes: [
-      { n: 2, chemin: "sous-traitance/heures", libelle: "Heures vendues et payées" },
+      { n: 2, chemin: "sous-traitance/heures", libelle: "Heures de l’entreprise", detail: "Vendues et payées" },
       { n: 3, chemin: "sous-traitance", libelle: "Sous-traitance", exact: true },
     ],
   },
@@ -32,7 +32,7 @@ const GROUPES: { titre: string; etapes: Etape[] }[] = [
     titre: "Contrôler",
     etapes: [
       { n: 4, chemin: "dgfip", libelle: "DGFiP", detail: "Factures" },
-      { n: 5, chemin: "urssaf", libelle: "URSSAF", detail: "Travail illégal" },
+      { n: 5, chemin: "urssaf", libelle: "URSSAF", detail: "Travail illégal, salariés" },
       { n: 6, chemin: "cnaps", libelle: "CNAPS", detail: "Dracar Ultimate" },
     ],
   },

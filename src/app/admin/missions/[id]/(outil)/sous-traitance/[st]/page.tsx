@@ -152,7 +152,7 @@ export default async function DossierSousTraitantPage({
           <p className="text-meta text-encre-2">Ce calcul apparaît dès qu’une facture a un mois de prestation.</p>
         ) : (
           <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[46rem] border-collapse text-meta">
+            <table className="w-full min-w-[43rem] border-collapse text-meta">
               <thead>
                 <tr className="border-b-[1.5px] border-encre text-left text-note text-encre-2">
                   <th scope="col" className="py-2 pr-3 font-medium">Mois</th>
@@ -373,7 +373,7 @@ export default async function DossierSousTraitantPage({
         <p className="text-meta text-encre-2">
           Une non-conformité à formaliser (nature, action corrective, délai) ?{" "}
           <Link href={`/admin/missions/${id}/actions`} className="font-medium text-vert underline underline-offset-4">
-            Elle se note dans l’onglet Rapport.
+            Elle se note dans le plan d’actions.
           </Link>
         </p>
       </section>

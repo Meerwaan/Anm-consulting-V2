@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import FormulaireParametres from "@/components/sous-traitance/FormulaireParametres";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
@@ -25,9 +24,6 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
   return (
     <div className="flex flex-col gap-14">
       <div className="flex flex-col gap-3">
-        <Link href={`/admin/missions/${id}/sous-traitance`} className="flex min-h-11 w-fit items-center text-meta text-encre-2 underline-offset-4 hover:text-vert hover:underline">
-          ← Synthèse de la sous-traitance
-        </Link>
         <h2 className="font-display text-t3 text-encre">Heures de l’entreprise</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Les heures vendues aux clients (A) et les heures figurant sur les bulletins de paie (B). La différence, A − B, est le volume

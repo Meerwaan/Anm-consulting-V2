@@ -38,7 +38,7 @@ export interface EtatCreation {
 /**
  * Crée le client, puis la mission, puis ses repères (période contrôlée).
  * Le trigger `init_mission` pose le reste (liste des pièces, étapes).
- * La mission s'ouvre sur la sous-traitance, cœur du contrôle.
+ * La mission s'ouvre sur sa première étape, les pièces justificatives.
  */
 export const creerMission = async (_etat: EtatCreation, formData: FormData): Promise<EtatCreation> => {
   await exigerRole("consultant");
@@ -92,7 +92,7 @@ export const creerMission = async (_etat: EtatCreation, formData: FormData): Pro
   }
 
   revalidatePath("/admin");
-  redirect(`${chemin(mission.id)}/sous-traitance`);
+  redirect(`${chemin(mission.id)}/pieces`);
 };
 
 /** Résultat d'un point de contrôle. La gravité par défaut reprend le risque initial du référentiel. */
