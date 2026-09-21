@@ -15,7 +15,7 @@
  *
  * Fonctions pures, sans accès à la base : testées par scripts/tester-calculs-st.mjs.
  */
-import type { Attestation, FactureST, Paie, Paiement, ParametresST, Smic, SousTraitant, Vente } from "./types";
+import type { Agent, Attestation, FactureST, Paie, Paiement, ParametresST, Smic, SousTraitant, Vente } from "./types";
 
 // ——— Outils ————————————————————————————————————————————————————————————————
 
@@ -63,6 +63,8 @@ export interface LigneEcart {
   avecConversion: boolean;
   /** Des ventes du mois n'ont ni heures ni montant convertible. */
   ventesIncompletes: boolean;
+  /** Heures réalisées par les salariés (planning, pointage). */
+  realisees: number | null;
   /** B — heures figurant sur les bulletins de paie. */
   payees: number | null;
   effectif: number | null;
@@ -100,6 +102,7 @@ export const calculerEcart = (ventes: Vente[], paie: Paie[], p: ParametresST): E
       vendues,
       avecConversion: conv.some((c) => c.converties),
       ventesIncompletes: conv.some((c) => c.heures === null),
+      realisees: b?.heures_realisees ?? null,
       payees,
       effectif: b?.effectif ?? null,
       ecart,
@@ -171,11 +174,12 @@ export interface Alerte {
   niveau: NiveauAlerte;
   texte: string;
   /** Grille de Sofia dont l'indicateur est issu. */
-  grille: "02" | "03" | "04" | "05";
+  grille: "01" | "02" | "03" | "04" | "05" | "dgfip" | "urssaf";
 }
 
 export interface DossierSousTraitant {
   st: SousTraitant;
+  agents: Agent[];
   mois: MoisSousTraitant[];
   totalHeures: number;
   totalHT: number;
@@ -199,8 +203,10 @@ export const analyserSousTraitant = (
   paiements: Paiement[],
   p: ParametresST,
   smics: Smic[],
+  agents: Agent[] = [],
 ): DossierSousTraitant => {
   const at = attestations.filter((a) => a.sous_traitant_id === st.id);
+  const ag = agents.filter((a) => a.sous_traitant_id === st.id);
   const fa = factures.filter((f) => f.sous_traitant_id === st.id);
   const pa = paiements.filter((x) => x.sous_traitant_id === st.id);
   const alertes: Alerte[] = [];
@@ -316,8 +322,35 @@ export const analyserSousTraitant = (
       texte: `Paiement${x.montant !== null ? ` de ${eur(x.montant)}` : ""} versé sur un compte qui n’est pas au nom du sous-traitant.` });
   }
 
+  // Agents contrôlés un par un (grilles 02 §7, 03 §4, 01 §3).
+  for (const a of ag) {
+    const qui = a.nom?.trim() || "Un agent";
+    if (a.present_documents === "non") {
+      alertes.push({ code: "agent_hors_documents", niveau: "alerte", grille: "03",
+        texte: `${qui} travaille sur le marché mais n’apparaît pas dans les documents transmis par le sous-traitant.` });
+    }
+    if (a.carte_valide === "non") {
+      alertes.push({ code: "carte_non_valide", niveau: "alerte", grille: "02",
+        texte: `${qui} : carte professionnelle non valide.` });
+    }
+    if (a.dracar === "non") {
+      alertes.push({ code: "agent_hors_dracar", niveau: "alerte", grille: "02",
+        texte: `${qui} n’est pas rattaché dans Dracar Ultimate.` });
+    }
+    if (a.planning === "non") {
+      alertes.push({ code: "agent_hors_planning", niveau: "a_verifier", grille: "02",
+        texte: `${qui} n’apparaît pas sur le planning.` });
+    }
+  }
+  const effectifMax = Math.max(0, ...at.map((a) => a.effectif_etp ?? 0));
+  if (ag.length > 0 && at.some((a) => a.effectif_etp !== null) && ag.length > effectifMax) {
+    alertes.push({ code: "agents_superieurs_effectif", niveau: "alerte", grille: "03",
+      texte: `${ag.length} agents identifiés sur le marché pour un effectif déclaré de ${effectifMax} sur l’attestation.` });
+  }
+
   return {
     st,
+    agents: ag,
     mois,
     totalHeures: arrondi(somme(fa.map((f) => f.heures))),
     totalHT,
@@ -386,4 +419,97 @@ export const boucler = (ecart: EcartHeures, sousTraitants: SousTraitant[], factu
     totalExcedent,
     alertes,
   };
+};
+
+// ——— Ventes et paie du donneur d'ordre (objectif de l'audit, §1 et §2) —————————————————————
+
+/** Taux normal de TVA, celui des prestations de sécurité privée. */
+export const TAUX_TVA = 0.2;
+/** Tolérance d'arrondi, en euros, sur les montants. */
+const TOLERANCE_EUROS = 1;
+
+const refVente = (v: Vente) =>
+  [v.numero_facture ? `Facture ${v.numero_facture}` : "Une vente", v.client ? `(${v.client}, ${moisLisible(cleMois(v.mois))})` : `(${moisLisible(cleMois(v.mois))})`].join(" ");
+
+/**
+ * Contrôles DGFiP sur les ventes (bon de commande ↔ facture ↔ TVA ↔ règlement) et URSSAF
+ * sur la paie (heures réalisées ↔ heures payées ↔ masse salariale).
+ */
+export const analyserEntreprise = (ventes: Vente[], paie: Paie[], smics: Smic[]): { ventes: Alerte[]; paie: Alerte[] } => {
+  const av: Alerte[] = [];
+  for (const v of ventes) {
+    const ref = refVente(v);
+    if (!v.bon_commande && v.heures_commandees === null) {
+      av.push({ code: "vente_sans_commande", niveau: "a_verifier", grille: "dgfip",
+        texte: `${ref} : ni bon de commande ni heures commandées. Une facture doit pouvoir être rattachée à une commande.` });
+    }
+    if (v.heures_commandees !== null && v.heures_facturees !== null && v.heures_facturees > v.heures_commandees + 0.5) {
+      av.push({ code: "facture_au_dela_commande", niveau: "alerte", grille: "dgfip",
+        texte: `${ref} : ${h(v.heures_facturees)} facturées pour ${h(v.heures_commandees)} commandées.` });
+    }
+    if (v.montant_ht !== null && v.tva !== null && Math.abs(v.tva - v.montant_ht * TAUX_TVA) > TOLERANCE_EUROS) {
+      av.push({ code: "tva_incoherente", niveau: "a_verifier", grille: "dgfip",
+        texte: `${ref} : TVA de ${eur(v.tva)} pour ${eur(v.montant_ht)} HT, soit ${((v.tva / v.montant_ht) * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}\u00A0% au lieu de 20\u00A0%.` });
+    }
+    if (v.montant_ht !== null && v.tva !== null && v.montant_ttc !== null && Math.abs(v.montant_ht + v.tva - v.montant_ttc) > TOLERANCE_EUROS) {
+      av.push({ code: "ttc_incoherent", niveau: "alerte", grille: "dgfip",
+        texte: `${ref} : le TTC (${eur(v.montant_ttc)}) n’est pas égal au HT plus la TVA (${eur(v.montant_ht + v.tva)}).` });
+    }
+    const du = v.montant_ttc ?? (v.montant_ht !== null && v.tva !== null ? v.montant_ht + v.tva : null);
+    if (du !== null && v.montant_regle !== null) {
+      if (v.montant_regle > du + TOLERANCE_EUROS) {
+        av.push({ code: "vente_trop_reglee", niveau: "alerte", grille: "dgfip",
+          texte: `${ref} : ${eur(v.montant_regle)} encaissés pour ${eur(du)} facturés TTC.` });
+      } else if (v.montant_regle < du - TOLERANCE_EUROS) {
+        av.push({ code: "vente_partiellement_reglee", niveau: "a_verifier", grille: "dgfip",
+          texte: `${ref} : ${eur(v.montant_regle)} encaissés sur ${eur(du)} TTC.` });
+      }
+    }
+  }
+
+  const ap: Alerte[] = [];
+  for (const b of paie) {
+    const lib = moisLisible(cleMois(b.mois));
+    if (b.heures_realisees !== null && b.heures_payees !== null && b.heures_realisees > b.heures_payees + 0.5) {
+      ap.push({ code: "heures_non_payees", niveau: "alerte", grille: "urssaf",
+        texte: `${lib} : ${h(b.heures_realisees)} réalisées selon le planning ou le pointage, ${h(b.heures_payees)} payées sur les bulletins. ${h(b.heures_realisees - b.heures_payees)} n’apparaissent sur aucun bulletin.` });
+    }
+    if (b.masse_salariale !== null && b.heures_payees) {
+      const smic = smicA(smics, `${cleMois(b.mois)}-01`);
+      const coutHoraire = b.masse_salariale / b.heures_payees;
+      if (smic && coutHoraire < smic.taux_brut) {
+        ap.push({ code: "cout_horaire_sous_smic", niveau: "alerte", grille: "urssaf",
+          texte: `${lib} : masse salariale de ${eur(b.masse_salariale)} pour ${h(b.heures_payees)}, soit ${eur(coutHoraire)} de l’heure, sous le SMIC horaire (${eur(smic.taux_brut)}). Les heures ou la masse salariale déclarées sont à vérifier.` });
+      }
+    }
+  }
+  return { ventes: av, paie: ap };
+};
+
+// ——— Cartes professionnelles des agents de l'entreprise (CNAPS) ————————————————————————
+
+/** Délai d'alerte avant l'expiration d'une carte professionnelle. */
+export const ALERTE_CARTE_JOURS = 30;
+
+export const analyserCartes = (agents: Agent[], aujourdHui: string): Alerte[] => {
+  const alertes: Alerte[] = [];
+  const limite = new Date(`${aujourdHui}T12:00:00Z`);
+  limite.setUTCDate(limite.getUTCDate() + ALERTE_CARTE_JOURS);
+  const dans30 = limite.toISOString().slice(0, 10);
+  for (const a of agents.filter((x) => x.sous_traitant_id === null)) {
+    const qui = a.nom?.trim() || "Un agent";
+    const fin = a.carte_fin ? new Date(`${a.carte_fin}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" }) : null;
+    if (a.carte_fin && a.carte_fin < aujourdHui) {
+      alertes.push({ code: "carte_expiree", niveau: "alerte", grille: "01", texte: `${qui} : carte professionnelle expirée depuis le ${fin}.` });
+    } else if (a.carte_fin && a.carte_fin <= dans30) {
+      alertes.push({ code: "carte_bientot_expiree", niveau: "a_verifier", grille: "01", texte: `${qui} : carte professionnelle valable jusqu’au ${fin}, renouvellement à lancer.` });
+    }
+    if (!a.carte_fin) {
+      alertes.push({ code: "carte_sans_date", niveau: "a_verifier", grille: "01", texte: `${qui} : date de fin de validité de la carte non renseignée.` });
+    }
+    if (a.dracar === "non") alertes.push({ code: "agent_non_declare_dracar", niveau: "alerte", grille: "01", texte: `${qui} n’est pas déclaré dans Dracar Ultimate.` });
+    if (a.affecte_mission === "non") alertes.push({ code: "affectation_non_conforme", niveau: "alerte", grille: "01", texte: `${qui} : affectation non conforme à l’activité autorisée.` });
+    if (a.planning === "non") alertes.push({ code: "agent_absent_planning", niveau: "a_verifier", grille: "01", texte: `${qui} n’apparaît pas sur le planning.` });
+  }
+  return alertes;
 };

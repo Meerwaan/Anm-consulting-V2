@@ -31,37 +31,68 @@ const retour: Retour = (missionId, ordre, params) => {
   redirect(`${chemin(missionId)}/etapes/${ordre}${q ? `?${q}` : ""}`);
 };
 
+export interface EtatCreation {
+  erreur: string | null;
+}
+
 /**
- * Crée l'organisation cliente si besoin, puis la mission.
- * Le trigger `init_mission` fait le reste : modules, 15 étapes, 7 phases et la
- * checklist des pièces s'initialisent seuls selon le type de mission.
+ * Crée le client, puis la mission, puis ses repères (période contrôlée).
+ * Le trigger `init_mission` pose le reste (liste des pièces, étapes).
+ * La mission s'ouvre sur la sous-traitance, cœur du contrôle.
  */
-export const creerMission = async (formData: FormData): Promise<void> => {
+export const creerMission = async (_etat: EtatCreation, formData: FormData): Promise<EtatCreation> => {
   await exigerRole("consultant");
   const supabase = await createClient();
 
   const nomClient = String(formData.get("client") ?? "").trim();
   const reference = String(formData.get("reference") ?? "").trim();
+  const siren = String(formData.get("siren") ?? "").replace(/\s/g, "") || null;
   const type = String(formData.get("type") ?? "audit_360") as TypeMission;
   const effectif = Number(formData.get("effectif") ?? 0) || null;
-  const sites = Number(formData.get("sites") ?? 0) || null;
-  if (!nomClient || !reference) return;
+  const organisme = String(formData.get("organisme") ?? "").trim();
+  const echeance = String(formData.get("echeance") ?? "").trim() || null;
+  const debut = String(formData.get("periode_debut") ?? "").trim();
+  const fin = String(formData.get("periode_fin") ?? "").trim();
+
+  if (!nomClient) return { erreur: "Indique le nom du client." };
+  if (!reference) return { erreur: "Indique une référence de mission." };
+  if (siren && !/^\d{9}(\d{5})?$/.test(siren)) return { erreur: "Le SIREN compte 9 chiffres (14 pour un SIRET)." };
+  if (debut && fin && fin < debut) return { erreur: "La fin de la période est avant son début." };
 
   const { data: org, error: erreurOrg } = await supabase
     .from("organizations")
-    .insert({ name: nomClient, headcount: effectif, establishments: sites })
+    .insert({ name: nomClient, siren, headcount: effectif })
     .select("id")
     .single();
-  if (erreurOrg || !org) return;
+  if (erreurOrg || !org) return { erreur: "Le client n’a pas pu être créé. Réessaie." };
 
-  const { data: mission } = await supabase
+  const { data: mission, error: erreurMission } = await supabase
     .from("missions")
-    .insert({ org_id: org.id, reference, type })
+    .insert({
+      org_id: org.id,
+      reference,
+      type,
+      control_in_progress: Boolean(organisme),
+      control_body: organisme || null,
+      control_deadline: organisme ? echeance : null,
+    })
     .select("id")
     .single();
+  if (erreurMission || !mission) {
+    await supabase.from("organizations").delete().eq("id", org.id);
+    return { erreur: /duplicate|unique/i.test(erreurMission?.message ?? "") ? "Cette référence existe déjà." : "La mission n’a pas pu être créée. Réessaie." };
+  }
+
+  if (debut || fin) {
+    await supabase.from("st_parametres").insert({
+      mission_id: mission.id,
+      periode_debut: debut ? `${debut}-01` : null,
+      periode_fin: fin ? `${fin}-01` : null,
+    });
+  }
 
   revalidatePath("/admin");
-  if (mission) redirect(`${chemin(mission.id)}/etapes/1`);
+  redirect(`${chemin(mission.id)}/sous-traitance`);
 };
 
 /** Résultat d'un point de contrôle. La gravité par défaut reprend le risque initial du référentiel. */

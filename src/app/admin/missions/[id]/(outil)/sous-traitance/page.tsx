@@ -4,8 +4,11 @@ import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import AjoutSousTraitant from "@/components/sous-traitance/AjoutSousTraitant";
 import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
-import { analyserSousTraitant, boucler, calculerEcart } from "@/lib/sous-traitance/calculs";
+import { analyserEntreprise, analyserSousTraitant, boucler, calculerEcart } from "@/lib/sous-traitance/calculs";
 import { fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
+import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
+import { GRILLE_RAPPROCHEMENT, GRILLE_SOUS_TRAITANT } from "@/content/grilles";
+import { lireGrilles } from "@/lib/grilles/lecture";
 
 export const metadata: Metadata = { title: "Sous-traitance — ANM Consulting", robots: { index: false } };
 
@@ -16,11 +19,18 @@ export const metadata: Metadata = { title: "Sous-traitance — ANM Consulting", 
  */
 export default async function SousTraitancePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const d = await lireDonneesST(id);
+  const [d, g] = await Promise.all([lireDonneesST(id), lireGrilles(id)]);
   const ecart = calculerEcart(d.ventes, d.paie, d.parametres);
   const bouclage = boucler(ecart, d.sousTraitants, d.factures);
-  const dossiers = d.sousTraitants.map((s) => analyserSousTraitant(s, d.attestations, d.factures, d.paiements, d.parametres, d.smics));
-  const nbAlertes = bouclage.alertes.length;
+  const dossiers = d.sousTraitants.map((s) => analyserSousTraitant(s, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents));
+  const controles = analyserEntreprise(d.ventes, d.paie, d.smics);
+  const constats = g.nonConformites.map((n) => n.constat ?? "");
+  const groupes = [
+    { titre: "Rapprochement des heures", alertes: bouclage.alertes, vide: "Chaque mois complet est couvert par la paie et la sous-traitance facturée." },
+    { titre: "Ventes, factures, TVA et règlements (DGFiP)", alertes: controles.ventes, vide: "Aucune incohérence sur les ventes." },
+    { titre: "Heures réalisées, payées et masse salariale (URSSAF)", alertes: controles.paie, vide: "Aucune incohérence sur la paie." },
+  ];
+  const nbAlertes = groupes.reduce((n, x) => n + x.alertes.filter((a) => a.niveau === "alerte").length, 0);
   const heuresSaisies = d.ventes.length > 0 || d.paie.length > 0;
 
   const chiffres: [string, string, string?][] = [
@@ -90,11 +100,12 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
           </p>
         ) : (
           <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[40rem] border-collapse text-meta">
+            <table className="w-full min-w-[44rem] border-collapse text-meta">
               <thead>
                 <tr className="border-b-[1.5px] border-encre text-left text-note text-encre-2">
                   <th scope="col" className="py-2 pr-3 font-medium">Mois</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">A · Vendues</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">Réalisées</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">B · Payées</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">A − B</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Sous-traitants</th>
@@ -111,6 +122,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
                         {fmtHeures(l.vendues)}
                         {l.avecConversion ? <span className="block text-note text-gris">dont montants convertis</span> : null}
                       </td>
+                      <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.realisees)}</td>
                       <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.payees)}</td>
                       <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.ecart)}</td>
                       <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(b.documentees)}</td>
@@ -144,9 +156,32 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
         <h3 id="alertes" className="font-display text-t4 text-encre">
           Ce qui ressort{nbAlertes ? <span className="text-critique"> · {nbAlertes} alerte{nbAlertes > 1 ? "s" : ""}</span> : null}
         </h3>
-        <ListeAlertes
-          alertes={bouclage.alertes}
-          vide={heuresSaisies ? "Chaque mois complet est couvert par la paie et la sous-traitance facturée." : "Rien à signaler tant que les heures ne sont pas saisies."}
+        {heuresSaisies ? (
+          groupes.map((x) => (
+            <div key={x.titre} className="flex flex-col gap-3">
+              <h4 className="text-corps font-medium text-encre">{x.titre}</h4>
+              <ListeAlertes alertes={x.alertes} vide={x.vide} missionId={id} constatsExistants={constats} />
+            </div>
+          ))
+        ) : (
+          <p className="text-meta text-encre-2">Rien à signaler tant que les heures ne sont pas saisies.</p>
+        )}
+      </section>
+
+      <section aria-labelledby="conclusion-rp" className="flex flex-col gap-6">
+        <div>
+          <h3 id="conclusion-rp" className="font-display text-t4 text-encre">Ta conclusion sur le rapprochement</h3>
+          <p className="mt-1 max-w-2xl text-meta text-encre-2">
+            Ce que tu retiens de l’écart entre heures vendues et heures payées (grille 04). C’est ce qui figure au rapport.
+          </p>
+        </div>
+        <ConclusionsSaisie
+          missionId={id}
+          grille="rapprochement"
+          cible="mission"
+          conclusions={GRILLE_RAPPROCHEMENT.conclusions}
+          valeurs={g.conclusions}
+          reponses={g.reponses}
         />
       </section>
 
@@ -168,8 +203,13 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
                         {x.st.raison_sociale}
                         {x.st.rang === 2 ? <span className="ml-2 text-meta font-normal text-majeur">rang 2</span> : null}
                       </span>
+                      {g.conclusions[`st-conclusion|${x.st.id}`]?.choix ? (
+                        <span className="text-meta font-medium text-encre">{g.conclusions[`st-conclusion|${x.st.id}`]?.choix}</span>
+                      ) : null}
                       <span className="text-meta text-encre-2">
-                        {fmtHeures(x.totalHeures)} facturées · {(() => { const n = d.attestations.filter((a) => a.sous_traitant_id === x.st.id).length; return n === 0 ? "aucune attestation" : `${n} attestation${n > 1 ? "s" : ""}`; })()}
+                        {fmtHeures(x.totalHeures)} facturées · {(() => { const n = d.attestations.filter((a) => a.sous_traitant_id === x.st.id).length; return n === 0 ? "aucune attestation" : `${n} attestation${n > 1 ? "s" : ""}`; })()} · contrôle{" "}
+                        {GRILLE_SOUS_TRAITANT.sections.reduce((n, s) => n + s.items.filter((i) => g.reponses[`st|${x.st.id}|${i.code}`]?.reponse).length, 0)}&nbsp;/&nbsp;
+                        {GRILLE_SOUS_TRAITANT.sections.reduce((n, s) => n + s.items.length, 0)}
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-3 text-meta">

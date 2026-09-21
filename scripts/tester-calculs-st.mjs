@@ -86,3 +86,33 @@ test("bouclage : une sous-traitance facturée au-delà de l'écart est une alert
   assert.equal(b.totalReste, 500);
   assert.deepEqual(b.alertes.map((a) => a.code).sort(), ["ecart_non_explique", "sous_traitance_excedentaire"]);
 });
+
+test("agents : absent des documents, carte non valide, plus d'agents que l'effectif déclaré", () => {
+  const a = { id: "a", sous_traitant_id: "st1", date_delivrance: "2026-01-10", mois_reference: null, effectif_etp: 2, remunerations: null, siren_conforme: "oui", authentifiee: "oui", note: null };
+  const ag = (nom, extra = {}) => ({ id: nom, sous_traitant_id: "st1", nom, employeur: null, carte_numero: null, heures: null, present_documents: "oui", carte_valide: "oui", carte_activite: null, dracar: "oui", planning: "oui", note: null, ...extra });
+  const codes = analyserSousTraitant(st, [a], [], [], P, [], [ag("A"), ag("B", { present_documents: "non" }), ag("C", { carte_valide: "non" })]).alertes.map((x) => x.code);
+  for (const c of ["agent_hors_documents", "carte_non_valide", "agents_superieurs_effectif"]) assert.ok(codes.includes(c), c);
+});
+
+import { analyserEntreprise, analyserCartes } from "../src/lib/sous-traitance/calculs.ts";
+
+test("ventes : sans commande, au-delà de la commande, TVA, TTC, règlement", () => {
+  const v = (x) => ({ id: "v", mois: "2026-03-01", client: "C", bon_commande: null, heures_commandees: null, heures_facturees: null, montant_ht: null, numero_facture: "F1", tva: null, montant_ttc: null, montant_regle: null, date_reglement: null, note: null, ...x });
+  const a = analyserEntreprise([
+    v({}),
+    v({ bon_commande: "BC", heures_commandees: 100, heures_facturees: 120 }),
+    v({ bon_commande: "BC", montant_ht: 1000, tva: 100, montant_ttc: 1200, montant_regle: 1500 }),
+  ], [], []).ventes.map((x) => x.code);
+  for (const c of ["vente_sans_commande", "facture_au_dela_commande", "tva_incoherente", "ttc_incoherent", "vente_trop_reglee"]) assert.ok(a.includes(c), c);
+});
+
+test("paie : heures réalisées non payées, coût horaire sous le SMIC", () => {
+  const a = analyserEntreprise([], [{ mois: "2026-03-01", effectif: 10, heures_realisees: 1800, heures_payees: 1500, masse_salariale: 15000, note: null }], [{ valable_du: "2026-01-01", taux_brut: 12 }]).paie.map((x) => x.code);
+  assert.deepEqual(a.sort(), ["cout_horaire_sous_smic", "heures_non_payees"]);
+});
+
+test("cartes : expirée, bientôt expirée, sans date", () => {
+  const ag = (nom, carte_fin) => ({ id: nom, sous_traitant_id: null, nom, employeur: null, carte_numero: null, heures: null, present_documents: null, carte_valide: null, carte_activite: null, dracar: "oui", planning: "oui", carte_fin, affecte_mission: "oui", note: null });
+  const codes = analyserCartes([ag("A", "2026-09-01"), ag("B", "2026-10-05"), ag("C", null), ag("D", "2027-06-01")], "2026-09-21").map((x) => x.code);
+  assert.deepEqual(codes, ["carte_expiree", "carte_bientot_expiree", "carte_sans_date"]);
+});
