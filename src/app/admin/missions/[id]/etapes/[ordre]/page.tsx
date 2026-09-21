@@ -20,7 +20,7 @@ import { OFFRES } from "@/content/offres";
 import {
   lireActions, lireConstats, lireDomainesEtape, lireEtapes, lireHorsEtape, lireMission,
   lireHeuresAgents, lireNotes, lireObjectifEtape, lireRapprochements, lireReponsesEntretien,
-  lireValiditePieces, lirePointsDEtape,
+  lireFichiersPieces, lireValiditePieces, lirePointsDEtape,
 } from "@/lib/portail/mission";
 
 export const metadata: Metadata = { robots: { index: false } };
@@ -34,7 +34,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
   const { id, ordre } = await params;
   const { ok, erreur } = await searchParams;
 
-  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien, heures] =
+  const [mission, etapes, horsEtape, pieces, rapprochements, constats, actions, entretien, heures, fichiers] =
     await Promise.all([
       lireMission(id),
       lireEtapes(id),
@@ -45,6 +45,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
       lireActions(id),
       lireReponsesEntretien(id),
       lireHeuresAgents(id),
+      lireFichiersPieces(id),
     ]);
   if (!mission || etapes.length === 0) notFound();
 
@@ -160,7 +161,7 @@ export default async function EtapePage({ params, searchParams }: Params) {
         {points.length > 0 ? <TableauPoints missionId={id} ordre={ordre} points={points} constats={constats} /> : null}
 
         {etape?.kind === "collecte" ? (
-          <ListePieces missionId={id} ordre={ordre} pieces={pieces} />
+          <ListePieces missionId={id} ordre={ordre} pieces={pieces} fichiers={fichiers} />
         ) : null}
 
         {etape?.kind === "rapprochement" ? (

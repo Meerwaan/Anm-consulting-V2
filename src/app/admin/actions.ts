@@ -252,9 +252,20 @@ export const definirDateDocument = async (formData: FormData): Promise<void> => 
 
   await supabase
     .from("mission_documents")
-    .update({ [champ]: valeur, received: valeur ? "oui" : "non", received_on: valeur ? new Date().toISOString().slice(0, 10) : null })
+    .update({ [champ]: valeur })
     .eq("id", documentId)
     .eq("mission_id", missionId);
+
+  // Une date saisie vaut réception. L'effacer ne rend pas la pièce manquante : elle peut
+  // avoir des fichiers déposés, ou avoir été consultée sur place.
+  if (valeur) {
+    await supabase
+      .from("mission_documents")
+      .update({ received: "oui", received_on: new Date().toISOString().slice(0, 10) })
+      .eq("id", documentId)
+      .eq("mission_id", missionId)
+      .neq("received", "oui");
+  }
 
   revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
 };

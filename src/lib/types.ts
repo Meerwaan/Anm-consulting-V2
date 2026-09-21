@@ -115,12 +115,27 @@ export interface ValiditePiece {
   category: string;
   required: boolean;
   received: "oui" | "non" | "na" | "a_verifier";
+  received_on: string | null;
   document_date: string | null;
   validite_nature: "texte" | "pratique" | "date_du_document" | "indefinie" | null;
   validite_note: string | null;
   validite_jours: number | null;
   echeance: string | null;
   etat: EtatValidite;
+  /** Nombre de fichiers déposés (table mission_document_files). */
+  nb_fichiers: number;
+  /** Ordre du modèle de pièce, pour afficher les pièces dans l'ordre du pack. */
+  ordre: number;
+}
+
+/** Un fichier déposé pour une pièce (bucket `pieces`). */
+export interface FichierPiece {
+  id: string;
+  document_id: string;
+  file_name: string;
+  file_size: number | null;
+  content_type: string | null;
+  uploaded_at: string;
 }
 
 /** Contrôle croisé (vue mission_reconciliation_status). */

@@ -1,130 +1,102 @@
-import type { EtatValidite, ValiditePiece } from "@/lib/types";
-import { definirDateDocument, demanderPiecesManquantes } from "@/app/admin/actions";
+import type { FichierPiece, ValiditePiece } from "@/lib/types";
+import LignePiece from "./LignePiece";
+import CopierPiecesManquantes from "./CopierPiecesManquantes";
 
 /**
- * « Sans objet » disait « Reçue », en vert, pour toute pièce dépourvue de durée de
- * péremption — soit 29 modèles sur 37. Sur la mission Secu 91, 23 pièces jamais reçues
- * s'affichaient ainsi et l'en-tête annonçait 4 manquantes au lieu de 27.
+ * Checklist des pièces, avec leurs fichiers et leur validité.
+ *
+ * « Rien ne manque » ne suffit pas : une attestation de vigilance de sept mois ne vaut
+ * rien le jour du contrôle. Chaque pièce dont la durée est connue affiche son échéance.
  * « Sans objet » ne veut dire qu'une chose : ce document ne s'applique pas à cette
- * entreprise (seuil d'effectif). Ne pas avoir de date de péremption n'est pas une
- * dispense de réception.
+ * entreprise (seuil d'effectif, ou décision de la consultante).
  */
-const ETAT: Record<EtatValidite, { texte: string; couleur: string }> = {
-  perimee:         { texte: "Périmée",       couleur: "var(--anm-critique)" },
-  bientot_perimee: { texte: "Bientôt",       couleur: "var(--anm-majeur)" },
-  date_manquante:  { texte: "Date à saisir", couleur: "var(--anm-majeur)" },
-  non_recue:       { texte: "Manquante",     couleur: "var(--anm-critique)" },
-  valide:          { texte: "À jour",        couleur: "var(--anm-mineur)" },
-  recue:           { texte: "Reçue",         couleur: "var(--anm-mineur)" },
-  sans_objet:      { texte: "Sans objet",    couleur: "var(--anm-muted)" },
+
+const CATEGORIES: Record<string, string> = {
+  entreprise: "Entreprise",
+  cnaps: "CNAPS",
+  social: "Social",
+  paie: "Paie",
+  temps: "Temps de travail",
+  sst: "Santé et sécurité au travail",
+  cse: "CSE",
+  fiscal: "Fiscal",
+  sous_traitance: "Sous-traitance",
 };
 
-const jour = (d: string | null): string => (d ? new Date(d).toLocaleDateString("fr-FR") : "");
+const RECUES = new Set(["recue", "valide", "bientot_perimee", "perimee", "date_manquante"]);
 
 interface Props {
   missionId: string;
   ordre: string;
   pieces: ValiditePiece[];
+  fichiers: FichierPiece[];
 }
 
-/**
- * Checklist des pièces, avec leur validité.
- *
- * « Rien ne manque » ne suffit pas : une attestation de vigilance de sept mois ne vaut
- * rien le jour du contrôle. Chaque pièce dont la durée est connue affiche son échéance,
- * et la nature de cette durée — un texte l'impose, ou l'usage l'exige.
- */
-const ListePieces = ({ missionId, ordre, pieces }: Props) => {
+const ListePieces = ({ missionId, ordre, pieces, fichiers }: Props) => {
   const manquantes = pieces.filter((p) => p.required && p.etat === "non_recue");
   const perimees = pieces.filter((p) => p.etat === "perimee" || p.etat === "bientot_perimee");
+  const recues = pieces.filter((p) => RECUES.has(p.etat)).length;
+  const applicables = pieces.filter((p) => p.etat !== "sans_objet").length;
+
+  const groupes = new Map<string, ValiditePiece[]>();
+  for (const p of pieces) groupes.set(p.category, [...(groupes.get(p.category) ?? []), p]);
+  const fichiersDe = (id: string) => fichiers.filter((f) => f.document_id === id);
 
   return (
-    <section>
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="text-xl">Pièces et validité</h2>
-        {manquantes.length > 0 ? (
-          <form action={demanderPiecesManquantes}>
-            <input type="hidden" name="missionId" value={missionId} />
-            <input type="hidden" name="ordre" value={ordre} />
-            <button
-              type="submit"
-              className="rounded bg-[var(--anm-green)] px-3 py-1.5 text-sm font-medium text-[var(--anm-paper)]"
-            >
-              Demander les {manquantes.length} pièces manquantes
-            </button>
-          </form>
-        ) : (
-          <p className="font-mono text-xs uppercase tracking-widest text-[var(--anm-mineur)]">
-            Rien ne manque
-          </p>
-        )}
-      </div>
-
-      {perimees.length > 0 ? (
-        <p className="mt-3 border-l-2 border-[var(--anm-majeur)] bg-[var(--anm-mint)] px-3 py-2 text-sm">
-          {perimees.length} pièce{perimees.length > 1 ? "s" : ""} périmée
-          {perimees.length > 1 ? "s" : ""} ou sur le point de l&apos;être. Une pièce reçue mais
-          dépassée ne vaut rien le jour du contrôle.
+    <section className="flex flex-col gap-8">
+      <header className="flex flex-col gap-5 border-b border-filet pb-6">
+        <div>
+          <p className="etiquette">Collecte</p>
+          <h2 className="mt-2 font-display text-t3 text-encre">Pièces justificatives</h2>
+        </div>
+        <p className="text-corps text-encre-2">
+          <strong className="font-medium text-encre">{recues}</strong> reçue{recues > 1 ? "s" : ""} sur {applicables}
+          {manquantes.length > 0 ? (
+            <>
+              {" · "}
+              <strong className="font-medium text-critique">{manquantes.length}</strong> manquante{manquantes.length > 1 ? "s" : ""}
+            </>
+          ) : null}
+          {perimees.length > 0 ? (
+            <>
+              {" · "}
+              <strong className="font-medium text-majeur">{perimees.length}</strong> périmée{perimees.length > 1 ? "s" : ""} ou bientôt
+            </>
+          ) : null}
         </p>
-      ) : null}
+        {manquantes.length > 0 ? (
+          <CopierPiecesManquantes missionId={missionId} ordre={ordre} noms={manquantes.map((p) => p.name)} />
+        ) : (
+          <p className="text-meta font-medium text-mineur">Toutes les pièces obligatoires sont reçues.</p>
+        )}
+        {perimees.length > 0 ? (
+          <p className="rounded-[5px] border border-majeur/30 bg-majeur-l/50 px-4 py-3 text-meta text-encre">
+            Une pièce reçue mais dépassée ne vaut rien le jour du contrôle : redemande la version à jour.
+          </p>
+        ) : null}
+      </header>
 
-      <ul className="mt-4 flex flex-col">
-        {pieces.map((p) => {
-          const etat = ETAT[p.etat];
-          const parLeDocument = p.validite_nature === "date_du_document";
-          const suitUneDuree = p.validite_nature === "texte" || p.validite_nature === "pratique";
-          return (
-            <li key={p.id} className="border-b border-[var(--anm-hairline)] py-3 last:border-b-0">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <span className="font-medium">{p.name}</span>
-                <span
-                  className="shrink-0 font-mono text-[0.68rem] uppercase tracking-wide"
-                  style={{ color: etat.couleur }}
-                >
-                  {etat.texte}
-                  {p.echeance ? ` · ${jour(p.echeance)}` : ""}
-                </span>
-              </div>
-
-              {p.validite_note ? (
-                <p className="mt-1 max-w-3xl text-xs text-[var(--anm-muted)]">
-                  {suitUneDuree ? (
-                    <span className="font-mono uppercase tracking-wide">
-                      {p.validite_nature === "texte" ? "texte · " : "usage · "}
-                      {p.validite_jours} j —{" "}
-                    </span>
-                  ) : null}
-                  {p.validite_note}
-                </p>
-              ) : null}
-
-              {p.validite_nature && p.validite_nature !== "indefinie" ? (
-                <form action={definirDateDocument} className="mt-2 flex flex-wrap items-end gap-2">
-                  <input type="hidden" name="missionId" value={missionId} />
-                  <input type="hidden" name="ordre" value={ordre} />
-                  <input type="hidden" name="documentId" value={p.id} />
-                  <input type="hidden" name="champ" value={parLeDocument ? "expire_le" : "document_date"} />
-                  <label className="flex flex-col gap-1 text-xs">
-                    {parLeDocument ? "Échéance portée par la pièce" : "Date de la pièce"}
-                    <input
-                      name="valeur"
-                      type="date"
-                      defaultValue={(parLeDocument ? p.echeance : p.document_date) ?? ""}
-                      className="rounded border border-[var(--anm-hairline)] bg-white px-2 py-1 text-sm"
-                    />
-                  </label>
-                  <button
-                    type="submit"
-                    className="rounded border border-[var(--anm-hairline)] px-2.5 py-1.5 text-xs hover:border-[var(--anm-green)]"
-                  >
-                    Enregistrer
-                  </button>
-                </form>
-              ) : null}
-            </li>
-          );
-        })}
-      </ul>
+      {[...groupes.entries()].map(([categorie, liste]) => {
+        const n = liste.filter((p) => RECUES.has(p.etat)).length;
+        const app = liste.filter((p) => p.etat !== "sans_objet").length;
+        return (
+          <section key={categorie} aria-labelledby={`cat-${categorie}`}>
+            <div className="flex items-baseline justify-between gap-4 border-b-[1.5px] border-encre pb-2">
+              <h3 id={`cat-${categorie}`} className="font-display text-t4 text-encre">
+                {CATEGORIES[categorie] ?? categorie}
+              </h3>
+              <span className="text-meta tabular-nums text-gris">
+                {n} / {app}
+              </span>
+            </div>
+            <ul>
+              {liste.map((p) => (
+                <LignePiece key={p.id} missionId={missionId} ordre={ordre} piece={p} fichiers={fichiersDe(p.id)} />
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </section>
   );
 };
