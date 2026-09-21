@@ -27,7 +27,7 @@ const CreerAction = ({
   const [etat, setEtat] = useState<"repos" | "cours" | "creee" | "erreur">(dejaCreee ? "creee" : "repos");
   if (etat === "creee") {
     return (
-      <Link href={`/admin/missions/${missionId}/rapport#actions`} className="flex min-h-11 shrink-0 items-center gap-1 text-meta text-vert underline-offset-4 hover:underline">
+      <Link href={`/admin/missions/${missionId}/actions`} className="flex min-h-11 shrink-0 items-center gap-1 text-meta text-vert underline-offset-4 hover:underline">
         Action créée <ArrowRight size={14} aria-hidden />
       </Link>
     );

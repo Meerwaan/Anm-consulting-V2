@@ -6,7 +6,7 @@
  * deux côtés, une colonne absente ne peut pas être écrite.
  */
 
-export type TypeColonne = "mois" | "date" | "heures" | "euros" | "nombre" | "texte" | "verif" | "facture";
+export type TypeColonne = "mois" | "date" | "heures" | "euros" | "nombre" | "texte" | "verif" | "facture" | "choix";
 
 export interface Colonne {
   cle: string;
@@ -15,6 +15,8 @@ export interface Colonne {
   /** Largeur minimale en rem, pour que le tableau reste lisible sur iPad. */
   largeur: number;
   aide?: string;
+  /** Colonne « choix » : valeurs permises, avec leur libellé. */
+  options?: { v: string; l: string }[];
 }
 
 export type NomTable =
@@ -26,6 +28,11 @@ export type NomTable =
   | "st_paiements"
   | "st_agents"
   | "agents_entreprise"
+  | "identite_entreprise"
+  | "identite_st"
+  | "salaries_entreprise"
+  | "salaries_registre"
+  | "salaries_identite"
   | "smic_horaire";
 
 export interface DefTable {
@@ -43,8 +50,26 @@ export interface DefTable {
    * suppression, pas de collage). Chaque ligne est présentée par un libellé en lecture seule.
    */
   complement?: boolean;
+  /** Vue complémentaire : titre et largeur (rem) de la colonne qui nomme la ligne. */
+  titreLigne?: string;
+  largeurLigne?: number;
   colonnes: Colonne[];
 }
+
+const PIECES = [
+  { v: "cni", l: "Carte d’identité" },
+  { v: "passeport", l: "Passeport" },
+  { v: "titre_sejour", l: "Titre de séjour" },
+  { v: "autre", l: "Autre" },
+];
+
+/** Pièce d'identité ou titre de séjour, sa fin de validité, l'autorisation de travail (Sofia, 21/09/2026). */
+const COLONNES_IDENTITE: Colonne[] = [
+  { cle: "piece_identite", libelle: "Pièce d’identité", type: "choix", largeur: 7, options: PIECES },
+  { cle: "piece_fin", libelle: "Valable jusqu’au", type: "date", largeur: 6.5 },
+  { cle: "autorisation_travail", libelle: "Autorisé à travailler", type: "verif", largeur: 6 },
+  { cle: "titre_authentifie", libelle: "Titre vérifié en préfecture", type: "verif", largeur: 6 },
+];
 
 export const TABLES: Record<NomTable, DefTable> = {
   st_ventes: {
@@ -152,6 +177,71 @@ export const TABLES: Record<NomTable, DefTable> = {
       { cle: "planning", libelle: "Sur le planning", type: "verif", largeur: 6 },
       { cle: "affecte_mission", libelle: "Affectation conforme", type: "verif", largeur: 6 },
     ],
+  },
+  identite_entreprise: {
+    nom: "identite_entreprise",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: false,
+    complement: true,
+    titreLigne: "Agent",
+    largeurLigne: 10,
+    colonnes: COLONNES_IDENTITE,
+  },
+  identite_st: {
+    nom: "identite_st",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: true,
+    complement: true,
+    titreLigne: "Agent",
+    largeurLigne: 10,
+    colonnes: COLONNES_IDENTITE,
+  },
+  salaries_entreprise: {
+    nom: "salaries_entreprise",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: false,
+    colonnes: [
+      { cle: "nom", libelle: "Salarié", type: "texte", largeur: 7.5 },
+      { cle: "type_contrat", libelle: "Contrat", type: "choix", largeur: 6, options: [
+        { v: "cdi", l: "CDI" },
+        { v: "cdd", l: "CDD" },
+        { v: "cdi_tp", l: "CDI temps partiel" },
+        { v: "cdd_tp", l: "CDD temps partiel" },
+        { v: "apprenti", l: "Apprentissage" },
+        { v: "autre", l: "Autre" },
+      ] },
+      { cle: "date_entree", libelle: "Entré le", type: "date", largeur: 6.5 },
+      { cle: "date_dpae", libelle: "DPAE du", type: "date", largeur: 6.5 },
+      { cle: "date_sortie", libelle: "Sorti le", type: "date", largeur: 6.5 },
+    ],
+  },
+  salaries_registre: {
+    nom: "salaries_registre",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: false,
+    complement: true,
+    titreLigne: "Salarié",
+    largeurLigne: 10,
+    colonnes: [
+      { cle: "contrat_signe", libelle: "Contrat signé", type: "verif", largeur: 6 },
+      { cle: "registre", libelle: "Au registre du personnel", type: "verif", largeur: 6 },
+      { cle: "visite_medicale", libelle: "Dernière visite médicale", type: "date", largeur: 6.5 },
+      { cle: "visite_prochaine", libelle: "Prochaine visite", type: "date", largeur: 6.5 },
+    ],
+  },
+  salaries_identite: {
+    nom: "salaries_identite",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: false,
+    complement: true,
+    titreLigne: "Salarié",
+    largeurLigne: 10,
+    colonnes: COLONNES_IDENTITE,
   },
   smic_horaire: {
     nom: "smic_horaire",

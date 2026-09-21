@@ -32,15 +32,15 @@ const nombres = <T extends Record<string, unknown>>(lignes: T[] | null, cles: st
 export const lireDonneesST = async (missionId: string): Promise<DonneesST> => {
   const supabase = await createClient();
   const [p, v, b, s, a, f, pa, sm, ag] = await Promise.all([
-    supabase.from("st_parametres").select("periode_debut, periode_fin, taux_horaire_vendu, heures_mensuelles_etp").eq("mission_id", missionId).maybeSingle(),
+    supabase.from("st_parametres").select("periode_debut, periode_fin, taux_horaire_vendu, heures_mensuelles_etp, cout_revient_horaire, cout_revient_source").eq("mission_id", missionId).maybeSingle(),
     supabase.from("st_ventes").select("id, mois, client, bon_commande, heures_commandees, heures_facturees, montant_ht, numero_facture, tva, montant_ttc, montant_regle, date_reglement, note").eq("mission_id", missionId).order("mois").order("created_at"),
     supabase.from("st_paie").select("mois, effectif, heures_realisees, heures_payees, masse_salariale, note").eq("mission_id", missionId).order("mois"),
-    supabase.from("st_sous_traitants").select("id, raison_sociale, siren, adresse, dirigeant, activite, debut_relation, contrat_ref, montant_contrat_ht, rang, donneur_id, note").eq("mission_id", missionId).order("rang").order("raison_sociale"),
+    supabase.from("st_sous_traitants").select("id, raison_sociale, siren, adresse, dirigeant, activite, debut_relation, date_conclusion_contrat, date_fin_contrat, contrat_ref, montant_contrat_ht, rang, donneur_id, note").eq("mission_id", missionId).order("rang").order("raison_sociale"),
     supabase.from("st_attestations").select("id, sous_traitant_id, date_delivrance, mois_reference, effectif_etp, remunerations, siren_conforme, authentifiee, note").eq("mission_id", missionId).order("date_delivrance", { nullsFirst: false }),
     supabase.from("st_factures").select("id, sous_traitant_id, numero, date_facture, mois, heures, montant_ht, montant_ttc, note").eq("mission_id", missionId).order("mois", { nullsFirst: false }).order("date_facture"),
     supabase.from("st_paiements").select("id, sous_traitant_id, facture_id, date_paiement, montant, reference, compte_au_nom, note").eq("mission_id", missionId).order("date_paiement", { nullsFirst: false }),
     supabase.from("smic_horaire").select("valable_du, taux_brut, source").order("valable_du"),
-    supabase.from("st_agents").select("id, sous_traitant_id, nom, employeur, carte_numero, heures, present_documents, carte_valide, carte_activite, dracar, planning, carte_fin, affecte_mission, note").eq("mission_id", missionId).order("created_at"),
+    supabase.from("st_agents").select("id, sous_traitant_id, nom, employeur, carte_numero, heures, present_documents, carte_valide, carte_activite, dracar, planning, carte_fin, affecte_mission, piece_identite, piece_fin, autorisation_travail, titre_authentifie, type_contrat, date_entree, date_sortie, date_dpae, contrat_signe, registre, visite_medicale, visite_prochaine, note").eq("mission_id", missionId).order("created_at"),
   ]);
 
   const param = p.data

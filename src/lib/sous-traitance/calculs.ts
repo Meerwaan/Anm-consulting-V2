@@ -175,6 +175,8 @@ export interface Alerte {
   texte: string;
   /** Grille de Sofia dont l'indicateur est issu. */
   grille: "01" | "02" | "03" | "04" | "05" | "dgfip" | "urssaf";
+  /** Le sous-traitant concerné : une action créée depuis l'alerte lui est rattachée. */
+  sousTraitantId?: string;
 }
 
 export interface DossierSousTraitant {
@@ -188,6 +190,7 @@ export interface DossierSousTraitant {
   flechage: FlechageFacture[];
   paiementsSansFacture: Paiement[];
   vigilanceObligatoire: boolean | null;
+  echeancier: EcheancierVigilance | null;
   alertes: Alerte[];
 }
 
@@ -195,6 +198,60 @@ const h = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} h`;
 const eur = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 const moisLisible = (m: string) =>
   new Date(`${m}-01T12:00:00Z`).toLocaleDateString("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" });
+
+// ——— Échéancier de vigilance (demande de Sofia du 21/09/2026) ——————————————————————————
+
+export type StatutEcheance = "fournie" | "tardive" | "manquante" | "prochaine" | "a_venir";
+
+export interface EcheanceVigilance {
+  date: string;
+  statut: StatutEcheance;
+  /** L'attestation retenue pour cette échéance. */
+  attestation: Attestation | null;
+}
+
+export interface EcheancierVigilance {
+  debut: string;
+  /** null : contrat sans date de fin, l'échéancier s'arrête à la prochaine échéance. */
+  fin: string | null;
+  echeances: EcheanceVigilance[];
+}
+
+/**
+ * Une attestation à la conclusion du contrat, puis tous les 6 mois jusqu'à sa fin.
+ * Une échéance est tenue par une attestation délivrée dans les 6 mois qui la précèdent ;
+ * délivrée après l'échéance mais avant la suivante, elle est tardive.
+ */
+export const echeancierVigilance = (st: SousTraitant, attestations: Attestation[], aujourdHui: string): EcheancierVigilance | null => {
+  if (!st.date_conclusion_contrat) return null;
+  const debut = st.date_conclusion_contrat;
+  const fin = st.date_fin_contrat && st.date_fin_contrat >= debut ? st.date_fin_contrat : null;
+  const datees = attestations
+    .filter((a) => a.sous_traitant_id === st.id && a.date_delivrance)
+    .sort((a, b) => a.date_delivrance!.localeCompare(b.date_delivrance!));
+  const dates: string[] = [];
+  for (let k = 0; k < 60; k++) {
+    const d = ajouterMois(debut, VALIDITE_ATTESTATION_MOIS * k);
+    if (fin ? d > fin : dates.length > 0 && dates[dates.length - 1] > aujourdHui) break;
+    dates.push(d);
+  }
+  let prochaineVue = false;
+  const echeances = dates.map((date, k): EcheanceVigilance => {
+    // Une échéance à venir reste à tenir : le contrôle se fait à sa date.
+    if (date > aujourdHui) {
+      const statut: StatutEcheance = prochaineVue ? "a_venir" : "prochaine";
+      prochaineVue = true;
+      return { date, statut, attestation: null };
+    }
+    const avant = ajouterMois(date, -VALIDITE_ATTESTATION_MOIS);
+    const aTemps = [...datees].reverse().find((a) => a.date_delivrance! > avant && a.date_delivrance! <= date) ?? null;
+    if (aTemps) return { date, statut: "fournie", attestation: aTemps };
+    const suivante = dates[k + 1] ?? ajouterMois(date, VALIDITE_ATTESTATION_MOIS);
+    const tard = datees.find((a) => a.date_delivrance! > date && a.date_delivrance! <= suivante) ?? null;
+    return { date, statut: tard ? "tardive" : "manquante", attestation: tard };
+  });
+  return { debut, fin, echeances };
+};
 
 export const analyserSousTraitant = (
   st: SousTraitant,
@@ -204,6 +261,7 @@ export const analyserSousTraitant = (
   p: ParametresST,
   smics: Smic[],
   agents: Agent[] = [],
+  aujourdHui: string = new Date().toISOString().slice(0, 10),
 ): DossierSousTraitant => {
   const at = attestations.filter((a) => a.sous_traitant_id === st.id);
   const ag = agents.filter((a) => a.sous_traitant_id === st.id);
@@ -241,7 +299,7 @@ export const analyserSousTraitant = (
     }
     if (m.heuresFacturees !== null && m.capacite !== null && m.heuresFacturees > m.capacite) {
       alertes.push({ code: "capacite_depassee", niveau: "alerte", grille: "03",
-        texte: `${lib} : ${h(m.heuresFacturees)} facturées pour une capacité déclarée de ${h(m.capacite)} (${m.attestation?.effectif_etp} ETP). L’effectif de l’attestation ne peut pas produire ces heures à lui seul.` });
+        texte: `${lib} : ${h(m.heuresFacturees)} facturées pour ${h(m.capacite)} disponibles (${m.attestation?.effectif_etp} ETP × ${p.heures_mensuelles_etp.toLocaleString("fr-FR")} h). L’effectif de l’attestation ne peut pas produire ces heures à lui seul.` });
     }
     if (m.heuresFacturees !== null && m.plafondSmic !== null && m.heuresFacturees > m.plafondSmic) {
       alertes.push({ code: "plafond_smic_depasse", niveau: "alerte", grille: "03",
@@ -284,6 +342,18 @@ export const analyserSousTraitant = (
     if (ajouterMois(datees[i - 1], VALIDITE_ATTESTATION_MOIS) < datees[i]) {
       alertes.push({ code: "renouvellement_tardif", niveau: "alerte", grille: "05",
         texte: `Plus de 6 mois entre les attestations du ${new Date(`${datees[i - 1]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} et du ${new Date(`${datees[i]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} : la vigilance n’a pas été renouvelée à temps.` });
+    }
+  }
+
+  // Identité des agents contrôlés : titre de séjour, autorisation de travail (Sofia, 21/09/2026).
+  alertes.push(...analyserIdentites(ag, aujourdHui));
+
+  const echeancier = echeancierVigilance(st, at, aujourdHui);
+  for (const e of echeancier?.echeances ?? []) {
+    const date = new Date(`${e.date}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" });
+    if (e.statut === "manquante") {
+      alertes.push({ code: "echeance_vigilance_manquee", niveau: "alerte", grille: "05",
+        texte: `Échéance de vigilance du ${date} : aucune attestation délivrée dans les 6 mois qui la précèdent.` });
     }
   }
 
@@ -359,6 +429,7 @@ export const analyserSousTraitant = (
     flechage,
     paiementsSansFacture,
     vigilanceObligatoire,
+    echeancier,
     alertes,
   };
 };
@@ -510,6 +581,188 @@ export const analyserCartes = (agents: Agent[], aujourdHui: string): Alerte[] =>
     if (a.dracar === "non") alertes.push({ code: "agent_non_declare_dracar", niveau: "alerte", grille: "01", texte: `${qui} n’est pas déclaré dans Dracar Ultimate.` });
     if (a.affecte_mission === "non") alertes.push({ code: "affectation_non_conforme", niveau: "alerte", grille: "01", texte: `${qui} : affectation non conforme à l’activité autorisée.` });
     if (a.planning === "non") alertes.push({ code: "agent_absent_planning", niveau: "a_verifier", grille: "01", texte: `${qui} n’apparaît pas sur le planning.` });
+  }
+  return alertes;
+};
+
+// ——— DGFiP : indices de facture fictive ou de complaisance ———————————————————————————
+
+const normaliserNumero = (n: string | null) => (n ?? "").trim().toUpperCase().replace(/\s+/g, "");
+
+/**
+ * Indices chiffrés sur les factures, dans les deux sens (dictée de Sofia du 21/09/2026) :
+ * un numéro de facture utilisé deux fois, une sous-traitance achetée plus cher à l'heure qu'elle
+ * n'est revendue, ou à un prix horaire qui ne paie même pas un agent au SMIC.
+ */
+export const analyserFacturation = (
+  ventes: Vente[],
+  factures: FactureST[],
+  sousTraitants: SousTraitant[],
+  smics: Smic[],
+  p: ParametresST,
+): Alerte[] => {
+  const alertes: Alerte[] = [];
+
+  const vus = new Map<string, number>();
+  for (const v of ventes) {
+    const n = normaliserNumero(v.numero_facture);
+    if (n) vus.set(n, (vus.get(n) ?? 0) + 1);
+  }
+  for (const [n, fois] of vus) {
+    if (fois > 1) {
+      const original = ventes.find((v) => normaliserNumero(v.numero_facture) === n)?.numero_facture ?? n;
+      alertes.push({ code: "numero_vente_double", niveau: "alerte", grille: "dgfip",
+        texte: `Le numéro de facture ${original} est utilisé ${fois} fois dans les ventes. La numérotation doit être unique et continue.` });
+    }
+  }
+
+  // Prix de vente moyen de l'heure : ventes qui portent heures et montant, sinon le taux saisi.
+  const ventesChiffrees = ventes.filter((v) => v.heures_facturees && v.montant_ht !== null);
+  const heuresV = somme(ventesChiffrees.map((v) => v.heures_facturees));
+  const prixVente = heuresV > 0 ? somme(ventesChiffrees.map((v) => v.montant_ht)) / heuresV : p.taux_horaire_vendu;
+
+  // Prix de vente de l'heure, facture par facture, comparé au coût de revient de référence.
+  const ref = p.cout_revient_horaire ?? null;
+  if (ref) {
+    for (const v of ventes) {
+      if (!v.heures_facturees || v.montant_ht === null) continue;
+      const prix = v.montant_ht / v.heures_facturees;
+      if (prix < ref - 0.005) {
+        alertes.push({ code: "prix_vente_sous_revient", niveau: "a_verifier", grille: "dgfip",
+          texte: `${v.numero_facture ? `Facture ${v.numero_facture}` : "Une vente"}${v.client ? ` (${v.client})` : ""} : l’heure vendue ${eur(prix)} HT, sous le coût de revient horaire de référence (${eur(ref)} HT${p.cout_revient_source ? `, ${p.cout_revient_source}` : ""}). Un prix inférieur est à justifier.` });
+      }
+    }
+  }
+
+  for (const st of sousTraitants) {
+    const fs = factures.filter((f) => f.sous_traitant_id === st.id);
+    const nums = new Map<string, number>();
+    for (const f of fs) {
+      const n = normaliserNumero(f.numero);
+      if (n) nums.set(n, (nums.get(n) ?? 0) + 1);
+    }
+    for (const [n, fois] of nums) {
+      if (fois > 1) {
+        alertes.push({ code: "numero_st_double", niveau: "alerte", grille: "dgfip", sousTraitantId: st.id,
+          texte: `${st.raison_sociale} : le numéro de facture ${fs.find((f) => normaliserNumero(f.numero) === n)?.numero ?? n} apparaît ${fois} fois. Une même facture ne peut pas être comptabilisée deux fois.` });
+      }
+    }
+
+    const chiffrees = fs.filter((f) => f.heures && f.montant_ht !== null);
+    const heures = somme(chiffrees.map((f) => f.heures));
+    if (heures <= 0) continue;
+    const cout = somme(chiffrees.map((f) => f.montant_ht)) / heures;
+    if (prixVente && cout > prixVente + 0.01) {
+      alertes.push({ code: "cout_st_superieur_vente", niveau: "a_verifier", grille: "dgfip", sousTraitantId: st.id,
+        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, plus cher que l’heure revendue aux clients (${eur(prixVente)} HT). Une sous-traitance revendue à perte doit s’expliquer.` });
+    }
+    const ref = p.cout_revient_horaire ?? null;
+    if (ref && cout < ref - 0.005) {
+      alertes.push({ code: "cout_st_sous_revient", niveau: "alerte", grille: "dgfip", sousTraitantId: st.id,
+        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le coût de revient horaire de référence (${eur(ref)} HT${p.cout_revient_source ? `, ${p.cout_revient_source}` : ""}). À ce prix, les charges d’un agent ne sont pas couvertes : la réalité des heures et la déclaration des salariés sont à vérifier.` });
+    }
+    const derniere = chiffrees.map((f) => f.mois ?? f.date_facture).filter((x): x is string => Boolean(x)).sort().pop();
+    const smic = derniere ? smicA(smics, `${cleMois(derniere)}-01`) : null;
+    if (smic && cout < smic.taux_brut) {
+      alertes.push({ code: "cout_st_sous_smic", niveau: "alerte", grille: "dgfip", sousTraitantId: st.id,
+        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le SMIC horaire brut (${eur(smic.taux_brut)}). À ce prix, le salaire d’un agent n’est pas couvert : la réalité des heures facturées est à vérifier.` });
+    }
+  }
+  return alertes;
+};
+
+// ——— Identité des agents et salariés de l'entreprise (Sofia, 21/09/2026) ——————————————————
+
+/** Délai d'alerte avant la fin de validité d'un titre de séjour. */
+export const ALERTE_TITRE_JOURS = 60;
+/** Délai après l'embauche au-delà duquel une première visite médicale est attendue. */
+export const DELAI_VISITE_MOIS = 3;
+
+const dateLisible = (d: string) => new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" });
+const plusJours = (d: string, n: number) => {
+  const x = new Date(`${d}T12:00:00Z`);
+  x.setUTCDate(x.getUTCDate() + n);
+  return x.toISOString().slice(0, 10);
+};
+
+/**
+ * Pièce d'identité ou titre de séjour : fin de validité et autorisation de travail. Vaut pour les
+ * agents de l'entreprise comme pour ceux des sous-traitants. Un salarié sorti n'est plus suivi.
+ */
+export const analyserIdentites = (agents: Agent[], aujourdHui: string): Alerte[] => {
+  const alertes: Alerte[] = [];
+  const bientot = plusJours(aujourdHui, ALERTE_TITRE_JOURS);
+  for (const a of agents) {
+    if (a.date_sortie && a.date_sortie < aujourdHui) continue;
+    const qui = a.nom?.trim() || "Un agent";
+    const st = a.sous_traitant_id ?? undefined;
+    const titre = a.piece_identite === "titre_sejour";
+    if (a.piece_fin && a.piece_fin < aujourdHui) {
+      alertes.push(titre
+        ? { code: "titre_sejour_expire", niveau: "alerte", grille: "urssaf", sousTraitantId: st, texte: `${qui} : titre de séjour expiré depuis le ${dateLisible(a.piece_fin)}. Un étranger ne peut être employé sans titre en cours de validité l’autorisant à travailler.` }
+        : { code: "piece_expiree", niveau: "a_verifier", grille: "urssaf", sousTraitantId: st, texte: `${qui} : pièce d’identité expirée depuis le ${dateLisible(a.piece_fin)}, une copie à jour est à demander.` });
+    } else if (titre && a.piece_fin && a.piece_fin <= bientot) {
+      alertes.push({ code: "titre_sejour_bientot_expire", niveau: "a_verifier", grille: "urssaf", sousTraitantId: st,
+        texte: `${qui} : titre de séjour valable jusqu’au ${dateLisible(a.piece_fin)}, le renouvellement est à suivre.` });
+    }
+    if (titre && !a.piece_fin) {
+      alertes.push({ code: "titre_sans_date", niveau: "a_verifier", grille: "urssaf", sousTraitantId: st, texte: `${qui} : fin de validité du titre de séjour non renseignée.` });
+    }
+    if (titre && a.autorisation_travail === "non") {
+      alertes.push({ code: "sans_autorisation_travail", niveau: "alerte", grille: "urssaf", sousTraitantId: st,
+        texte: `${qui} : le titre de séjour n’autorise pas à travailler.` });
+    }
+    if (titre && a.titre_authentifie === "non") {
+      alertes.push({ code: "titre_non_authentifie", niveau: "a_verifier", grille: "urssaf", sousTraitantId: st,
+        texte: `${qui} : titre de séjour non vérifié auprès de la préfecture avant l’embauche.` });
+    }
+  }
+  return alertes;
+};
+
+/**
+ * Les salariés de l'entreprise auditée (module URSSAF) : DPAE, contrat, registre du personnel,
+ * visite médicale, et l'effectif de la liste rapproché de celui de la paie.
+ */
+export const analyserSalaries = (agents: Agent[], paie: Paie[], aujourdHui: string): Alerte[] => {
+  const alertes: Alerte[] = [];
+  const salaries = agents.filter((a) => a.sous_traitant_id === null);
+  for (const a of salaries) {
+    const qui = a.nom?.trim() || "Un salarié";
+    const present = !a.date_sortie || a.date_sortie >= aujourdHui;
+    if (a.date_entree && !a.date_dpae) {
+      alertes.push({ code: "dpae_absente", niveau: "alerte", grille: "urssaf", texte: `${qui} : entré le ${dateLisible(a.date_entree)}, aucune DPAE saisie.` });
+    } else if (a.date_entree && a.date_dpae && a.date_dpae > a.date_entree) {
+      alertes.push({ code: "dpae_tardive", niveau: "alerte", grille: "urssaf",
+        texte: `${qui} : DPAE du ${dateLisible(a.date_dpae)} pour une entrée le ${dateLisible(a.date_entree)}. La déclaration doit précéder l’embauche.` });
+    }
+    if (a.registre === "non") alertes.push({ code: "absent_registre", niveau: "alerte", grille: "urssaf", texte: `${qui} n’apparaît pas sur le registre unique du personnel.` });
+    if (a.contrat_signe === "non") {
+      const ecritObligatoire = a.type_contrat && a.type_contrat !== "cdi";
+      alertes.push({ code: "contrat_non_signe", niveau: ecritObligatoire ? "alerte" : "a_verifier", grille: "urssaf",
+        texte: ecritObligatoire ? `${qui} : pas de contrat signé, alors que ce contrat doit être écrit.` : `${qui} : pas de contrat de travail signé.` });
+    }
+    if (present && a.date_entree && !a.visite_medicale && ajouterMois(a.date_entree, DELAI_VISITE_MOIS) < aujourdHui) {
+      alertes.push({ code: "visite_absente", niveau: "a_verifier", grille: "urssaf",
+        texte: `${qui} : entré le ${dateLisible(a.date_entree)}, aucune visite de médecine du travail saisie.` });
+    }
+    if (present && a.visite_prochaine && a.visite_prochaine < aujourdHui) {
+      alertes.push({ code: "visite_depassee", niveau: "a_verifier", grille: "urssaf",
+        texte: `${qui} : visite de médecine du travail prévue le ${dateLisible(a.visite_prochaine)}, pas encore passée.` });
+    }
+  }
+  // Effectif : la liste des salariés présents dans le mois, rapprochée de l'effectif de la paie.
+  if (salaries.some((a) => a.date_entree)) {
+    for (const b of paie) {
+      if (b.effectif === null) continue;
+      const debut = `${cleMois(b.mois)}-01`;
+      const fin = ajouterMois(debut, 1);
+      const n = salaries.filter((a) => a.date_entree && a.date_entree < fin && (!a.date_sortie || a.date_sortie >= debut)).length;
+      if (n !== b.effectif) {
+        alertes.push({ code: "effectif_liste_paie", niveau: "a_verifier", grille: "urssaf",
+          texte: `${moisLisible(cleMois(b.mois))} : ${n} salariés présents dans la liste, ${b.effectif} dans la paie. La liste doit être complète pour que le registre et la paie concordent.` });
+      }
+    }
   }
   return alertes;
 };

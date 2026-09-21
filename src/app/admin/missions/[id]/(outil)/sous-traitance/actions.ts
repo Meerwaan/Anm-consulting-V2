@@ -51,6 +51,13 @@ const convertir = (table: NomTable, ligne: Record<string, string>): { valeurs: R
       case "facture":
         v = /^[0-9a-f-]{36}$/.test(brut) ? brut : null;
         break;
+      case "choix": {
+        const x = brut.trim();
+        const o = c.options?.find((p) => p.v === x || p.l.toLowerCase() === x.toLowerCase());
+        if (x && !o) return { erreur: `« ${brut} » n’est pas un choix possible (${c.libelle}).` };
+        v = o?.v ?? null;
+        break;
+      }
       default:
         v = brut.trim() || null;
     }
@@ -225,7 +232,7 @@ export const creerSousTraitant = async (entree: {
   return { ok: true, valeur: data.id };
 };
 
-const CHAMPS_IDENTITE = ["raison_sociale", "siren", "adresse", "dirigeant", "activite", "debut_relation", "contrat_ref", "montant_contrat_ht", "note"] as const;
+const CHAMPS_IDENTITE = ["raison_sociale", "siren", "adresse", "dirigeant", "activite", "debut_relation", "date_conclusion_contrat", "date_fin_contrat", "contrat_ref", "montant_contrat_ht", "note"] as const;
 
 export const enregistrerIdentite = async (entree: {
   missionId: string;
@@ -241,9 +248,9 @@ export const enregistrerIdentite = async (entree: {
       const n = lireNombre(brut);
       if (Number.isNaN(n)) return { ok: false, erreur: "Le montant du contrat n’est pas un nombre." };
       maj[k] = n;
-    } else if (k === "debut_relation") {
+    } else if (k === "debut_relation" || k === "date_conclusion_contrat" || k === "date_fin_contrat") {
       const d = lireDate(brut);
-      if (d === "invalide") return { ok: false, erreur: "Date de début de relation illisible. Exemple : 01/03/2025." };
+      if (d === "invalide") return { ok: false, erreur: "Date illisible. Exemple : 01/03/2025." };
       maj[k] = d;
     } else if (k === "raison_sociale") {
       if (!brut.trim()) return { ok: false, erreur: "La raison sociale ne peut pas être vide." };

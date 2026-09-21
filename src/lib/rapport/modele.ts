@@ -6,9 +6,10 @@
  * et des calculs, jamais une qualification juridique, jamais une promesse de garantie. Un
  * texte non validé est imprimé, mais le rapport porte alors la mention « version de travail ».
  */
-import { GRILLE_DRACAR, GRILLE_RAPPROCHEMENT, GRILLE_SOUS_TRAITANT, NATURES_NC } from "@/content/grilles";
+import { GRILLE_CNAPS, GRILLE_DGFIP, GRILLE_RAPPROCHEMENT, GRILLE_SOUS_TRAITANT, GRILLE_URSSAF, NATURES_NC, type Grille } from "@/content/grilles";
+import { bilanGrille, type BilanGrille } from "@/lib/modules/analyse";
 import type { DonneesGrilles, NonConformite } from "@/lib/grilles/lecture";
-import { analyserCartes, analyserEntreprise, analyserSousTraitant, boucler, calculerEcart, type Alerte, type Bouclage, type DossierSousTraitant, type EcartHeures } from "@/lib/sous-traitance/calculs";
+import { analyserCartes, analyserEntreprise, analyserFacturation, analyserIdentites, analyserSalaries, analyserSousTraitant, boucler, calculerEcart, type Alerte, type Bouclage, type DossierSousTraitant, type EcartHeures } from "@/lib/sous-traitance/calculs";
 import type { DonneesST } from "@/lib/sous-traitance/lecture";
 import { fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
 
@@ -49,6 +50,16 @@ export interface ChapitreSousTraitant {
   totalQuestions: number;
 }
 
+/** Un module de contrôle (URSSAF, DGFiP) : sa grille, ses conclusions, ses alertes propres. */
+export interface ChapitreModule {
+  renseigne: boolean;
+  bilan: BilanGrille;
+  points: PointDefavorable[];
+  conclusions: { titre: string; valeur: string | null }[];
+  synthese: string | null;
+  alertes: Alerte[];
+}
+
 export interface ModeleRapport {
   mission: InfosMission;
   periode: { debut: string | null; fin: string | null };
@@ -59,6 +70,8 @@ export interface ModeleRapport {
   rapprochement: { sources: string[]; question: string | null; explications: string[]; conclusion: string | null; justificatifs: string | null; observations: string | null };
   sousTraitants: ChapitreSousTraitant[];
   dracar: { renseigne: boolean; controles: number; conformes: number; nonConformes: number; aVerifier: number; points: PointDefavorable[]; niveau: string | null; actions: string | null; delai: string | null };
+  urssaf: ChapitreModule;
+  dgfip: ChapitreModule;
   nonConformites: (NonConformite & { libelleNature: string; sousTraitant: string | null })[];
   textes: Record<CleTexte, { texte: string; valide: boolean }>;
   documents: string[];
@@ -90,7 +103,7 @@ const proposerContexte = (m: InfosMission, periode: ModeleRapport["periode"], nb
   );
 };
 
-const proposerSynthese = (e: EcartHeures, b: Bouclage, chapitres: ChapitreSousTraitant[], dracarNiveau: string | null): string => {
+const proposerSynthese = (e: EcartHeures, b: Bouclage, chapitres: ChapitreSousTraitant[], dracarNiveau: string | null, urssaf: string | null = null, dgfip: string | null = null): string => {
   const phrases: string[] = [];
   if (e.lignes.length) {
     phrases.push(
@@ -121,6 +134,8 @@ const proposerSynthese = (e: EcartHeures, b: Bouclage, chapitres: ChapitreSousTr
       phrases.push(`${debut}, ${pluriel(alertes, "alerte")} ressort${alertes > 1 ? "ent" : ""} des chiffres et reste${alertes > 1 ? "nt" : ""} à conclure.`);
     }
   });
+  if (urssaf) phrases.push(`Pour l’entreprise elle-même, la conclusion du contrôle URSSAF est : ${minuscule(urssaf)}.`);
+  if (dgfip) phrases.push(`Sur les factures, le risque de facture fictive ou de complaisance est apprécié ainsi : ${minuscule(dgfip)}.`);
   if (dracarNiveau) phrases.push(`Sur Dracar Ultimate, le niveau de conformité retenu est : ${minuscule(dracarNiveau)}.`);
   return phrases.join(" ");
 };
@@ -157,7 +172,7 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
   const totalQuestions = GRILLE_SOUS_TRAITANT.sections.reduce((n, s) => n + s.items.length, 0);
 
   const sousTraitants: ChapitreSousTraitant[] = d.sousTraitants.map((st) => {
-    const dossier = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents);
+    const dossier = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents, aujourdHui);
     const conclusions = Object.fromEntries(
       GRILLE_SOUS_TRAITANT.conclusions.filter((c) => c.type === "choix").map((c) => [c.code, g.conclusions[`${c.code}|${st.id}`]?.choix ?? null]),
     );
@@ -182,19 +197,37 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     observations: rpC("rp-observations")?.synthese ?? null,
   };
 
-  const itemsDracar = GRILLE_DRACAR.sections.flatMap((s) => s.items);
-  const vD = (code: string) => g.reponses[`cnaps|mission|${code}`]?.reponse ?? null;
+  const bilanCnaps = bilanGrille(g, "cnaps", "mission", GRILLE_CNAPS.sections);
   const dracar = {
-    renseigne: itemsDracar.some((i) => vD(i.code)),
-    controles: itemsDracar.filter((i) => vD(i.code) && vD(i.code) !== "na").length,
-    conformes: itemsDracar.filter((i) => vD(i.code) === "oui").length,
-    nonConformes: itemsDracar.filter((i) => vD(i.code) === "non").length,
-    aVerifier: itemsDracar.filter((i) => vD(i.code) === "a_verifier").length,
-    points: pointsDefavorables(g, "cnaps", "mission", GRILLE_DRACAR.sections),
+    renseigne: GRILLE_CNAPS.sections.some((s) => s.items.some((i) => g.reponses[`cnaps|mission|${i.code}`])),
+    controles: bilanCnaps.controles,
+    conformes: bilanCnaps.conformes,
+    nonConformes: bilanCnaps.nonConformes,
+    aVerifier: bilanCnaps.aVerifier,
+    points: pointsDefavorables(g, "cnaps", "mission", GRILLE_CNAPS.sections),
     niveau: rpC("cn-niveau")?.choix ?? null,
     actions: rpC("cn-actions")?.synthese ?? null,
     delai: rpC("cn-delai")?.synthese ?? null,
   };
+
+  const chapitreModule = (grille: Grille, codeSynthese: string, alertes: Alerte[]): ChapitreModule => {
+    const bilan = bilanGrille(g, grille.code, "mission", grille.sections);
+    const conclusions = grille.conclusions.filter((c) => c.type === "choix").map((c) => ({ titre: c.titre, valeur: rpC(c.code)?.choix ?? null }));
+    const synthese = rpC(codeSynthese)?.synthese ?? null;
+    return {
+      renseigne: bilan.controles > 0 || conclusions.some((c) => c.valeur) || Boolean(synthese) || grille.sections.some((s) => s.items.some((i) => g.reponses[`${grille.code}|mission|${i.code}`])),
+      bilan,
+      points: pointsDefavorables(g, grille.code, "mission", grille.sections),
+      conclusions,
+      synthese,
+      alertes,
+    };
+  };
+  const urssaf = chapitreModule(GRILLE_URSSAF, "ur-synthese", [
+    ...analyserSalaries(d.agents, d.paie, aujourdHui),
+    ...analyserIdentites(d.agents.filter((a) => a.sous_traitant_id === null), aujourdHui),
+  ]);
+  const dgfip = chapitreModule(GRILLE_DGFIP, "dg-synthese", analyserFacturation(d.ventes, d.factures, d.sousTraitants, d.smics, d.parametres));
 
   const nonConformites = g.nonConformites.map((n) => ({
     ...n,
@@ -204,7 +237,7 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
 
   const propositions: Record<CleTexte, string> = {
     contexte: proposerContexte(m, { debut: d.parametres.periode_debut, fin: d.parametres.periode_fin }, d.sousTraitants.length),
-    synthese: proposerSynthese(ecart, bouclage, sousTraitants, dracar.niveau),
+    synthese: proposerSynthese(ecart, bouclage, sousTraitants, dracar.niveau, rpC("ur-conclusion")?.choix ?? null, rpC("dg-risque")?.choix ?? null),
     conclusion: proposerConclusion(rapprochement.conclusion, nonConformites.length),
     limites: LIMITES,
   };
@@ -221,7 +254,9 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     if (!c.conclusions["st-conclusion"]) manques.push(`${c.dossier.st.raison_sociale} : conclusion non choisie.`);
     if (c.repondues < c.totalQuestions) manques.push(`${c.dossier.st.raison_sociale} : ${c.totalQuestions - c.repondues} points de contrôle sans réponse.`);
   }
-  if (dracar.renseigne && !dracar.niveau) manques.push("Dracar Ultimate : niveau de conformité non choisi.");
+  if (dracar.renseigne && !dracar.niveau) manques.push("CNAPS : niveau de conformité non choisi.");
+  if (urssaf.renseigne && !rpC("ur-conclusion")?.choix) manques.push("URSSAF : conclusion non choisie.");
+  if (dgfip.renseigne && !rpC("dg-risque")?.choix) manques.push("DGFiP : risque de facture fictive ou de complaisance non apprécié.");
   for (const k of CLES_TEXTES) if (!textes[k].valide) manques.push(`Texte « ${TITRES_TEXTES[k]} » : proposition de l’outil pas encore relue et validée.`);
 
   return {
@@ -234,6 +269,8 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     rapprochement,
     sousTraitants,
     dracar,
+    urssaf,
+    dgfip,
     nonConformites,
     textes,
     documents,
@@ -246,7 +283,7 @@ export const propositionsTextes = (r: ModeleRapport): Record<CleTexte, string> =
   const m = r.mission;
   return {
     contexte: proposerContexte(m, r.periode, r.sousTraitants.length),
-    synthese: proposerSynthese(r.ecart, r.bouclage, r.sousTraitants, r.dracar.niveau),
+    synthese: proposerSynthese(r.ecart, r.bouclage, r.sousTraitants, r.dracar.niveau, r.urssaf.conclusions.find((c) => c.titre === "Conclusion")?.valeur ?? null, r.dgfip.conclusions.find((c) => c.titre.startsWith("Risque"))?.valeur ?? null),
     conclusion: proposerConclusion(r.rapprochement.conclusion, r.nonConformites.length),
     limites: LIMITES,
   };

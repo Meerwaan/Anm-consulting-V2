@@ -3,14 +3,20 @@
 //   node --experimental-strip-types --env-file=.env.local scripts/demo.mjs
 //
 // Efface la démo existante et la recrée à neuf : on peut la rejouer autant qu'on veut.
+// Attention : ce que Sofia a saisi dans la démo est effacé aussi.
+//
+// Pour les tests automatiques, une copie à part, jamais la démo de Sofia :
+//   DEMO_NOM="Test automatique" DEMO_REF=E2E-TEST node … scripts/demo.mjs
+//   DEMO_NOM="Test automatique" DEMO_SUPPRIMER=1 node … scripts/demo.mjs   (la supprime)
 // Données entièrement fictives (SIREN 999 999 999), avec de vraies erreurs à trouver :
 // facture au-delà de la commande, TVA à 10 %, vente sans bon de commande, facture impayée,
 // heures réalisées non payées, sous-traitant de 3 salariés qui facture 800 h par mois,
 // attestation non renouvelée, paiement sur le compte d'un tiers, paiement sans facture,
-// sous-traitance facturée au-delà du besoin, rang 2 sans attestation, cartes expirées.
+// sous-traitance facturée au-delà du besoin, rang 2 sans attestation, cartes expirées,
+// numéro de facture utilisé deux fois, échéances de vigilance manquées.
 // Une partie des grilles est remplie, le reste est à faire : c'est l'exercice.
 import { createClient } from "@supabase/supabase-js";
-import { GRILLE_DRACAR, GRILLE_SOUS_TRAITANT } from "../src/content/grilles.ts";
+import { GRILLE_CNAPS, GRILLE_DGFIP, GRILLE_SOUS_TRAITANT, GRILLE_URSSAF } from "../src/content/grilles.ts";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const cle = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,7 +25,8 @@ if (!url || !cle) {
   process.exit(1);
 }
 const db = createClient(url, cle, { auth: { persistSession: false, autoRefreshToken: false } });
-const NOM = "Démo — Horizon Sécurité Privée";
+const NOM = process.env.DEMO_NOM || "Démo — Horizon Sécurité Privée";
+const REF = process.env.DEMO_REF || "DEMO-2026";
 
 const verifier = (r, quoi) => {
   if (r.error) throw new Error(`${quoi} : ${r.error.message}`);
@@ -45,13 +52,17 @@ for (const o of anciennes) {
   }
   verifier(await db.from("organizations").delete().eq("id", o.id), "suppression");
 }
+if (process.env.DEMO_SUPPRIMER) {
+  console.log(`« ${NOM} » supprimée.`);
+  process.exit(0);
+}
 
 // 2. Le client et la mission -----------------------------------------------------------------
 const org = verifier(await db.from("organizations").insert({ name: NOM, siren: "999999999", headcount: 20, establishments: 1 }).select("id").single(), "client");
 const mission = verifier(
   await db
     .from("missions")
-    .insert({ org_id: org.id, reference: "DEMO-2026", type: "social_urssaf", control_in_progress: true, control_body: "URSSAF", control_deadline: "2026-11-16" })
+    .insert({ org_id: org.id, reference: REF, type: "social_urssaf", control_in_progress: true, control_body: "URSSAF", control_deadline: "2026-11-16" })
     .select("id")
     .single(),
   "mission",
@@ -84,10 +95,10 @@ mois.forEach((mm, i) => {
     date_reglement: `2026-${String(Math.min(n + 1, 12)).padStart(2, "0")}-05`,
   });
 });
-// Avril : une prestation événementielle facturée sans bon de commande.
+// Avril : une prestation événementielle facturée sans bon de commande, sous un numéro déjà utilisé.
 ventes.push({
   mission_id: M, mois: "2026-04-01", client: "Stade municipal (événement)", bon_commande: null, heures_commandees: null,
-  heures_facturees: 400, montant_ht: 400 * 26, numero_facture: "FA-2604-03", tva: 400 * 26 * 0.2, montant_ttc: 400 * 26 * 1.2,
+  heures_facturees: 400, montant_ht: 400 * 26, numero_facture: "FA-2604-02", tva: 400 * 26 * 0.2, montant_ttc: 400 * 26 * 1.2,
   montant_regle: 400 * 26 * 1.2, date_reglement: "2026-05-02",
 });
 verifier(await db.from("st_ventes").insert(ventes), "ventes");
@@ -106,9 +117,9 @@ verifier(
 
 // 5. Les sous-traitants ----------------------------------------------------------------------------
 const st = async (x) => verifier(await db.from("st_sous_traitants").insert({ mission_id: M, ...x }).select("id").single(), "sous-traitant").id;
-const vigilance = await st({ raison_sociale: "Vigilance Services IDF", siren: "999999991", dirigeant: "Karim B.", activite: "Surveillance humaine", adresse: "Créteil (94)", debut_relation: "2025-09-01", contrat_ref: "CST-2025-07", montant_contrat_ht: 160000 });
-const protect = await st({ raison_sociale: "Protect Ouest", siren: "999999992", dirigeant: "Sébastien L.", activite: "Sécurité privée", adresse: "Nanterre (92)", debut_relation: "2025-11-01", contrat_ref: null, montant_contrat_ht: 110000 });
-const garde = await st({ raison_sociale: "Garde Express", siren: "999999993", activite: "Gardiennage", rang: 2, donneur_id: protect, montant_contrat_ht: null });
+const vigilance = await st({ raison_sociale: "Vigilance Services IDF", siren: "999999991", dirigeant: "Karim B.", activite: "Surveillance humaine", adresse: "Créteil (94)", debut_relation: "2025-09-01", date_conclusion_contrat: "2025-12-05", date_fin_contrat: "2027-08-31", contrat_ref: "CST-2025-07", montant_contrat_ht: 160000 });
+const protect = await st({ raison_sociale: "Protect Ouest", siren: "999999992", dirigeant: "Sébastien L.", activite: "Sécurité privée", adresse: "Nanterre (92)", debut_relation: "2025-11-01", date_conclusion_contrat: "2025-11-01", contrat_ref: null, montant_contrat_ht: 110000 });
+const garde = await st({ raison_sociale: "Garde Express", siren: "999999993", activite: "Gardiennage", rang: 2, donneur_id: protect, date_conclusion_contrat: "2026-02-01", date_fin_contrat: "2026-12-31", montant_contrat_ht: null });
 
 verifier(
   await db.from("st_attestations").insert([
@@ -186,7 +197,18 @@ const reponses = [
   r(protect, "Facturation essentiellement calculée sur les heures / effectifs fournis", "oui"),
   // Dracar Ultimate.
   ...[["Espace administrateur créé", "oui"], ["Espace gestionnaire créé", "oui"], ["Gestionnaires désignés", "oui"], ["Établissements rattachés aux comptes concernés", "a_verifier"], ["Procédure interne de gestion de Dracar Ultimate définie", "non"], ["Tous les salariés/agents concernés sont rattachés dans Dracar Ultimate", "non"], ["Vérification régulière de la validité des cartes professionnelles", "non"]].map(([l, v]) =>
-    r("mission", l, v, l.startsWith("Tous les salariés") ? "Loïc F. n’est pas rattaché ; la liste n’est pas tenue à jour depuis mars." : l.startsWith("Vérification régulière") ? "Aucune traçabilité : la validité des cartes n’est vérifiée qu’à l’embauche." : null, GRILLE_DRACAR, "cnaps"),
+    r("mission", l, v, l.startsWith("Tous les salariés") ? "Loïc F. n’est pas rattaché ; la liste n’est pas tenue à jour depuis mars." : l.startsWith("Vérification régulière") ? "Aucune traçabilité : la validité des cartes n’est vérifiée qu’à l’embauche." : null, GRILLE_CNAPS, "cnaps"),
+  ),
+  ...[["Autorisation d’exercer CNAPS valide", "oui"], ["Une autorisation détenue pour chaque activité exercée", "a_verifier", "Surveillance humaine et événementiel : une seule autorisation présentée."], ["Compte administrateur validé par le CNAPS", "oui"], ["Rattachements rompus pour les salariés sortis", "non", "Deux agents sortis en avril sont toujours rattachés."], ["Entreprise concernée par la surveillance de grands événements", "oui", "Match au stade municipal en avril."], ["Validité des cartes contrôlée avant affectation", "non", "Aucune vérification tracée avant l’événement d’avril."]].map(([l, v, o = null]) =>
+    r("mission", l, v, o, GRILLE_CNAPS, "cnaps"),
+  ),
+  // URSSAF : l'entreprise elle-même.
+  ...[["DPAE effectuée avant chaque prise de poste", "oui"], ["Registre unique du personnel à jour", "oui"], ["Toutes les heures réalisées figurent sur les bulletins de paie", "non", "Avril : 300 h au planning ne figurent sur aucun bulletin."], ["Heures réalisées supérieures aux heures payées", "oui", "Avril 2026."], ["Entreprise immatriculée pour l’activité réellement exercée", "oui"], ["DSN déposées chaque mois", "oui"], ["Le client ne choisit, n’évalue ni ne sanctionne les agents", "a_verifier", "Le centre commercial demande parfois le remplacement d’un agent nommément."], ["Donneur d’ordre établissant directement les plannings", "oui", "Plannings de Protect Ouest faits par le chef de site d’Horizon."]].map(([l, v, o = null]) =>
+    r("mission", l, v, o, GRILLE_URSSAF, "urssaf"),
+  ),
+  // DGFiP : factures.
+  ...[["Numérotation continue et chronologique, sans doublon", "non", "FA-2604-02 attribué à deux factures (Logistique Val-de-Marne et Stade municipal)."], ["Taux de TVA correct", "non", "Mars : TVA à 10 % sur la facture Arcades."], ["Chaque facture correspond à une prestation identifiable (sites, dates, agents)", "a_verifier", "PO-2603-B : aucune liste d’agents ni planning joint."], ["Paiement effectué sur un compte au nom du sous-traitant", "non", "Avril : virement Protect Ouest sur un compte au nom d’un tiers."], ["Facture sans prestation identifiable", "oui", "PO-2603-B, 900 h en mars."], ["Paiement vers un compte différent de celui de l’émetteur", "oui"]].map(([l, v, o = null]) =>
+    r("mission", l, v, o, GRILLE_DGFIP, "dgfip"),
   ),
 ];
 verifier(await db.from("grille_reponses").insert(reponses), "réponses");
@@ -230,5 +252,5 @@ const { data: pieces } = await db.from("mission_documents").select("id, name").e
 const recues = (pieces ?? []).slice(0, 6).map((p) => p.id);
 if (recues.length) await db.from("mission_documents").update({ received: "oui", received_on: "2026-09-15" }).in("id", recues);
 
-console.log(`Démo prête : « ${NOM} », mission DEMO-2026 (${M}).`);
+console.log(`Démo prête : « ${NOM} », mission ${REF} (${M}).`);
 console.log(`${ventes.length} ventes, 6 mois de paie, 3 sous-traitants, ${factures.length} factures, ${paiements.length} paiements, 11 agents, ${reponses.length} réponses de grille, 2 actions.`);

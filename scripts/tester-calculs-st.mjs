@@ -116,3 +116,67 @@ test("cartes : expirée, bientôt expirée, sans date", () => {
   const codes = analyserCartes([ag("A", "2026-09-01"), ag("B", "2026-10-05"), ag("C", null), ag("D", "2027-06-01")], "2026-09-21").map((x) => x.code);
   assert.deepEqual(codes, ["carte_expiree", "carte_bientot_expiree", "carte_sans_date"]);
 });
+
+import { analyserFacturation } from "../src/lib/sous-traitance/calculs.ts";
+
+test("DGFiP : numéros de facture en double, sous-traitance plus chère que la vente ou sous le SMIC", () => {
+  const v = (numero, heures, montant) => ({ id: numero + heures, mois: "2026-03-01", client: "C", bon_commande: "BC", heures_commandees: null, heures_facturees: heures, montant_ht: montant, numero_facture: numero, tva: null, montant_ttc: null, montant_regle: null, date_reglement: null, note: null });
+  const f = (sid, numero, heures, montant) => ({ id: sid + numero + heures, sous_traitant_id: sid, numero, date_facture: null, mois: "2026-03-01", heures, montant_ht: montant, montant_ttc: null, note: null });
+  const cher = { ...st, id: "cher", raison_sociale: "Cher" };
+  const bas = { ...st, id: "bas", raison_sociale: "Bas" };
+  const a = analyserFacturation(
+    [v("F-1", 100, 2500), v("f-1 ", 100, 2500)],
+    [f("cher", "C1", 100, 3000), f("cher", "C1", 100, 3000), f("bas", "B1", 100, 1000)],
+    [cher, bas],
+    [{ valable_du: "2026-01-01", taux_brut: 12 }],
+    P,
+  ).map((x) => x.code);
+  assert.deepEqual(a.sort(), ["cout_st_sous_smic", "cout_st_superieur_vente", "numero_st_double", "numero_vente_double"]);
+});
+
+import { echeancierVigilance } from "../src/lib/sous-traitance/calculs.ts";
+
+test("échéancier de vigilance : conclusion puis tous les 6 mois jusqu'à la fin du contrat", () => {
+  const c = { ...st, date_conclusion_contrat: "2025-10-15", date_fin_contrat: "2027-01-31" };
+  const at = (id, date_delivrance) => ({ id, sous_traitant_id: "st1", date_delivrance, mois_reference: null, effectif_etp: 3, remunerations: null, siren_conforme: "oui", authentifiee: "oui", note: null });
+  const e = echeancierVigilance(c, [at("a1", "2025-10-01"), at("a2", "2026-05-02")], "2026-09-21");
+  assert.deepEqual(e.echeances.map((x) => [x.date, x.statut]), [
+    ["2025-10-15", "fournie"],
+    ["2026-04-15", "tardive"],
+    ["2026-10-15", "prochaine"],
+  ]);
+  const sansFin = echeancierVigilance({ ...c, date_fin_contrat: null }, [], "2026-09-21");
+  assert.deepEqual(sansFin.echeances.map((x) => x.statut), ["manquante", "manquante", "prochaine"]);
+  assert.equal(echeancierVigilance(st, [], "2026-09-21"), null);
+});
+
+import { analyserIdentites, analyserSalaries } from "../src/lib/sous-traitance/calculs.ts";
+
+test("identité : titre expiré, bientôt expiré, sans autorisation de travail ; un salarié sorti n'est plus suivi", () => {
+  const ag = (nom, x) => ({ id: nom, sous_traitant_id: null, nom, note: null, ...x });
+  const codes = analyserIdentites([
+    ag("A", { piece_identite: "titre_sejour", piece_fin: "2026-09-01" }),
+    ag("B", { piece_identite: "titre_sejour", piece_fin: "2026-10-30", autorisation_travail: "non" }),
+    ag("C", { piece_identite: "cni", piece_fin: "2026-01-01" }),
+    ag("D", { piece_identite: "titre_sejour", piece_fin: "2026-01-01", date_sortie: "2026-03-01" }),
+  ], "2026-09-21").map((x) => x.code);
+  assert.deepEqual(codes, ["titre_sejour_expire", "titre_sejour_bientot_expire", "sans_autorisation_travail", "piece_expiree"]);
+});
+
+test("salariés : DPAE absente ou tardive, registre, contrat, visite, effectif de la paie", () => {
+  const ag = (nom, x) => ({ id: nom, sous_traitant_id: null, nom, note: null, ...x });
+  const codes = analyserSalaries([
+    ag("A", { date_entree: "2026-03-02", date_dpae: "2026-03-05", registre: "non" }),
+    ag("B", { date_entree: "2026-01-05", type_contrat: "cdd", contrat_signe: "non" }),
+    ag("C", { date_entree: "2025-01-05", date_dpae: "2025-01-02", visite_medicale: "2025-02-01", visite_prochaine: "2026-02-01" }),
+  ], [{ mois: "2026-03-01", effectif: 5, heures_payees: null, note: null }], "2026-09-21").map((x) => x.code);
+  for (const c of ["dpae_tardive", "absent_registre", "dpae_absente", "contrat_non_signe", "visite_absente", "visite_depassee", "effectif_liste_paie"]) assert.ok(codes.includes(c), c);
+});
+
+test("DGFiP : prix de vente et prix d'achat sous le coût de revient de référence", () => {
+  const v = { id: "v", mois: "2026-03-01", client: "C", bon_commande: "BC", heures_commandees: null, heures_facturees: 100, montant_ht: 2000, numero_facture: "F-9", tva: null, montant_ttc: null, montant_regle: null, date_reglement: null, note: null };
+  const f = { id: "f", sous_traitant_id: "st1", numero: "S1", date_facture: null, mois: "2026-03-01", heures: 100, montant_ht: 1900, montant_ttc: null, note: null };
+  const codes = analyserFacturation([v], [f], [st], [], { ...P, cout_revient_horaire: 22, cout_revient_source: "Indice de la branche 2026" }).map((x) => x.code);
+  assert.deepEqual(codes.sort(), ["cout_st_sous_revient", "prix_vente_sous_revient"]);
+  assert.deepEqual(analyserFacturation([v], [f], [st], [], P).map((x) => x.code), []);
+});
