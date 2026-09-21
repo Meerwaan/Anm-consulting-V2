@@ -15,3 +15,6 @@ Claude outputs/
 
 # Verrous git que la session Claude ne peut pas supprimer (à vider à la main)
 _to_delete/
+
+# Compilation de test locale (next.config.ts, NEXT_DIST_DIR)
+/.next-test/

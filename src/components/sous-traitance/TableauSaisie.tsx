@@ -37,7 +37,9 @@ interface Props {
   /** Pour une colonne « facture » : les factures du sous-traitant. */
   factures?: { id: string; libelle: string }[];
   titreVide: string;
-  libelleAjout: string;
+  libelleAjout?: string;
+  /** Vue complémentaire : libellé en lecture seule de chaque ligne, par clé. */
+  libelles?: Record<string, string>;
 }
 
 let compteur = 0;
@@ -58,24 +60,43 @@ const Cellule = ({
   factures?: { id: string; libelle: string }[];
   etiquette: string;
 }) => {
-  const base =
-    "h-11 w-full rounded-[4px] border border-filet bg-papier px-2 text-meta text-encre outline-none transition-colors focus:border-vert";
+  const base = "h-11 w-full rounded-[4px] border border-filet bg-papier px-2 text-meta text-encre outline-none transition-colors focus:border-vert";
   if (colonne.type === "verif") {
     return (
-      <select aria-label={etiquette} value={valeur} onChange={(e) => { onChange(e.target.value); onValider(); }} className={base}>
+      <select
+        aria-label={etiquette}
+        value={valeur}
+        onChange={(e) => {
+          onChange(e.target.value);
+          onValider();
+        }}
+        className={base}
+      >
         <option value="">—</option>
         {["oui", "non", "a_verifier", "na"].map((v) => (
-          <option key={v} value={v}>{LIBELLES_VERIF[v]}</option>
+          <option key={v} value={v}>
+            {LIBELLES_VERIF[v]}
+          </option>
         ))}
       </select>
     );
   }
   if (colonne.type === "facture") {
     return (
-      <select aria-label={etiquette} value={valeur} onChange={(e) => { onChange(e.target.value); onValider(); }} className={base}>
+      <select
+        aria-label={etiquette}
+        value={valeur}
+        onChange={(e) => {
+          onChange(e.target.value);
+          onValider();
+        }}
+        className={base}
+      >
         <option value="">Aucune</option>
         {(factures ?? []).map((f) => (
-          <option key={f.id} value={f.id}>{f.libelle}</option>
+          <option key={f.id} value={f.id}>
+            {f.libelle}
+          </option>
         ))}
       </select>
     );
@@ -94,11 +115,10 @@ const Cellule = ({
   );
 };
 
-const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, factures, titreVide, libelleAjout }: Props) => {
+const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, factures, titreVide, libelleAjout, libelles }: Props) => {
   const def = TABLES[table];
-  const [lignes, setLignes] = useState<Ligne[]>(() =>
-    initiales.map((l) => ({ uid: l.cle, cle: l.cle, valeurs: l.valeurs, etat: "propre" })),
-  );
+  const complement = Boolean(def.complement);
+  const [lignes, setLignes] = useState<Ligne[]>(() => initiales.map((l) => ({ uid: l.cle, cle: l.cle, valeurs: l.valeurs, etat: "propre" })));
   const [aSupprimer, setASupprimer] = useState<string | null>(null);
   const [collage, setCollage] = useState<string | null>(null);
   const [retourCollage, setRetourCollage] = useState<string | null>(null);
@@ -113,8 +133,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
   const enregistree = useRef(new Map<string, number>());
   const cles = useRef(new Map<string, string | null>(initiales.map((l) => [l.cle, l.cle])));
 
-  const maj = (uid: string, champs: Partial<Ligne>) =>
-    setLignes((l) => l.map((x) => (x.uid === uid ? { ...x, ...champs } : x)));
+  const maj = (uid: string, champs: Partial<Ligne>) => setLignes((l) => l.map((x) => (x.uid === uid ? { ...x, ...champs } : x)));
 
   const enregistrerMaintenant = async (uid: string): Promise<boolean> => {
     // Laisser React appliquer la dernière frappe : un select change la valeur puis enregistre.
@@ -135,9 +154,12 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
     enregistree.current.set(uid, v);
     const aJour = (version.current.get(uid) ?? 0) === v;
     // La ligne revient normalisée : un mois collé « 03/2026 » devient lisible par le sélecteur.
-    maj(uid, aJour
-      ? { etat: "propre", cle: res.valeur.cle, valeurs: { ...ligne.valeurs, ...res.valeur.valeurs } }
-      : { etat: "modifiee", cle: res.valeur.cle });
+    maj(
+      uid,
+      aJour
+        ? { etat: "propre", cle: res.valeur.cle, valeurs: { ...ligne.valeurs, ...res.valeur.valeurs } }
+        : { etat: "modifiee", cle: res.valeur.cle },
+    );
     return true;
   };
 
@@ -211,7 +233,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
     );
   };
 
-  const largeurTotale = def.colonnes.reduce((t, c) => t + c.largeur, 0) + 5;
+  const largeurTotale = def.colonnes.reduce((t, c) => t + c.largeur, 0) + (complement ? 12 : 5);
 
   return (
     <div className="grid min-w-0 gap-3">
@@ -222,8 +244,18 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
           <table className="w-full border-separate border-spacing-x-1 border-spacing-y-1" style={{ minWidth: `${largeurTotale}rem` }}>
             <thead>
               <tr>
+                {complement ? (
+                  <th scope="col" className="px-1 pb-1 text-left align-bottom text-note font-medium text-encre-2" style={{ minWidth: "9rem" }}>
+                    Vente
+                  </th>
+                ) : null}
                 {def.colonnes.map((c) => (
-                  <th key={c.cle} scope="col" className="px-1 pb-1 text-left align-bottom text-note font-medium text-encre-2" style={{ minWidth: `${c.largeur}rem` }}>
+                  <th
+                    key={c.cle}
+                    scope="col"
+                    className="px-1 pb-1 text-left align-bottom text-note font-medium text-encre-2"
+                    style={{ minWidth: `${c.largeur}rem` }}
+                  >
                     {c.libelle}
                     {c.aide ? <span className="block font-normal text-gris">{c.aide}</span> : null}
                   </th>
@@ -237,6 +269,11 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
               {lignes.map((l) => (
                 <FragmentLigne key={l.uid}>
                   <tr>
+                    {complement ? (
+                      <th scope="row" className="px-1 text-left align-middle text-meta font-normal text-encre">
+                        {libelles?.[l.cle ?? ""] ?? "—"}
+                      </th>
+                    ) : null}
                     {def.colonnes.map((c) => (
                       <td key={c.cle}>
                         <Cellule
@@ -253,10 +290,12 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
                       <div className="flex items-center justify-end gap-1">
                         <span className="flex size-6 items-center justify-center" aria-live="polite">
                           {l.etat === "propre" && l.cle ? <Check size={16} className="text-mineur" aria-label="Enregistrée" /> : null}
-                          {l.etat === "enregistrement" ? <span className="size-3 animate-pulse rounded-full bg-brume" aria-label="Enregistrement" /> : null}
+                          {l.etat === "enregistrement" ? (
+                            <span className="size-3 animate-pulse rounded-full bg-brume" aria-label="Enregistrement" />
+                          ) : null}
                           {l.etat === "erreur" ? <WarningCircle size={18} className="text-critique" aria-label="Erreur" /> : null}
                         </span>
-                        {aSupprimer === l.uid ? (
+                        {complement ? null : aSupprimer === l.uid ? (
                           <button type="button" onClick={() => supprimer(l.uid)} className="h-11 px-1 text-note font-medium text-critique">
                             Supprimer ?
                           </button>
@@ -275,7 +314,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
                   </tr>
                   {l.etat === "erreur" && l.erreur ? (
                     <tr>
-                      <td colSpan={def.colonnes.length + 1} className="px-1 pb-2 text-meta text-critique" role="alert">
+                      <td colSpan={def.colonnes.length + (complement ? 2 : 1)} className="px-1 pb-2 text-meta text-critique" role="alert">
                         {l.erreur}
                       </td>
                     </tr>
@@ -287,31 +326,41 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={ajouter}
-          className="flex min-h-11 items-center gap-2 rounded-[5px] border border-encre px-4 text-meta font-medium text-encre transition-colors hover:bg-encre hover:text-papier"
-        >
-          <Plus size={16} aria-hidden />
-          {libelleAjout}
-        </button>
-        <button
-          type="button"
-          onClick={() => { setCollage(collage === null ? "" : null); setRetourCollage(null); }}
-          aria-expanded={collage !== null}
-          className="flex min-h-11 items-center gap-2 rounded-[5px] px-4 text-meta text-encre-2 underline-offset-4 hover:underline"
-        >
-          <ClipboardText size={16} aria-hidden />
-          Coller depuis Excel
-        </button>
-      </div>
+      {complement ? null : (
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={ajouter}
+            className="flex min-h-11 items-center gap-2 rounded-[5px] border border-encre px-4 text-meta font-medium text-encre transition-colors hover:bg-encre hover:text-papier"
+          >
+            <Plus size={16} aria-hidden />
+            {libelleAjout}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setCollage(collage === null ? "" : null);
+              setRetourCollage(null);
+            }}
+            aria-expanded={collage !== null}
+            className="flex min-h-11 items-center gap-2 rounded-[5px] px-4 text-meta text-encre-2 underline-offset-4 hover:underline"
+          >
+            <ClipboardText size={16} aria-hidden />
+            Coller depuis Excel
+          </button>
+        </div>
+      )}
 
       {collage !== null ? (
         <div className="flex flex-col gap-2 rounded-[5px] border border-filet bg-papier p-4">
           <label htmlFor={`coller-${table}-${sousTraitantId ?? ""}`} className="text-meta text-encre">
             Colle ici des lignes copiées d’Excel, colonnes dans cet ordre :{" "}
-            <strong className="font-medium">{def.colonnes.filter((c) => c.type !== "facture").map((c) => c.libelle).join(" · ")}</strong>
+            <strong className="font-medium">
+              {def.colonnes
+                .filter((c) => c.type !== "facture")
+                .map((c) => c.libelle)
+                .join(" · ")}
+            </strong>
           </label>
           <textarea
             id={`coller-${table}-${sousTraitantId ?? ""}`}
@@ -332,7 +381,11 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
           </div>
         </div>
       ) : null}
-      {retourCollage ? <p role="status" className="text-meta text-encre-2">{retourCollage}</p> : null}
+      {retourCollage ? (
+        <p role="status" className="text-meta text-encre-2">
+          {retourCollage}
+        </p>
+      ) : null}
     </div>
   );
 };

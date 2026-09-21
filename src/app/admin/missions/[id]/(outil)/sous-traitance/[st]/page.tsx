@@ -8,6 +8,10 @@ import { lireDonneesST } from "@/lib/sous-traitance/lecture";
 import { SEUIL_VIGILANCE_HT, analyserSousTraitant } from "@/lib/sous-traitance/calculs";
 import { versLigneInitiale } from "@/lib/sous-traitance/tables";
 import { fmtDate, fmtEuros, fmtEurosRond, fmtHeures, fmtMois, fmtNombre, fmtPct } from "@/lib/sous-traitance/format";
+import GrilleSaisie from "@/components/grilles/GrilleSaisie";
+import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
+import { GRILLE_SOUS_TRAITANT } from "@/content/grilles";
+import { lireGrilles } from "@/lib/grilles/lecture";
 
 export const metadata: Metadata = { title: "Dossier sous-traitant — ANM Consulting", robots: { index: false } };
 
@@ -25,12 +29,28 @@ const Titre = ({ n, id, children, sous }: { n: string; id: string; children: Rea
  * (l'effectif déclaré peut-il produire les heures facturées ?) et le fléchage DGFiP
  * (chaque facture est-elle payée, au bon montant, sur un compte à son nom ?).
  */
-export default async function DossierSousTraitantPage({ params }: { params: Promise<{ id: string; st: string }> }) {
+const VUES = [
+  { cle: "ensemble", libelle: "Vue d’ensemble" },
+  { cle: "donnees", libelle: "Pièces et chiffres" },
+  { cle: "controle", libelle: "Contrôle" },
+  { cle: "conclusion", libelle: "Conclusion" },
+] as const;
+type Vue = (typeof VUES)[number]["cle"];
+
+export default async function DossierSousTraitantPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string; st: string }>;
+  searchParams: Promise<{ vue?: string }>;
+}) {
   const { id, st: stId } = await params;
-  const d = await lireDonneesST(id);
+  const { vue: vueDemandee } = await searchParams;
+  const vue: Vue = VUES.some((v) => v.cle === vueDemandee) ? (vueDemandee as Vue) : "ensemble";
+  const [d, g] = await Promise.all([lireDonneesST(id), lireGrilles(id)]);
   const st = d.sousTraitants.find((s) => s.id === stId);
   if (!st) notFound();
-  const x = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics);
+  const x = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents);
   const donneur = st.donneur_id ? d.sousTraitants.find((s) => s.id === st.donneur_id) : null;
   const facturesST = d.factures.filter((f) => f.sous_traitant_id === st.id);
   const optionsFactures = facturesST.map((f) => ({
@@ -40,6 +60,11 @@ export default async function DossierSousTraitantPage({ params }: { params: Prom
       .join(" · "),
   }));
   const nbAlertes = x.alertes.filter((a) => a.niveau === "alerte").length;
+  const totalQuestions = GRILLE_SOUS_TRAITANT.sections.reduce((n, s) => n + s.items.length, 0);
+  const repondues = GRILLE_SOUS_TRAITANT.sections.reduce(
+    (n, s) => n + s.items.filter((i) => g.reponses[`st|${st.id}|${i.code}`]?.reponse).length,
+    0,
+  );
 
   return (
     <div className="flex flex-col gap-14">
@@ -73,67 +98,49 @@ export default async function DossierSousTraitantPage({ params }: { params: Prom
           ))}
         </dl>
       </div>
+      {/* Quatre vues : on ne voit jamais tout le dossier d'un coup. */}
+      <nav aria-label="Parties du dossier" className="-mt-6 flex gap-1 overflow-x-auto border-b border-filet">
+        {VUES.map((v) => (
+          <Link
+            key={v.cle}
+            href={`/admin/missions/${id}/sous-traitance/${st.id}${v.cle === "ensemble" ? "" : `?vue=${v.cle}`}`}
+            aria-current={vue === v.cle ? "page" : undefined}
+            className={`-mb-px flex min-h-12 shrink-0 items-center border-b-2 px-4 text-meta transition-colors ${
+              vue === v.cle ? "border-vert font-medium text-encre" : "border-transparent text-encre-2 hover:text-vert"
+            }`}
+          >
+            {v.libelle}
+            {v.cle === "controle" ? <span className="ml-2 tabular-nums text-gris">{repondues}&nbsp;/&nbsp;{totalQuestions}</span> : null}
+          </Link>
+        ))}
+      </nav>
 
+      {vue === "ensemble" ? (
+        <>
       <section aria-labelledby="alertes-st" className="flex flex-col gap-5">
         <Titre n="Ce qui ressort" id="alertes-st">Alertes et points à vérifier</Titre>
-        <ListeAlertes alertes={x.alertes} vide="Aucune alerte : attestations, faisabilité et paiements sont cohérents avec ce qui est saisi." />
+        <ListeAlertes alertes={x.alertes} vide="Aucune alerte : attestations, faisabilité et paiements sont cohérents avec ce qui est saisi." missionId={id} sousTraitantId={st.id} constatsExistants={g.nonConformites.map((n) => n.constat ?? "")} />
       </section>
-
-      <section aria-labelledby="identite" className="flex flex-col gap-5">
-        <Titre n="1" id="identite">Identification</Titre>
-        <FicheIdentite missionId={id} st={st} />
+      <section aria-labelledby="resume-conclusion" className="flex flex-col gap-4">
+        <h3 id="resume-conclusion" className="font-display text-t4 text-encre">Conclusions</h3>
+        <dl className="grid gap-x-8 gap-y-4 border-y border-filet py-5 sm:grid-cols-2">
+          {GRILLE_SOUS_TRAITANT.conclusions.filter((c) => c.type === "choix").map((c) => {
+            const v = g.conclusions[`${c.code}|${st.id}`]?.choix;
+            return (
+              <div key={c.code} className="flex flex-col gap-1">
+                <dt className="text-note text-gris">{c.titre}</dt>
+                <dd className={`text-corps ${v ? "text-encre" : "text-gris"}`}>{v ?? "Pas encore conclu"}</dd>
+              </div>
+            );
+          })}
+        </dl>
+        <Link href={`/admin/missions/${id}/sous-traitance/${st.id}?vue=conclusion`} className="flex min-h-11 w-fit items-center text-meta font-medium text-vert underline underline-offset-4">
+          Rédiger ou modifier la conclusion
+        </Link>
       </section>
-
-      <section aria-labelledby="attestations" className="flex flex-col gap-5">
-        <Titre
-          n="2"
-          id="attestations"
-          sous="Chaque attestation de vigilance URSSAF, avec l’effectif et les rémunérations qu’elle indique, et le mois de déclaration auquel ils se rapportent. Elle vaut 6 mois : elle doit être renouvelée pendant toute la relation."
-        >
-          Attestations de vigilance
-        </Titre>
-        <TableauSaisie
-          missionId={id}
-          table="st_attestations"
-          sousTraitantId={st.id}
-          lignes={d.attestations.filter((a) => a.sous_traitant_id === st.id).map((a) => versLigneInitiale("st_attestations", a as unknown as Record<string, unknown>))}
-          titreVide="Aucune attestation saisie."
-          libelleAjout="Ajouter une attestation"
-        />
-      </section>
-
-      <section aria-labelledby="factures" className="flex flex-col gap-5">
-        <Titre n="3" id="factures" sous="Les factures du sous-traitant, avec le nombre d’heures et le mois de prestation : c’est ce qui permet de contrôler la faisabilité.">
-          Factures du sous-traitant
-        </Titre>
-        <TableauSaisie
-          missionId={id}
-          table="st_factures"
-          sousTraitantId={st.id}
-          lignes={facturesST.map((f) => versLigneInitiale("st_factures", f as unknown as Record<string, unknown>))}
-          titreVide="Aucune facture saisie."
-          libelleAjout="Ajouter une facture"
-        />
-      </section>
-
-      <section aria-labelledby="paiements" className="flex flex-col gap-5">
-        <Titre n="4" id="paiements" sous="Chaque paiement, rattaché à la facture qu’il règle. La DGFiP regarde que l’argent va bien au sous-traitant qui a facturé.">
-          Paiements
-        </Titre>
-        <TableauSaisie
-          missionId={id}
-          table="st_paiements"
-          sousTraitantId={st.id}
-          factures={optionsFactures}
-          lignes={d.paiements.filter((p) => p.sous_traitant_id === st.id).map((p) => versLigneInitiale("st_paiements", p as unknown as Record<string, unknown>))}
-          titreVide="Aucun paiement saisi."
-          libelleAjout="Ajouter un paiement"
-        />
-      </section>
-
       <section aria-labelledby="faisabilite" className="flex flex-col gap-5">
         <Titre
-          n="5"
+          n="Calcul"
           id="faisabilite"
           sous={`Capacité = effectif de l’attestation × ${fmtNombre(d.parametres.heures_mensuelles_etp)} h. Plafond SMIC = rémunérations déclarées ÷ SMIC horaire. Des heures facturées au-delà ne peuvent pas être produites par les seuls salariés déclarés.`}
         >
@@ -184,9 +191,8 @@ export default async function DossierSousTraitantPage({ params }: { params: Prom
           sous-traitant peut avoir d’autres clients. Un dépassement est à expliquer, pas à qualifier.
         </p>
       </section>
-
       <section aria-labelledby="flechage" className="flex flex-col gap-5">
-        <Titre n="6" id="flechage" sous="Chaque facture rapprochée de ses paiements. Montant attendu : TTC s’il est saisi, sinon HT.">
+        <Titre n="Calcul" id="flechage" sous="Chaque facture rapprochée de ses paiements. Montant attendu : TTC s’il est saisi, sinon HT.">
           Fléchage des factures vers les paiements
         </Titre>
         {x.flechage.length === 0 && x.paiementsSansFacture.length === 0 ? (
@@ -237,6 +243,123 @@ export default async function DossierSousTraitantPage({ params }: { params: Prom
           </div>
         )}
       </section>
+        </>
+      ) : null}
+
+      {vue === "donnees" ? (
+        <>
+      <section aria-labelledby="identite" className="flex flex-col gap-5">
+        <Titre n="1" id="identite">Identification</Titre>
+        <FicheIdentite missionId={id} st={st} />
+      </section>
+      <section aria-labelledby="attestations" className="flex flex-col gap-5">
+        <Titre
+          n="2"
+          id="attestations"
+          sous="Chaque attestation de vigilance URSSAF, avec l’effectif et les rémunérations qu’elle indique, et le mois de déclaration auquel ils se rapportent. Elle vaut 6 mois : elle doit être renouvelée pendant toute la relation."
+        >
+          Attestations de vigilance
+        </Titre>
+        <TableauSaisie
+          missionId={id}
+          table="st_attestations"
+          sousTraitantId={st.id}
+          lignes={d.attestations.filter((a) => a.sous_traitant_id === st.id).map((a) => versLigneInitiale("st_attestations", a as unknown as Record<string, unknown>))}
+          titreVide="Aucune attestation saisie."
+          libelleAjout="Ajouter une attestation"
+        />
+      </section>
+
+      <section aria-labelledby="factures" className="flex flex-col gap-5">
+        <Titre n="3" id="factures" sous="Les factures du sous-traitant, avec le nombre d’heures et le mois de prestation : c’est ce qui permet de contrôler la faisabilité.">
+          Factures du sous-traitant
+        </Titre>
+        <TableauSaisie
+          missionId={id}
+          table="st_factures"
+          sousTraitantId={st.id}
+          lignes={facturesST.map((f) => versLigneInitiale("st_factures", f as unknown as Record<string, unknown>))}
+          titreVide="Aucune facture saisie."
+          libelleAjout="Ajouter une facture"
+        />
+      </section>
+
+      <section aria-labelledby="paiements" className="flex flex-col gap-5">
+        <Titre n="4" id="paiements" sous="Chaque paiement, rattaché à la facture qu’il règle. La DGFiP regarde que l’argent va bien au sous-traitant qui a facturé.">
+          Paiements
+        </Titre>
+        <TableauSaisie
+          missionId={id}
+          table="st_paiements"
+          sousTraitantId={st.id}
+          factures={optionsFactures}
+          lignes={d.paiements.filter((p) => p.sous_traitant_id === st.id).map((p) => versLigneInitiale("st_paiements", p as unknown as Record<string, unknown>))}
+          titreVide="Aucun paiement saisi."
+          libelleAjout="Ajouter un paiement"
+        />
+      </section>
+      <section aria-labelledby="agents" className="flex flex-col gap-5">
+        <Titre
+          n="5"
+          id="agents"
+          sous="Pour chaque agent vu sur le marché : est-il dans les documents du sous-traitant, sa carte est-elle valide, est-il rattaché dans Dracar Ultimate et présent sur le planning ?"
+        >
+          Agents contrôlés
+        </Titre>
+        <TableauSaisie
+          missionId={id}
+          table="st_agents"
+          sousTraitantId={st.id}
+          lignes={d.agents.filter((a) => a.sous_traitant_id === st.id).map((a) => versLigneInitiale("st_agents", a as unknown as Record<string, unknown>))}
+          titreVide="Aucun agent contrôlé."
+          libelleAjout="Ajouter un agent"
+        />
+      </section>
+
+        </>
+      ) : null}
+
+      {vue === "controle" ? (
+        <>
+      <section aria-labelledby="controle" className="flex flex-col gap-5">
+        <div>
+          <h3 id="controle" className="font-display text-t4 text-encre">Contrôle du sous-traitant</h3>
+          <p className="mt-1 max-w-2xl text-meta text-encre-2">
+            Les points de tes grilles 02 et 05. Ouvre une partie, réponds au toucher ; ajoute une observation quand c’est utile.
+            Les parties « points d’alerte » se lisent à l’envers : « oui » veut dire que l’anomalie est constatée.
+          </p>
+        </div>
+        <GrilleSaisie missionId={id} grille="st" cible={st.id} sections={GRILLE_SOUS_TRAITANT.sections} reponses={g.reponses} />
+      </section>
+        </>
+      ) : null}
+
+      {vue === "conclusion" ? (
+        <>
+      <section aria-labelledby="conclusion" className="flex flex-col gap-6">
+        <div>
+          <h3 id="conclusion" className="font-display text-t4 text-encre">Conclusion sur {st.raison_sociale}</h3>
+          <p className="mt-1 max-w-2xl text-meta text-encre-2">
+            Ce que tu retiens de ce dossier, avec les choix de tes grilles. C’est ce qui figure au rapport.
+          </p>
+        </div>
+        <ConclusionsSaisie
+          missionId={id}
+          grille="st"
+          cible={st.id}
+          conclusions={GRILLE_SOUS_TRAITANT.conclusions}
+          valeurs={g.conclusions}
+          reponses={g.reponses}
+        />
+        <p className="text-meta text-encre-2">
+          Une non-conformité à formaliser (nature, action corrective, délai) ?{" "}
+          <Link href={`/admin/missions/${id}/rapport#non-conformites`} className="font-medium text-vert underline underline-offset-4">
+            Elle se note dans l’onglet Rapport.
+          </Link>
+        </p>
+      </section>
+        </>
+      ) : null}
     </div>
   );
 }

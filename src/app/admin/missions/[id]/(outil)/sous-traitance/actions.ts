@@ -79,6 +79,8 @@ export const enregistrerLigne = async (entree: {
   if ("erreur" in conv) return { ok: false, erreur: conv.erreur };
   const valeurs = conv.valeurs;
   const supabase = await createClient();
+  const tableDb = def.base ?? def.nom;
+  if (def.complement && !entree.cle) return { ok: false, erreur: "Ajoute d’abord la ligne dans le tableau principal." };
 
   if (!def.globale) valeurs.mission_id = entree.missionId;
   if (def.parSousTraitant) {
@@ -92,7 +94,7 @@ export const enregistrerLigne = async (entree: {
     if (!st) return { ok: false, erreur: "Ce sous-traitant n’appartient pas à la mission. Recharge la page." };
     valeurs.sous_traitant_id = entree.sousTraitantId;
   }
-  if (entree.table === "st_ventes" || entree.table === "st_paie") {
+  if (tableDb === "st_ventes" || tableDb === "st_paie") {
     valeurs.updated_at = new Date().toISOString();
     valeurs.updated_by = session.utilisateurId;
   }
@@ -105,12 +107,12 @@ export const enregistrerLigne = async (entree: {
     if (!nouvelleCle) return { ok: false, erreur: `${def.colonnes.find((c) => c.cle === def.cle)?.libelle} est obligatoire.` };
     if (entree.table === "smic_horaire" && valeurs.taux_brut == null) return { ok: false, erreur: "Saisis le taux horaire brut." };
     if (entree.cle && entree.cle !== nouvelleCle) {
-      let suppr = supabase.from(entree.table).delete().eq(def.cle, entree.cle);
+      let suppr = supabase.from(tableDb).delete().eq(def.cle, entree.cle);
       if (!def.globale) suppr = suppr.eq("mission_id", entree.missionId);
       await suppr;
     }
     const conflit = def.globale ? def.cle : `mission_id,${def.cle}`;
-    const { error } = await supabase.from(entree.table).upsert(valeurs, { onConflict: conflit });
+    const { error } = await supabase.from(tableDb).upsert(valeurs, { onConflict: conflit });
     if (error) {
       console.error("[sous-traitance] enregistrement", entree.table, error.message);
       return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
@@ -120,7 +122,7 @@ export const enregistrerLigne = async (entree: {
   }
 
   if (entree.cle) {
-    let maj = supabase.from(entree.table).update(valeurs).eq("id", entree.cle).eq("mission_id", entree.missionId);
+    let maj = supabase.from(tableDb).update(valeurs).eq("id", entree.cle).eq("mission_id", entree.missionId);
     if (def.parSousTraitant) maj = maj.eq("sous_traitant_id", entree.sousTraitantId!);
     const { error } = await maj;
     if (error) {
@@ -131,8 +133,8 @@ export const enregistrerLigne = async (entree: {
     return { ok: true, valeur: { cle: entree.cle, valeurs: versLigneInitiale(entree.table, valeurs).valeurs } };
   }
 
-  if (entree.table === "st_ventes" && !valeurs.mois) return { ok: false, erreur: "Indique le mois de la vente." };
-  const { data, error } = await supabase.from(entree.table).insert(valeurs).select("id").single<{ id: string }>();
+  if (tableDb === "st_ventes" && !valeurs.mois) return { ok: false, erreur: "Indique le mois de la vente." };
+  const { data, error } = await supabase.from(tableDb).insert(valeurs).select("id").single<{ id: string }>();
   if (error || !data) {
     console.error("[sous-traitance] création", entree.table, error?.message);
     return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
@@ -149,8 +151,9 @@ export const supprimerLigne = async (entree: {
   await exigerRole("consultant");
   const def = TABLES[entree.table];
   if (!def) return { ok: false, erreur: "Tableau inconnu." };
+  if (def.complement) return { ok: false, erreur: "Supprime la ligne dans le tableau principal." };
   const supabase = await createClient();
-  let suppr = supabase.from(entree.table).delete().eq(def.cle, entree.cle);
+  let suppr = supabase.from(def.base ?? def.nom).delete().eq(def.cle, entree.cle);
   if (!def.globale) suppr = suppr.eq("mission_id", entree.missionId);
   const { error } = await suppr;
   if (error) return { ok: false, erreur: "La suppression a échoué. Réessaie." };

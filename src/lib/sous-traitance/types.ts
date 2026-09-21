@@ -20,6 +20,11 @@ export interface Vente {
   heures_commandees: number | null;
   heures_facturees: number | null;
   montant_ht: number | null;
+  numero_facture: string | null;
+  tva: number | null;
+  montant_ttc: number | null;
+  montant_regle: number | null;
+  date_reglement: string | null;
   note: string | null;
 }
 
@@ -27,7 +32,11 @@ export interface Vente {
 export interface Paie {
   mois: string;
   effectif: number | null;
+  /** Heures réalisées selon le planning ou le pointage. */
+  heures_realisees: number | null;
+  /** Heures rémunérées selon les bulletins. */
   heures_payees: number | null;
+  masse_salariale: number | null;
   note: string | null;
 }
 
@@ -85,4 +94,22 @@ export interface Smic {
   valable_du: string;
   taux_brut: number;
   source?: string | null;
+}
+
+/** Un agent contrôlé (grilles 02 §7 et 03 §4). */
+export interface Agent {
+  id: string;
+  sous_traitant_id: string | null;
+  nom: string | null;
+  employeur: string | null;
+  carte_numero: string | null;
+  heures: number | null;
+  present_documents: Verif | null;
+  carte_valide: Verif | null;
+  carte_activite: Verif | null;
+  dracar: Verif | null;
+  planning: Verif | null;
+  carte_fin: string | null;
+  affecte_mission: Verif | null;
+  note: string | null;
 }

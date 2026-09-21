@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import FormulaireParametres from "@/components/sous-traitance/FormulaireParametres";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
-import { calculerEcart } from "@/lib/sous-traitance/calculs";
+import { analyserEntreprise, calculerEcart } from "@/lib/sous-traitance/calculs";
+import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
+import { lireGrilles } from "@/lib/grilles/lecture";
 import { versLigneInitiale } from "@/lib/sous-traitance/tables";
-import { fmtHeures, fmtPct } from "@/lib/sous-traitance/format";
+import { fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
 
 export const metadata: Metadata = { title: "Heures de l’entreprise — ANM Consulting", robots: { index: false } };
 
@@ -15,8 +17,10 @@ export const metadata: Metadata = { title: "Heures de l’entreprise — ANM Con
  */
 export default async function HeuresPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const d = await lireDonneesST(id);
+  const [d, g] = await Promise.all([lireDonneesST(id), lireGrilles(id)]);
   const ecart = calculerEcart(d.ventes, d.paie, d.parametres);
+  const controles = analyserEntreprise(d.ventes, d.paie, d.smics);
+  const constats = g.nonConformites.map((n) => n.constat ?? "");
 
   return (
     <div className="flex flex-col gap-14">
@@ -74,12 +78,35 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
         />
       </section>
 
+      <section aria-labelledby="facturation" className="flex flex-col gap-5">
+        <div>
+          <p className="etiquette">2 bis</p>
+          <h3 id="facturation" className="mt-1 font-display text-t4 text-encre">Facturation, TVA et règlements</h3>
+          <p className="mt-1 max-w-2xl text-meta text-encre-2">
+            Pour chaque vente ci-dessus : le numéro de facture, la TVA, le TTC et ce que le client a réellement payé. C’est la chaîne
+            bon de commande → facture → TVA → règlement que regarde la DGFiP.
+          </p>
+        </div>
+        {d.ventes.length ? (
+          <TableauSaisie
+            missionId={id}
+            table="st_ventes_facturation"
+            lignes={d.ventes.map((v) => versLigneInitiale("st_ventes_facturation", v as unknown as Record<string, unknown>))}
+            libelles={Object.fromEntries(d.ventes.map((v) => [v.id, [fmtMois(v.mois), v.client, v.bon_commande].filter(Boolean).join(" · ")]))}
+            titreVide=""
+          />
+        ) : (
+          <p className="text-meta text-encre-2">Ajoute d’abord les ventes : leur facturation se complète ici.</p>
+        )}
+        <ListeAlertes alertes={controles.ventes} vide="Aucune incohérence entre commandes, factures, TVA et règlements." missionId={id} constatsExistants={constats} />
+      </section>
+
       <section aria-labelledby="paie" className="flex flex-col gap-5">
         <div>
           <p className="etiquette">3</p>
           <h3 id="paie" className="mt-1 font-display text-t4 text-encre">B · Heures payées aux salariés</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Une ligne par mois : le total des heures figurant sur les bulletins de paie. Sources : bulletins, DSN, livre de paie.
+            Une ligne par mois : les heures réalisées (planning, pointage), les heures payées (bulletins) et la masse salariale brute. Des heures réalisées qui n’apparaissent sur aucun bulletin sont le premier signe d’un travail dissimulé. Sources : bulletins, DSN, livre de paie, planning, pointage.
           </p>
         </div>
         <TableauSaisie
@@ -89,6 +116,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           titreVide="Aucun mois saisi. Ajoute le premier mois de la période."
           libelleAjout="Ajouter un mois"
         />
+        <ListeAlertes alertes={controles.paie} vide="Heures réalisées, heures payées et masse salariale sont cohérentes." missionId={id} constatsExistants={constats} />
       </section>
 
       <section aria-labelledby="smic" className="flex flex-col gap-5">

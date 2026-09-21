@@ -17,7 +17,16 @@ export interface Colonne {
   aide?: string;
 }
 
-export type NomTable = "st_ventes" | "st_paie" | "st_attestations" | "st_factures" | "st_paiements" | "smic_horaire";
+export type NomTable =
+  | "st_ventes"
+  | "st_ventes_facturation"
+  | "st_paie"
+  | "st_attestations"
+  | "st_factures"
+  | "st_paiements"
+  | "st_agents"
+  | "agents_entreprise"
+  | "smic_horaire";
 
 export interface DefTable {
   nom: NomTable;
@@ -27,6 +36,13 @@ export interface DefTable {
   parSousTraitant: boolean;
   /** Table commune à toutes les missions (SMIC). */
   globale?: boolean;
+  /** Table réelle en base, quand elle diffère du nom (deux vues sur une même table). */
+  base?: string;
+  /**
+   * Vue complémentaire : elle complète des lignes créées ailleurs (pas d'ajout, pas de
+   * suppression, pas de collage). Chaque ligne est présentée par un libellé en lecture seule.
+   */
+  complement?: boolean;
   colonnes: Colonne[];
 }
 
@@ -37,11 +53,25 @@ export const TABLES: Record<NomTable, DefTable> = {
     parSousTraitant: false,
     colonnes: [
       { cle: "mois", libelle: "Mois", type: "mois", largeur: 7.5 },
-      { cle: "client", libelle: "Client", type: "texte", largeur: 8 },
-      { cle: "bon_commande", libelle: "Bon de commande", type: "texte", largeur: 6.5 },
-      { cle: "heures_commandees", libelle: "Heures commandées", type: "heures", largeur: 5.5 },
-      { cle: "heures_facturees", libelle: "Heures facturées", type: "heures", largeur: 5.5 },
-      { cle: "montant_ht", libelle: "Montant HT", type: "euros", largeur: 6.5 },
+      { cle: "client", libelle: "Client", type: "texte", largeur: 7 },
+      { cle: "bon_commande", libelle: "Bon de commande", type: "texte", largeur: 6 },
+      { cle: "heures_commandees", libelle: "Heures commandées", type: "heures", largeur: 5 },
+      { cle: "heures_facturees", libelle: "Heures facturées", type: "heures", largeur: 5 },
+      { cle: "montant_ht", libelle: "Montant HT", type: "euros", largeur: 6 },
+    ],
+  },
+  st_ventes_facturation: {
+    nom: "st_ventes_facturation",
+    base: "st_ventes",
+    cle: "id",
+    parSousTraitant: false,
+    complement: true,
+    colonnes: [
+      { cle: "numero_facture", libelle: "N° de facture", type: "texte", largeur: 6.5 },
+      { cle: "tva", libelle: "TVA", type: "euros", largeur: 6 },
+      { cle: "montant_ttc", libelle: "Montant TTC", type: "euros", largeur: 6.5 },
+      { cle: "montant_regle", libelle: "Montant réglé", type: "euros", largeur: 6.5 },
+      { cle: "date_reglement", libelle: "Réglé le", type: "date", largeur: 7.5 },
     ],
   },
   st_paie: {
@@ -49,10 +79,12 @@ export const TABLES: Record<NomTable, DefTable> = {
     cle: "mois",
     parSousTraitant: false,
     colonnes: [
-      { cle: "mois", libelle: "Mois", type: "mois", largeur: 8 },
-      { cle: "effectif", libelle: "Effectif", type: "nombre", largeur: 5 },
-      { cle: "heures_payees", libelle: "Heures sur les bulletins", type: "heures", largeur: 8 },
-      { cle: "note", libelle: "Source / remarque", type: "texte", largeur: 12 },
+      { cle: "mois", libelle: "Mois", type: "mois", largeur: 7.5 },
+      { cle: "effectif", libelle: "Effectif", type: "nombre", largeur: 4.5 },
+      { cle: "heures_realisees", libelle: "Heures réalisées (planning, pointage)", type: "heures", largeur: 6 },
+      { cle: "heures_payees", libelle: "Heures payées (bulletins)", type: "heures", largeur: 6 },
+      { cle: "masse_salariale", libelle: "Masse salariale brute", type: "euros", largeur: 6.5 },
+      { cle: "note", libelle: "Source", type: "texte", largeur: 6 },
     ],
   },
   st_attestations: {
@@ -91,6 +123,34 @@ export const TABLES: Record<NomTable, DefTable> = {
       { cle: "montant", libelle: "Montant payé", type: "euros", largeur: 7 },
       { cle: "reference", libelle: "Référence bancaire", type: "texte", largeur: 8 },
       { cle: "compte_au_nom", libelle: "Compte au nom du sous-traitant", type: "verif", largeur: 7 },
+    ],
+  },
+  st_agents: {
+    nom: "st_agents",
+    cle: "id",
+    parSousTraitant: true,
+    colonnes: [
+      { cle: "nom", libelle: "Agent", type: "texte", largeur: 7 },
+      { cle: "carte_numero", libelle: "N° de carte pro", type: "texte", largeur: 6 },
+      { cle: "heures", libelle: "Heures réalisées", type: "heures", largeur: 4.5 },
+      { cle: "present_documents", libelle: "Dans les documents du sous-traitant", type: "verif", largeur: 5.5 },
+      { cle: "carte_valide", libelle: "Carte valide", type: "verif", largeur: 5.5 },
+      { cle: "dracar", libelle: "Rattaché Dracar", type: "verif", largeur: 5.5 },
+      { cle: "planning", libelle: "Sur le planning", type: "verif", largeur: 5.5 },
+    ],
+  },
+  agents_entreprise: {
+    nom: "agents_entreprise",
+    base: "st_agents",
+    cle: "id",
+    parSousTraitant: false,
+    colonnes: [
+      { cle: "nom", libelle: "Agent", type: "texte", largeur: 8 },
+      { cle: "carte_numero", libelle: "N° de carte pro", type: "texte", largeur: 7 },
+      { cle: "carte_fin", libelle: "Carte valable jusqu’au", type: "date", largeur: 7.5 },
+      { cle: "dracar", libelle: "Déclaré Dracar", type: "verif", largeur: 6 },
+      { cle: "planning", libelle: "Sur le planning", type: "verif", largeur: 6 },
+      { cle: "affecte_mission", libelle: "Affectation conforme", type: "verif", largeur: 6 },
     ],
   },
   smic_horaire: {
