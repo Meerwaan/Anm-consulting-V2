@@ -230,7 +230,7 @@ const SuiviActions = ({
     <div className="flex flex-col gap-3">
       {liste.length === 0 ? (
         <p className="rounded-[5px] border border-dashed border-filet-2 bg-papier px-4 py-5 text-meta text-gris">
-          Aucune action pour l’instant. Crée-les depuis les alertes (« Créer une action ») ou ici.
+          Aucune action pour l’instant. Crée-les depuis les alertes (« Créer une action ») ou ici.
         </p>
       ) : (
         liste.map((n, i) => (

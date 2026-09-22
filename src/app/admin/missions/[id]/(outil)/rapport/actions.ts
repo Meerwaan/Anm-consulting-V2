@@ -32,7 +32,7 @@ export const emettreRapport = async (missionId: string): Promise<{ ok: true; ver
     version,
     generated_by: session.utilisateurId,
     storage_path: chemin,
-    summary: r.manques.length ? `Version de travail : ${r.manques.length} point(s) à compléter.` : "Version complète.",
+    summary: r.manques.length ? `Version de travail : ${r.manques.length} point(s) à compléter.` : "Version complète.",
   });
   if (error) {
     await supabase.storage.from("pieces").remove([chemin]);

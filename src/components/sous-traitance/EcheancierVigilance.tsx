@@ -18,8 +18,8 @@ const EcheancierVigilance = ({ e }: { e: Echeancier | null }) => {
   if (!e) {
     return (
       <p className="rounded-[5px] border border-dashed border-filet-2 bg-papier px-4 py-3 text-meta text-encre-2">
-        Renseigne la date de conclusion du contrat dans l’identification : l’outil donnera les dates de renouvellement de
-        l’attestation, tous les 6 mois jusqu’à la fin du contrat.
+        Renseigne la date de conclusion du contrat dans l’identification : l’outil donnera les dates de renouvellement de
+        l’attestation, tous les 6 mois jusqu’à la fin du contrat.
       </p>
     );
   }
@@ -27,7 +27,7 @@ const EcheancierVigilance = ({ e }: { e: Echeancier | null }) => {
     <div className="flex flex-col gap-2">
       <p className="text-meta text-encre-2">
         Contrat conclu le {fmtDate(e.debut)}
-        {e.fin ? `, jusqu’au ${fmtDate(e.fin)}` : ", sans date de fin : l’échéancier s’arrête à la prochaine échéance"}. Une attestation
+        {e.fin ? `, jusqu’au ${fmtDate(e.fin)}` : ", sans date de fin : l’échéancier s’arrête à la prochaine échéance"}. Une attestation
         de moins de 6 mois est due à chacune de ces dates.
       </p>
       <ol className="flex flex-col divide-y divide-filet border-y border-filet">

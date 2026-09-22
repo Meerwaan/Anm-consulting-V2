@@ -265,7 +265,7 @@ const LignePiece = ({ missionId, ordre, piece, fichiers }: Props) => {
       ) : null}
 
       <div className="mt-4 flex flex-wrap items-end gap-3">
-        <label className="flex min-h-12 cursor-pointer items-center gap-2 rounded-[5px] bg-encre px-5 text-meta font-medium text-papier transition-colors hover:bg-vert has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-vert">
+        <label className="flex min-h-12 cursor-pointer items-center gap-2 rounded-[5px] border border-encre px-4 text-meta font-medium text-encre transition-colors hover:bg-encre hover:text-papier has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-vert">
           <Paperclip size={18} aria-hidden />
           {fichiers.length > 0 ? "Ajouter un fichier" : "Déposer le fichier"}
           <input ref={champFichier} type="file" multiple className="sr-only" onChange={(e) => choisir(e.target.files)} />

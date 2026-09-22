@@ -12,7 +12,7 @@ import { demanderPiecesManquantes } from "@/app/admin/actions";
 const CopierPiecesManquantes = ({ missionId, ordre, noms }: { missionId: string; ordre: string; noms: string[] }) => {
   const [etat, setEtat] = useState<"repos" | "copie" | "manuel">("repos");
   const formulaire = useRef<HTMLFormElement>(null);
-  const texte = `Pièces à nous transmettre :\n${noms.map((n) => `– ${n}`).join("\n")}`;
+  const texte = `Pièces à nous transmettre :\n${noms.map((n) => `– ${n}`).join("\n")}`;
 
   const copier = async () => {
     try {
@@ -40,12 +40,12 @@ const CopierPiecesManquantes = ({ missionId, ordre, noms }: { missionId: string;
       </button>
       {etat === "copie" ? (
         <p role="status" className="text-meta text-vert">
-          Liste copiée. Colle-la dans ton email au client ; la date de la demande est notée sur chaque pièce.
+          Liste copiée. Colle-la dans ton email au client ; la date de la demande est notée sur chaque pièce.
         </p>
       ) : null}
       {etat === "manuel" ? (
         <label className="flex w-full flex-col gap-1">
-          <span className="text-meta text-encre-2">La copie automatique a été refusée : sélectionne le texte ci-dessous.</span>
+          <span className="text-meta text-encre-2">La copie automatique a été refusée : sélectionne le texte ci-dessous.</span>
           <textarea readOnly value={texte} rows={Math.min(12, noms.length + 1)} className="w-full rounded-[5px] border border-gris/60 bg-papier p-3 text-meta text-encre" onFocus={(e) => e.currentTarget.select()} />
         </label>
       ) : null}

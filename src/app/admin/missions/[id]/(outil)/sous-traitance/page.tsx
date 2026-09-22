@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import AjoutSousTraitant from "@/components/sous-traitance/AjoutSousTraitant";
 import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
@@ -45,6 +46,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
   return (
     <div className="flex flex-col gap-14">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="sous-traitance" />
         <h2 className="font-display text-t3 text-encre">Sous-traitance</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Les heures vendues par l’entreprise doivent être couvertes par ses propres salariés ou par des sous-traitants capables de les
@@ -146,7 +148,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
           </div>
         )}
         <p className="max-w-3xl text-note text-gris">
-          L’écart A − B est un indicateur de contrôle, pas une preuve : il se rapproche des plannings, des factures des sous-traitants,
+          L’écart A − B est un indicateur de contrôle, pas une preuve : il se rapproche des plannings, des factures des sous-traitants,
           des paiements et des documents sociaux. Seuls les sous-traitants de rang 1 comptent ici, les heures du rang 2 étant déjà
           facturées à travers eux.
         </p>
@@ -166,23 +168,6 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
         ) : (
           <p className="text-meta text-encre-2">Rien à signaler tant que les heures ne sont pas saisies.</p>
         )}
-      </section>
-
-      <section aria-labelledby="conclusion-rp" className="flex flex-col gap-6">
-        <div>
-          <h3 id="conclusion-rp" className="font-display text-t4 text-encre">Ta conclusion sur le rapprochement</h3>
-          <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Ce que tu retiens de l’écart entre heures vendues et heures payées (grille 04). C’est ce qui figure au rapport.
-          </p>
-        </div>
-        <ConclusionsSaisie
-          missionId={id}
-          grille="rapprochement"
-          cible="mission"
-          conclusions={GRILLE_RAPPROCHEMENT.conclusions}
-          valeurs={g.conclusions}
-          reponses={g.reponses}
-        />
       </section>
 
       <section id="sous-traitants" aria-labelledby="titre-st" className="flex scroll-mt-6 flex-col gap-5">
@@ -229,6 +214,23 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
         <AjoutSousTraitant
           missionId={id}
           rang1={d.sousTraitants.filter((s) => s.rang === 1).map((s) => ({ id: s.id, nom: s.raison_sociale }))}
+        />
+      </section>
+
+      <section aria-labelledby="conclusion-rp" className="flex flex-col gap-6">
+        <div>
+          <h3 id="conclusion-rp" className="font-display text-t4 text-encre">Ta conclusion sur le rapprochement</h3>
+          <p className="mt-1 max-w-2xl text-meta text-encre-2">
+            Ce que tu retiens de l’écart entre heures vendues et heures payées (grille 04). C’est ce qui figure au rapport.
+          </p>
+        </div>
+        <ConclusionsSaisie
+          missionId={id}
+          grille="rapprochement"
+          cible="mission"
+          conclusions={GRILLE_RAPPROCHEMENT.conclusions}
+          valeurs={g.conclusions}
+          reponses={g.reponses}
         />
       </section>
     </div>

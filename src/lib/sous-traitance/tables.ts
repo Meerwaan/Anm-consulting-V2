@@ -334,7 +334,8 @@ export const versLigneInitiale = (table: NomTable, ligne: Record<string, unknown
     } else if (c.type === "mois") {
       valeurs[c.cle] = String(v).slice(0, 7);
     } else if (c.type === "heures" || c.type === "euros" || c.type === "nombre") {
-      valeurs[c.cle] = String(v).replace(".", ",");
+      // « 73 500 » se lit mieux que « 73500 » ; la lecture accepte les deux.
+      valeurs[c.cle] = Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 2, useGrouping: true });
     } else {
       valeurs[c.cle] = String(v);
     }

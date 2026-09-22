@@ -20,7 +20,7 @@ const NouvelleMission = ({ offres, referenceProposee }: { offres: { id: string; 
         </label>
         <label className="flex flex-col gap-2">
           <span className="text-meta font-medium text-encre">SIREN</span>
-          <input name="siren" inputMode="numeric" className={`${champ} tabular-nums`} />
+          <input name="siren" inputMode="numeric" placeholder="9 chiffres" className={`${champ} tabular-nums`} />
         </label>
         <label className="flex flex-col gap-2">
           <span className="text-meta font-medium text-encre">Référence de mission</span>
@@ -28,7 +28,7 @@ const NouvelleMission = ({ offres, referenceProposee }: { offres: { id: string; 
         </label>
         <label className="flex flex-col gap-2">
           <span className="text-meta font-medium text-encre">Nature de la mission</span>
-          <select name="type" defaultValue="audit_360" className={champ}>
+          <select name="type" defaultValue="social_urssaf" className={champ}>
             {offres.map((o) => (
               <option key={o.id} value={o.id}>{o.nom}</option>
             ))}
@@ -47,18 +47,16 @@ const NouvelleMission = ({ offres, referenceProposee }: { offres: { id: string; 
             ))}
           </select>
         </label>
-        {organisme ? (
-          <label className="flex flex-col gap-2">
-            <span className="text-meta font-medium text-encre">Échéance du contrôle</span>
-            <input name="echeance" type="date" className={champ} />
-          </label>
-        ) : null}
+        <label className={`flex flex-col gap-2 ${organisme ? "" : "invisible"}`} aria-hidden={!organisme}>
+          <span className="text-meta font-medium text-encre">Échéance du contrôle</span>
+          <input name="echeance" type="date" disabled={!organisme} className={champ} />
+        </label>
         <label className="flex flex-col gap-2">
-          <span className="text-meta font-medium text-encre">Période contrôlée : début</span>
+          <span className="text-meta font-medium text-encre">Période contrôlée : début</span>
           <input name="periode_debut" type="month" className={champ} />
         </label>
         <label className="flex flex-col gap-2">
-          <span className="text-meta font-medium text-encre">Période contrôlée : fin</span>
+          <span className="text-meta font-medium text-encre">Période contrôlée : fin</span>
           <input name="periode_fin" type="month" className={champ} />
         </label>
       </div>

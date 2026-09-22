@@ -99,7 +99,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
       "Attestation correspondant exactement au sous-traitant contractuel",
       "Justificatif d’immatriculation obtenu",
       "Documents archivés",
-      "Contrôle renouvelé tous les 6 mois pendant l’exécution du contrat",
+      "Contrôle renouvelé tous les 6 mois pendant l’exécution du contrat",
       "Échéance du prochain contrôle enregistrée",
     ]),
     section("realite", "Contrôle de la réalité de la prestation", "Grille 05 §6", [
@@ -126,7 +126,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
     ]),
     section(
       "td-alertes",
-      "Travail dissimulé : points d’alerte",
+      "Travail dissimulé : points d’alerte",
       "Grille 02 §4",
       [
         "Agent absent des documents transmis",
@@ -135,7 +135,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
         "Personnel fourni par une autre société",
         "Documents sociaux incomplets ou incohérents",
       ],
-      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
+      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
     ),
     section("pi", "Prêt illicite de main-d’œuvre", "Grille 02 §5", [
       "Le sous-traitant conserve la gestion de ses salariés",
@@ -149,7 +149,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
     ]),
     section(
       "pi-alertes",
-      "Prêt illicite : points d’alerte",
+      "Prêt illicite : points d’alerte",
       "Grille 02 §5",
       [
         "Donneur d’ordre établissant directement les plannings",
@@ -160,7 +160,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
         "Sous-traitant sans autonomie réelle",
         "Facturation essentiellement calculée sur les heures / effectifs fournis",
       ],
-      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
+      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
     ),
     section("ma", "Marchandage", "Grille 02 §6", [
       "Prestation commerciale réelle",
@@ -184,7 +184,7 @@ export const GRILLE_SOUS_TRAITANT: Grille = {
         "Sous-traitance utilisée principalement pour réduire les coûts sociaux",
         "Absence d’autonomie réelle du sous-traitant",
       ],
-      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
+      { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." },
     ),
     section("cascade", "Sous-traitance en cascade", "Grille 02 §8 · 05 §9", [
       "Absence de sous-traitance en cascade non autorisée",
@@ -241,7 +241,7 @@ export const GRILLE_RAPPROCHEMENT: Grille = {
   conclusions: [
     { code: "rp-sources", titre: "Sources contrôlées", source: "Grille 04 §2 · §3", type: "multi",
       choix: ["Bons de commande", "Contrats clients", "Factures", "Planning prévisionnel", "Facturation mensuelle", "Bulletins de paie", "DSN", "Livre de paie", "État des heures", "Planning des agents", "Registre du personnel", "Contrats de travail", "Pointage / badgeage", "Main courante"] },
-    { code: "rp-question", titre: "Le volume d’heures facturé aux clients paraît-il compatible avec les effectifs, les heures rémunérées et les capacités de production de l’entreprise ?", source: "Grille 04 §5", type: "choix",
+    { code: "rp-question", titre: "Le volume d’heures facturé aux clients paraît-il compatible avec les effectifs, les heures rémunérées et les capacités de production de l’entreprise ?", source: "Grille 04 §5", type: "choix",
       choix: ["Oui", "Partiellement", "Non", "À vérifier"] },
     { code: "rp-explications", titre: "Éléments permettant d’expliquer le volume non couvert", source: "Grille 04 §6", type: "multi",
       choix: ["Sous-traitance déclarée", "Intérim", "Dirigeant participant à la production", "Heures supplémentaires", "Agents mis à disposition légalement", "Autre établissement de l’entreprise"] },
@@ -260,10 +260,10 @@ export const GRILLE_RAPPROCHEMENT: Grille = {
 
 export const GRILLE_CNAPS: Grille = {
   code: "cnaps",
-  titre: "Contrôle CNAPS : Dracar Ultimate",
+  titre: "Contrôle CNAPS : Dracar Ultimate",
   portee: "mission",
   sections: [
-    section("entreprise", "Entreprise et autorisations", "Grille 01 §1 · fiche « Je dépose une demande »", [
+    section("entreprise", "Entreprise et autorisations", "Grille 01 §1 · fiche « Je dépose une demande »", [
       "Autorisation d’exercer CNAPS valide",
       "Agrément(s) des dirigeants valide(s)",
       "Activités exercées conformes aux autorisations détenues",
@@ -272,7 +272,7 @@ export const GRILLE_CNAPS: Grille = {
       "Dirigeants / responsables déclarés à jour",
       "Toute modification de situation déclarée au CNAPS dans le délai réglementaire",
     ]),
-    section("comptes", "Comptes et organisation", "Grille 01 §2 · fiches « compte administrateur » et « gestionnaire »", [
+    section("comptes", "Comptes et organisation", "Grille 01 §2 · fiches « compte administrateur » et « gestionnaire »", [
       "Espace administrateur créé",
       "Espace gestionnaire créé",
       "Gestionnaires désignés",
@@ -281,7 +281,7 @@ export const GRILLE_CNAPS: Grille = {
       "Compte administrateur validé par le CNAPS",
       "Un gestionnaire rattaché à chaque établissement (SIRET)",
     ]),
-    section("salaries", "Salariés", "Grille 01 §2 · fiche « Je rattache des salariés »", [
+    section("salaries", "Salariés", "Grille 01 §2 · fiche « Je rattache des salariés »", [
       "Tous les salariés/agents concernés sont rattachés dans Dracar Ultimate",
       "Liste des personnels à jour",
       "Entrées et sorties régulièrement actualisées",
@@ -290,23 +290,23 @@ export const GRILLE_CNAPS: Grille = {
       "Rattachements rompus pour les salariés sortis",
       "Liste Dracar Ultimate rapprochée du registre du personnel et de la paie",
     ]),
-    section("cartes", "Cartes professionnelles", "Grille 01 §2 · fiche « vérification des cartes »", [
+    section("cartes", "Cartes professionnelles", "Grille 01 §2 · fiche « vérification des cartes »", [
       "Vérification régulière de la validité des cartes professionnelles",
       "Vérification au minimum mensuelle",
       "Vérification avant affectation à un grand événement",
       "Traçabilité des vérifications conservée",
       "Procédure permettant d’empêcher l’affectation d’un agent dont la carte n’est plus valide",
     ]),
-    section("demarches", "Démarches CNAPS", "Grille 01 §2 · fiche « Je dépose une demande »", [
+    section("demarches", "Démarches CNAPS", "Grille 01 §2 · fiche « Je dépose une demande »", [
       "Demandes effectuées via le compte gestionnaire",
       "Suivi des renouvellements",
       "Suivi des échéances",
       "Lorsque plusieurs activités sont concernées, demandes distinctes effectuées pour chaque activité",
       "Renouvellements distincts par activité lorsque nécessaire",
-      "Renouvellements déposés dans les 6 mois qui précèdent l’expiration",
+      "Renouvellements déposés dans les 6 mois qui précèdent l’expiration",
       "Échanges avec le CNAPS suivis dans la messagerie Dracar Ultimate",
     ]),
-    section("tiers", "Tiers de confiance", "Fiche « J’agis comme tiers de confiance »", [
+    section("tiers", "Tiers de confiance", "Fiche « J’agis comme tiers de confiance »", [
       "L’entreprise agit comme tiers de confiance pour ses salariés",
       "Accord écrit de chaque salarié concerné conservé",
     ], { intro: "Sans objet si l’entreprise n’effectue pas les démarches à la place de ses salariés." }),
@@ -346,10 +346,10 @@ const CHOIX_INFRACTION = ["Aucun indice", "Point de vigilance", "Anomalie docume
 
 export const GRILLE_URSSAF: Grille = {
   code: "urssaf",
-  titre: "Contrôle URSSAF : travail illégal et sous-traitance",
+  titre: "Contrôle URSSAF : travail illégal et sous-traitance",
   portee: "mission",
   sections: [
-    section("emploi", "Travail dissimulé par dissimulation d’emploi salarié", "Grille 02 §4 · pack URS-001, URS-002, URS-016, URS-017, A360-066", [
+    section("emploi", "Travail dissimulé par dissimulation d’emploi salarié", "Grille 02 §4", [
       "DPAE effectuée avant chaque prise de poste",
       "Registre unique du personnel à jour",
       "Effectif cohérent entre registre, contrats, paie et DSN",
@@ -366,8 +366,8 @@ export const GRILLE_URSSAF: Grille = {
       "Heures réalisées supérieures aux heures payées",
       "Horaires incohérents",
       "Documents sociaux incomplets ou incohérents",
-    ], { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." }),
-    section("activite", "Travail dissimulé par dissimulation d’activité", "Pack URS-018, A360-079, FIS-005", [
+    ], { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." }),
+    section("activite", "Travail dissimulé par dissimulation d’activité", "Contrôle URSSAF", [
       "Entreprise immatriculée pour l’activité réellement exercée",
       "Établissements et sites d’intervention déclarés",
       "DSN déposées chaque mois",
@@ -376,7 +376,7 @@ export const GRILLE_URSSAF: Grille = {
       "Comptes de charges de personnel rapprochés des journaux de paie",
       "Aucune activité exercée sous une autre structure ou après radiation",
     ]),
-    section("independants", "Travailleurs présentés comme indépendants", "Grille 02 §4 · pack A360-076, URS-014", [
+    section("independants", "Travailleurs présentés comme indépendants", "Grille 02 §4", [
       "Indépendants et auto-entrepreneurs intervenant pour l’entreprise identifiés",
       "Chacun dispose d’une immatriculation et d’une clientèle propre",
       "Aucun horaire, planning ou instruction imposé comme à un salarié",
@@ -392,17 +392,17 @@ export const GRILLE_URSSAF: Grille = {
       "La sous-traitance ne sert pas principalement à réduire les coûts sociaux",
       "Les salariés concernés ne sont pas placés dans une situation moins favorable",
     ]),
-    section("pret-alertes", "Prêt illicite et marchandage : points d’alerte", "Grille 02 §5 · §6", [
+    section("pret-alertes", "Prêt illicite et marchandage : points d’alerte", "Grille 02 §5 · §6", [
       "Facturation essentiellement calculée sur les heures / effectifs fournis",
       "Donneur d’ordre établissant directement les plannings",
       "Donneur d’ordre donnant les instructions quotidiennes aux salariés",
       "Opération ayant principalement pour objet de fournir du personnel",
       "Sous-traitant sans autonomie réelle",
-    ], { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." }),
-    section("vigilance", "Vigilance du donneur d’ordre", "Grille 05 · pack A360-077, URS-015", [
+    ], { alerte: true, intro: "Réponds « oui » quand le point d’alerte est constaté." }),
+    section("vigilance", "Vigilance du donneur d’ordre", "Grille 05", [
       "Tous les sous-traitants de la période identifiés (grand livre fournisseurs)",
-      "Un dossier de vigilance complet pour chaque contrat de 5 000 € HT ou plus",
-      "Attestations renouvelées tous les 6 mois",
+      "Un dossier de vigilance complet pour chaque contrat de 5 000 € HT ou plus",
+      "Attestations renouvelées tous les 6 mois",
       "Procédure interne de contrôle des sous-traitants",
       "Sous-traitance en cascade identifiée et encadrée",
     ]),
@@ -427,16 +427,16 @@ export const GRILLE_URSSAF: Grille = {
 
 export const GRILLE_DGFIP: Grille = {
   code: "dgfip",
-  titre: "Contrôle DGFiP : factures fictives et de complaisance",
+  titre: "Contrôle DGFiP : factures fictives et de complaisance",
   portee: "mission",
   sections: [
-    section("formalisme", "Formalisme des factures émises", "Dictée de Sofia du 21/09/2026 · pack FIS-010", [
+    section("formalisme", "Formalisme des factures émises", "Précision de Sofia du 21/09/2026", [
       "Numéro unique, selon une séquence chronologique continue",
       "Date d’émission",
       "Nom, adresse et SIREN de l’entreprise et du client",
       "Numéro de TVA intracommunautaire",
       "Date ou période de la prestation",
-      "Désignation précise : site, nature de la prestation, heures ou forfait",
+      "Désignation précise : site, nature de la prestation, heures ou forfait",
       "Prix unitaire hors taxe et quantités",
       "Taux et montant de la TVA, totaux hors taxe et toutes taxes comprises",
       "Date d’échéance du paiement",
@@ -444,7 +444,7 @@ export const GRILLE_DGFIP: Grille = {
       "Numéro d’autorisation CNAPS et mention prévue par le code de la sécurité intérieure",
       "Préparation à la facturation électronique",
     ], { intro: "Sur l’échantillon de factures examiné." }),
-    section("contrats", "Contrats commerciaux", "Dictée de Sofia du 21/09/2026 · pack A360-021, A360-022", [
+    section("contrats", "Contrats commerciaux", "Précision de Sofia du 21/09/2026", [
       "Un contrat écrit et signé pour chaque client",
       "Objet, sites et horaires de la prestation définis",
       "Volume d’heures ou effectifs prévus",
@@ -454,20 +454,20 @@ export const GRILLE_DGFIP: Grille = {
       "Mentions CNAPS présentes sur le contrat et les devis",
       "Factures conformes aux prix et au périmètre du contrat",
     ]),
-    section("commandes", "Bons de commande", "Dictée de Sofia du 21/09/2026 · objectif de l’audit §1", [
+    section("commandes", "Bons de commande", "Précision de Sofia du 21/09/2026", [
       "Un bon de commande pour chaque prestation facturée",
       "Bon de commande daté et accepté avant la prestation",
       "Heures ou effectifs commandés précisés",
       "Prix repris du contrat",
       "Commande, planning et facture concordants",
     ]),
-    section("prix", "Taux horaires", "Dictée de Sofia du 21/09/2026 · pack A360-106", [
+    section("prix", "Taux horaires", "Précision de Sofia du 21/09/2026", [
       "Coût de revient horaire de référence de la branche retenu, avec sa source",
       "Prix de vente de l’heure au moins égal au coût de revient de référence",
       "Prix d’achat de la sous-traitance compatible avec le coût de revient de référence",
       "Tout prix inférieur justifié par écrit",
     ]),
-    section("emises", "Factures émises aux clients", "Objectif de l’audit §1 · pack FIS-005 à FIS-010", [
+    section("emises", "Factures émises aux clients", "Objectif de l’audit §1", [
       "Numérotation continue et chronologique, sans doublon",
       "Mentions obligatoires présentes",
       "Chaque facture rattachée à un contrat ou un bon de commande",
@@ -480,7 +480,7 @@ export const GRILLE_DGFIP: Grille = {
       "TVA collectée concordante avec la TVA déclarée",
       "Règlements reçus du client facturé",
     ]),
-    section("recues", "Factures reçues des sous-traitants et fournisseurs", "Grilles 03 §5 · §6, 05 §6 · §8 · pack FIS-008, FIS-013, FIS-017", [
+    section("recues", "Factures reçues des sous-traitants et fournisseurs", "Grilles 03 §5 · §6, 05 §6 · §8", [
       "Chaque facture correspond à un contrat et à une commande",
       "Chaque facture correspond à une prestation identifiable (sites, dates, agents)",
       "Émetteur existant et actif (SIREN, immatriculation vérifiés)",
@@ -494,7 +494,7 @@ export const GRILLE_DGFIP: Grille = {
       "Prestation sous-traitée refacturée au client final (fléchage)",
       "Marges cohérentes sur la sous-traitance",
     ]),
-    section("alertes", "Indices de facture fictive ou de complaisance", "Grille 05 §11 · pack FIS-018, FIS-019, A360-106", [
+    section("alertes", "Indices de facture fictive ou de complaisance", "Grille 05 §11", [
       "Facture sans prestation identifiable",
       "Facture supérieure aux prestations constatées",
       "Paiement vers un compte différent de celui de l’émetteur",
@@ -505,7 +505,7 @@ export const GRILLE_DGFIP: Grille = {
       "Même personne derrière le client ou le fournisseur et l’entreprise",
       "Factures de fournisseurs différents à la présentation identique",
       "Facturation groupée en fin d’exercice sans prestation correspondante",
-    ], { alerte: true, intro: "Réponds « oui » quand l’indice est constaté." }),
+    ], { alerte: true, intro: "Réponds « oui » quand l’indice est constaté." }),
   ],
   conclusions: [
     { code: "dg-emises", titre: "Factures émises", source: "Objectif de l’audit §1", type: "choix",
@@ -513,7 +513,7 @@ export const GRILLE_DGFIP: Grille = {
     { code: "dg-recues", titre: "Factures reçues", source: "Grille 05 §12", type: "choix",
       choix: ["Aucun indice", "Point de vigilance", "Anomalies à régulariser", "Vérifications complémentaires nécessaires"] },
     { code: "dg-risque", titre: "Risque de facture fictive ou de complaisance", source: "Objectif de l’audit §1", type: "choix",
-      choix: ["Aucun indice", "Indices isolés à documenter", "Indices concordants : justificatifs à produire", "Risque juridique identifié"] },
+      choix: ["Aucun indice", "Indices isolés à documenter", "Indices concordants : justificatifs à produire", "Risque juridique identifié"] },
     { code: "dg-synthese", titre: "Synthèse de l’auditeur", source: "Objectif de l’audit §5", type: "texte" },
   ],
 };

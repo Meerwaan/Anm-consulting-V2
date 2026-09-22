@@ -11,7 +11,7 @@ import { bilanGrille, type BilanGrille } from "@/lib/modules/analyse";
 import type { DonneesGrilles, NonConformite } from "@/lib/grilles/lecture";
 import { analyserCartes, analyserEntreprise, analyserFacturation, analyserIdentites, analyserSalaries, analyserSousTraitant, boucler, calculerEcart, type Alerte, type Bouclage, type DossierSousTraitant, type EcartHeures } from "@/lib/sous-traitance/calculs";
 import type { DonneesST } from "@/lib/sous-traitance/lecture";
-import { fmtEuros, fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
+import { fmtEuros, fmtHeures, fmtMois, fmtPct, nombreFr } from "@/lib/sous-traitance/format";
 
 export const CLES_TEXTES = ["contexte", "synthese", "conclusion", "limites"] as const;
 export type CleTexte = (typeof CLES_TEXTES)[number];
@@ -84,7 +84,7 @@ export interface ModeleRapport {
 }
 
 const minuscule = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
-const pluriel = (n: number, s: string, p = `${s}s`) => `${n.toLocaleString("fr-FR")} ${n > 1 ? p : s}`;
+const pluriel = (n: number, s: string, p = `${s}s`) => `${nombreFr(n)}\u00a0${n > 1 ? p : s}`;
 
 const choixMulti = (g: DonneesGrilles, grille: string, cible: string, code: string, choix: string[]) =>
   choix.filter((_, i) => g.reponses[`${grille}|${cible}|${code}.${i}`]?.reponse === "oui");
@@ -101,8 +101,8 @@ const proposerContexte = (m: InfosMission, periode: ModeleRapport["periode"], nb
   const cadre = m.controleEnCours ? `, dans le cadre du contrôle ${m.organisme ? `${m.organisme} ` : ""}en cours` : "";
   return (
     `À la demande de ${m.client}, ANM Consulting a examiné le recours à la sous-traitance de l’entreprise ${quand}${cadre}. ` +
-    `Les travaux ont porté sur trois points : les heures vendues aux clients, rapprochées des heures figurant sur les bulletins de paie ; ` +
-    `le dossier de vigilance de ${nbST === 0 ? "chaque sous-traitant" : pluriel(nbST, "sous-traitant")} (attestations, factures, paiements, agents intervenus) ; ` +
+    `Les travaux ont porté sur trois points : les heures vendues aux clients, rapprochées des heures figurant sur les bulletins de paie ; ` +
+    `le dossier de vigilance de ${nbST === 0 ? "chaque sous-traitant" : pluriel(nbST, "sous-traitant")} (attestations, factures, paiements, agents intervenus) ; ` +
     `la cohérence d’ensemble entre ce qui est vendu, produit, facturé et payé.`
   );
 };
@@ -115,13 +115,13 @@ const proposerSynthese = (e: EcartHeures, b: Bouclage, chapitres: ChapitreSousTr
     );
     if (b.totalEcart > 0) {
       phrases.push(
-        `L’écart, soit ${fmtHeures(b.totalEcart)}${e.totalEcartPct !== null ? ` (${fmtPct(e.totalEcartPct)} des heures vendues)` : ""}, doit être couvert par la sous-traitance : les factures des sous-traitants en expliquent ${fmtHeures(b.totalDocumentees)}.`,
+        `L’écart, soit ${fmtHeures(b.totalEcart)}${e.totalEcartPct !== null ? ` (${fmtPct(e.totalEcartPct)} des heures vendues)` : ""}, doit être couvert par la sous-traitance : les factures des sous-traitants en expliquent ${fmtHeures(b.totalDocumentees)}.`,
       );
     }
     if (b.totalReste > 0.5) phrases.push(`${fmtHeures(b.totalReste)} restent sans justification à ce stade.`);
     if (b.totalExcedent > 0.5) {
       phrases.push(
-        `À l’inverse, les sous-traitants facturent ${fmtHeures(b.totalExcedent)} de plus que les ventes n’en demandent certains mois : ces factures doivent pouvoir être rattachées à des prestations réelles.`,
+        `À l’inverse, les sous-traitants facturent ${fmtHeures(b.totalExcedent)} de plus que les ventes n’en demandent certains mois : ces factures doivent pouvoir être rattachées à des prestations réelles.`,
       );
     }
     if (b.totalReste <= 0.5 && b.totalExcedent <= 0.5 && b.totalEcart > 0) phrases.push("Chaque mois complet est couvert.");
@@ -133,19 +133,19 @@ const proposerSynthese = (e: EcartHeures, b: Bouclage, chapitres: ChapitreSousTr
     const alertes = c.dossier.alertes.filter((a) => a.niveau === "alerte").length;
     const debut = `${ouvertures[i % ouvertures.length]} ${c.dossier.st.raison_sociale}`;
     if (concl) {
-      phrases.push(`${debut}, la conclusion retenue est : ${minuscule(concl)}${alertes ? `, avec ${pluriel(alertes, "alerte")} relevée${alertes > 1 ? "s" : ""} dans les chiffres` : ""}.`);
+      phrases.push(`${debut}, la conclusion retenue est : ${minuscule(concl)}${alertes ? `, avec ${pluriel(alertes, "alerte")} relevée${alertes > 1 ? "s" : ""} dans les chiffres` : ""}.`);
     } else if (alertes) {
       phrases.push(`${debut}, ${pluriel(alertes, "alerte")} ressort${alertes > 1 ? "ent" : ""} des chiffres et reste${alertes > 1 ? "nt" : ""} à conclure.`);
     }
   });
-  if (urssaf) phrases.push(`Pour l’entreprise elle-même, la conclusion du contrôle URSSAF est : ${minuscule(urssaf)}.`);
-  if (dgfip) phrases.push(`Sur les factures, le risque de facture fictive ou de complaisance est apprécié ainsi : ${minuscule(dgfip)}.`);
-  if (dracarNiveau) phrases.push(`Sur Dracar Ultimate, le niveau de conformité retenu est : ${minuscule(dracarNiveau)}.`);
+  if (urssaf) phrases.push(`Pour l’entreprise elle-même, la conclusion du contrôle URSSAF est : ${minuscule(urssaf)}.`);
+  if (dgfip) phrases.push(`Sur les factures, le risque de facture fictive ou de complaisance est apprécié ainsi : ${minuscule(dgfip)}.`);
+  if (dracarNiveau) phrases.push(`Sur Dracar Ultimate, le niveau de conformité retenu est : ${minuscule(dracarNiveau)}.`);
   return phrases.join(" ");
 };
 
 const proposerConclusion = (rp: string | null, nbNC: number): string => {
-  const debut = rp ? `Au terme de ces travaux, la conclusion sur le rapprochement des heures est la suivante : ${minuscule(rp)}.` : "Au terme de ces travaux, plusieurs points restent à éclaircir.";
+  const debut = rp ? `Au terme de ces travaux, la conclusion sur le rapprochement des heures est la suivante : ${minuscule(rp)}.` : "Au terme de ces travaux, plusieurs points restent à éclaircir.";
   const nc = nbNC
     ? ` ${pluriel(nbNC, "non-conformité")} appelle${nbNC > 1 ? "nt" : ""} une action, détaillée au plan d’actions avec son délai et le justificatif attendu.`
     : " Aucune non-conformité n’a été formalisée.";
@@ -153,7 +153,7 @@ const proposerConclusion = (rp: string | null, nbNC: number): string => {
 };
 
 const LIMITES =
-  "Le diagnostic repose sur les documents communiqués par l’entreprise et par ses sous-traitants, examinés sur copie. Il ne vaut ni certification ni garantie contre un redressement ou une sanction, et ne remplace pas l’analyse de l’avocat ou de l’expert-comptable. L’effectif figurant sur une attestation de vigilance est un indicateur de cohérence : il ne désigne pas les salariés qui ont exécuté la prestation. Les écarts d’heures sont des points d’investigation, non des qualifications.";
+  "Le diagnostic repose sur les documents communiqués par l’entreprise et par ses sous-traitants, examinés sur copie. Il ne vaut ni certification ni garantie contre un redressement ou une sanction, et ne remplace pas l’analyse de l’avocat ou de l’expert-comptable. L’effectif figurant sur une attestation de vigilance est un indicateur de cohérence : il ne désigne pas les salariés qui ont exécuté la prestation. Les écarts d’heures sont des points d’investigation, non des qualifications.";
 
 // ——— Assemblage ——————————————————————————————————————————————————————————————
 
@@ -259,10 +259,10 @@ export const construireRapport = (m: InfosMission, d: DonneesST, g: DonneesGrill
     if (!c.conclusions["st-conclusion"]) manque(`${c.dossier.st.raison_sociale} : conclusion non choisie.`, `sous-traitance/${c.dossier.st.id}?vue=conclusion`);
     if (c.repondues < c.totalQuestions) manque(`${c.dossier.st.raison_sociale} : ${c.totalQuestions - c.repondues} points de contrôle sans réponse.`, `sous-traitance/${c.dossier.st.id}?vue=controle`);
   }
-  if (dracar.renseigne && !dracar.niveau) manque("CNAPS : niveau de conformité non choisi.", "cnaps#synthese");
+  if (dracar.renseigne && !dracar.niveau) manque("CNAPS : niveau de conformité non choisi.", "cnaps#synthese");
   if (urssaf.renseigne && !rpC("ur-conclusion")?.choix) manque("URSSAF : conclusion non choisie.", "urssaf#conclusion");
-  if (dgfip.renseigne && !rpC("dg-risque")?.choix) manque("DGFiP : risque de facture fictive ou de complaisance non apprécié.", "dgfip#conclusion");
-  for (const k of CLES_TEXTES) if (!textes[k].valide) manque(`Texte « ${TITRES_TEXTES[k]} » : proposition de l’outil pas encore relue et validée.`, "rapport#textes");
+  if (dgfip.renseigne && !rpC("dg-risque")?.choix) manque("DGFiP : risque de facture fictive ou de complaisance non apprécié.", "dgfip#conclusion");
+  for (const k of CLES_TEXTES) if (!textes[k].valide) manque(`Texte « ${TITRES_TEXTES[k]} » : proposition de l’outil pas encore relue et validée.`, "rapport#textes");
 
   const manques = aFaire.map((x) => x.texte);
   return {

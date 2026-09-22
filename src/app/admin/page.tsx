@@ -68,7 +68,7 @@ export default async function AdminPage() {
         <div>
           <h2 id="deroule" className="font-display text-t3 text-encre">Comment se déroule une mission</h2>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Huit étapes, toujours dans le même ordre, dans la barre de gauche de chaque mission. Chaque étape dit où elle en est : à faire,
+            Huit étapes, toujours dans le même ordre, dans la barre de gauche de chaque mission. Chaque étape dit où elle en est : à faire,
             en cours, faite. En bas de chaque page, un bouton mène à l’étape suivante. Tout s’enregistre tout seul.
           </p>
         </div>
@@ -76,7 +76,7 @@ export default async function AdminPage() {
           {[
             ["Préparer", "1", "Réunir les pièces justificatives, déposées depuis l’iPad."],
             ["Saisir", "2 · 3", "Les heures vendues et payées, puis le dossier de chaque sous-traitant. L’outil calcule les écarts."],
-            ["Contrôler", "4 · 5 · 6", "DGFiP, URSSAF, CNAPS : répondre aux points au toucher, lire les alertes, conclure."],
+            ["Contrôler", "4 · 5 · 6", "DGFiP, URSSAF, CNAPS : répondre aux points au toucher, lire les alertes, conclure."],
             ["Conclure", "7 · 8", "Transformer les anomalies en actions, relire les textes, émettre le rapport."],
           ].map(([titre, n, texte]) => (
             <li key={titre} className="flex flex-col gap-1">
@@ -87,7 +87,7 @@ export default async function AdminPage() {
           ))}
         </ol>
         <p className="text-meta text-encre-2">
-          Pour t’entraîner : ouvre la mission « Démo — Horizon Sécurité Privée ». Elle contient de vraies anomalies à trouver, et tu peux tout
+          Pour t’entraîner : ouvre la mission « Démo — Horizon Sécurité Privée ». Elle contient de vraies anomalies à trouver, et tu peux tout
           y modifier sans risque.
         </p>
       </section>

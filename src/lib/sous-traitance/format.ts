@@ -1,7 +1,12 @@
-/** Affichage à la française : espaces fines comme séparateur de milliers, insécable avant l'unité. */
+/** Affichage à la française : séparateur de milliers insécable, espace insécable avant l'unité. */
 
-/** Signe moins typographique (U+2212) plutôt que le trait d'union. */
-const moins = (t: string) => t.replace(/^-/, "−");
+/**
+ * Signe moins typographique (U+2212) plutôt que le trait d'union, et espace insécable (U+00A0)
+ * à la place de l'espace fine (U+202F) que produit toLocaleString : les polices du PDF n'ont
+ * pas l'espace fine, les chiffres se chevauchaient.
+ */
+const moins = (t: string) => t.replace(/^-/, "−").replace(/\u202f/g, "\u00a0");
+export const nombreFr = (n: number, options?: Intl.NumberFormatOptions): string => n.toLocaleString("fr-FR", options).replace(/\u202f/g, "\u00a0");
 
 export const fmtHeures = (n: number | null | undefined): string =>
   n === null || n === undefined ? "—" : moins(`${n.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} h`);

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import FormulaireParametres from "@/components/sous-traitance/FormulaireParametres";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
@@ -24,6 +25,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
   return (
     <div className="flex flex-col gap-14">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="sous-traitance/heures" />
         <h2 className="font-display text-t3 text-encre">Heures de l’entreprise</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Les heures vendues aux clients (A) et les heures figurant sur les bulletins de paie (B). La différence, A − B, est le volume
@@ -51,7 +53,6 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
 
       <section aria-labelledby="reperes" className="flex flex-col gap-5">
         <div>
-          <p className="etiquette">1</p>
           <h3 id="reperes" className="mt-1 font-display text-t4 text-encre">Période et repères de calcul</h3>
         </div>
         <FormulaireParametres missionId={id} parametres={d.parametres} />
@@ -59,10 +60,9 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
 
       <section aria-labelledby="ventes" className="flex flex-col gap-5">
         <div>
-          <p className="etiquette">2</p>
           <h3 id="ventes" className="mt-1 font-display text-t4 text-encre">A · Heures vendues aux clients</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Une ligne par bon de commande ou par facture client. Si les heures facturées manquent, le montant HT est converti avec le taux horaire vendu. Sources : bons de commande, contrats clients, factures, facturation mensuelle.
+            Une ligne par bon de commande ou par facture client. Si les heures facturées manquent, le montant HT est converti avec le taux horaire vendu. Sources : bons de commande, contrats clients, factures, facturation mensuelle.
           </p>
         </div>
         <TableauSaisie
@@ -76,10 +76,9 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
 
       <section aria-labelledby="facturation" className="flex flex-col gap-5">
         <div>
-          <p className="etiquette">2 bis</p>
           <h3 id="facturation" className="mt-1 font-display text-t4 text-encre">Facturation, TVA et règlements</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Pour chaque vente ci-dessus : le numéro de facture, la TVA, le TTC et ce que le client a réellement payé. C’est la chaîne
+            Pour chaque vente ci-dessus : le numéro de facture, la TVA, le TTC et ce que le client a réellement payé. C’est la chaîne
             bon de commande → facture → TVA → règlement que regarde la DGFiP.
           </p>
         </div>
@@ -92,17 +91,16 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
             titreVide=""
           />
         ) : (
-          <p className="text-meta text-encre-2">Ajoute d’abord les ventes : leur facturation se complète ici.</p>
+          <p className="text-meta text-encre-2">Ajoute d’abord les ventes : leur facturation se complète ici.</p>
         )}
         <ListeAlertes alertes={controles.ventes} vide="Aucune incohérence entre commandes, factures, TVA et règlements." missionId={id} constatsExistants={constats} />
       </section>
 
       <section aria-labelledby="paie" className="flex flex-col gap-5">
         <div>
-          <p className="etiquette">3</p>
           <h3 id="paie" className="mt-1 font-display text-t4 text-encre">B · Heures payées aux salariés</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Une ligne par mois : les heures réalisées (planning, pointage), les heures payées (bulletins) et la masse salariale brute. Des heures réalisées qui n’apparaissent sur aucun bulletin sont le premier signe d’un travail dissimulé. Sources : bulletins, DSN, livre de paie, planning, pointage.
+            Une ligne par mois : les heures réalisées (planning, pointage), les heures payées (bulletins) et la masse salariale brute. Des heures réalisées qui n’apparaissent sur aucun bulletin sont le premier signe d’un travail dissimulé. Sources : bulletins, DSN, livre de paie, planning, pointage.
           </p>
         </div>
         <TableauSaisie
@@ -117,10 +115,9 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
 
       <section aria-labelledby="smic" className="flex flex-col gap-5">
         <div>
-          <p className="etiquette">4</p>
           <h3 id="smic" className="mt-1 font-display text-t4 text-encre">SMIC horaire brut</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Sert à vérifier qu’un sous-traitant a pu payer les heures qu’il facture : rémunérations déclarées ÷ SMIC = heures payables au
+            Sert à vérifier qu’un sous-traitant a pu payer les heures qu’il facture : rémunérations déclarées ÷ SMIC = heures payables au
             maximum. Commun à toutes les missions. Saisis chaque valeur avec sa date d’entrée en vigueur et sa source.
           </p>
         </div>
@@ -128,7 +125,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           missionId={id}
           table="smic_horaire"
           lignes={d.smics.map((s) => versLigneInitiale("smic_horaire", s as unknown as Record<string, unknown>))}
-          titreVide="Aucun SMIC saisi : le contrôle par les rémunérations déclarées reste inactif."
+          titreVide="Aucun SMIC saisi : le contrôle par les rémunérations déclarées reste inactif."
           libelleAjout="Ajouter une valeur du SMIC"
         />
       </section>

@@ -35,11 +35,11 @@ const FormulaireParametres = ({ missionId, parametres }: { missionId: string; pa
     >
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <label className="flex flex-col gap-2">
-          <span className="text-meta font-medium text-encre">Période contrôlée : début</span>
+          <span className="text-meta font-medium text-encre">Période contrôlée : début</span>
           <input type="month" value={valeurs.periode_debut} onChange={maj("periode_debut")} className={champ} />
         </label>
         <label className="flex flex-col gap-2">
-          <span className="text-meta font-medium text-encre">Période contrôlée : fin</span>
+          <span className="text-meta font-medium text-encre">Période contrôlée : fin</span>
           <input type="month" value={valeurs.periode_fin} onChange={maj("periode_fin")} className={champ} />
         </label>
         <label className="flex flex-col gap-2">
@@ -48,9 +48,9 @@ const FormulaireParametres = ({ missionId, parametres }: { missionId: string; pa
           <span className="text-note text-gris">Convertit en heures une facture client qui ne donne qu’un montant.</span>
         </label>
         <label className="flex flex-col gap-2">
-          <span className="text-meta font-medium text-encre">Heures d’un temps plein, par mois</span>
+          <span className="text-meta font-medium text-encre">Heures d’un temps plein</span>
           <input inputMode="decimal" value={valeurs.heures_mensuelles_etp} onChange={maj("heures_mensuelles_etp")} className={`${champ} text-right tabular-nums`} />
-          <span className="text-note text-gris">151,67 h = 35 h × 52 semaines ÷ 12. Convertit l’effectif d’une attestation en heures.</span>
+          <span className="text-note text-gris">151,67 h = 35 h × 52 semaines ÷ 12. Convertit l’effectif d’une attestation en heures.</span>
         </label>
       </div>
       <div className="flex flex-wrap items-center gap-4">

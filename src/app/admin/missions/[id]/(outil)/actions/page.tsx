@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import { DownloadSimple } from "@phosphor-icons/react/dist/ssr";
 import SuiviActions from "@/components/grilles/SuiviActions";
 import { createClient } from "@/lib/supabase/server";
@@ -24,13 +25,14 @@ export default async function ActionsPage({ params }: { params: Promise<{ id: st
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-3">
+          <EtapePage chemin="actions" />
           <h2 className="font-display text-t3 text-encre">
             Plan d’actions
             {ouvertes ? <span className="text-critique"> · {ouvertes} ouverte{ouvertes > 1 ? "s" : ""}</span> : null}
           </h2>
           <p className="max-w-2xl text-corps text-encre-2">
-            Chaque anomalie devient une action : constat, risque, action corrective, justificatif, responsable, échéance, contrôle de
-            régularisation. Les alertes des étapes 3 à 6 s’y ajoutent d’un geste (« Créer une action »). L’entreprise garde ce tableau
+            Chaque anomalie devient une action : constat, risque, action corrective, justificatif, responsable, échéance, contrôle de
+            régularisation. Les alertes des étapes 3 à 6 s’y ajoutent d’un geste (« Créer une action »). L’entreprise garde ce tableau
             après l’audit.
           </p>
         </div>

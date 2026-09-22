@@ -12,7 +12,7 @@ import { lireNombre } from "@/lib/sous-traitance/tables";
 export const enregistrerCoutRevient = async (entree: { missionId: string; valeur: string; source: string }): Promise<{ ok: true } | { ok: false; erreur: string }> => {
   const session = await exigerRole("consultant");
   const n = lireNombre(entree.valeur);
-  if (Number.isNaN(n)) return { ok: false, erreur: "Le coût de revient n’est pas un nombre. Exemple : 22,50." };
+  if (Number.isNaN(n)) return { ok: false, erreur: "Le coût de revient n’est pas un nombre. Exemple : 22,50." };
   if (n !== null && n <= 0) return { ok: false, erreur: "Le coût de revient doit être positif." };
   const source = entree.source.trim();
   if (n !== null && !source) return { ok: false, erreur: "Indique la source du chiffre (organisme, publication, année)." };

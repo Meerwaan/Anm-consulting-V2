@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import FicheIdentite from "@/components/sous-traitance/FicheIdentite";
+import EtapePage from "@/components/portail/EtapePage";
 import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
 import EcheancierVigilance from "@/components/sous-traitance/EcheancierVigilance";
@@ -16,9 +17,8 @@ import { lireGrilles } from "@/lib/grilles/lecture";
 
 export const metadata: Metadata = { title: "Dossier sous-traitant — ANM Consulting", robots: { index: false } };
 
-const Titre = ({ n, id, children, sous }: { n: string; id: string; children: React.ReactNode; sous?: string }) => (
+const Titre = ({ id, children, sous }: { n?: string; id: string; children: React.ReactNode; sous?: string }) => (
   <div>
-    <p className="etiquette">{n}</p>
     <h3 id={id} className="mt-1 font-display text-t4 text-encre">{children}</h3>
     {sous ? <p className="mt-1 max-w-2xl text-meta text-encre-2">{sous}</p> : null}
   </div>
@@ -74,6 +74,7 @@ export default async function DossierSousTraitantPage({
         <Link href={`/admin/missions/${id}/sous-traitance#sous-traitants`} className="flex min-h-11 w-fit items-center text-meta text-encre-2 underline-offset-4 hover:text-vert hover:underline">
           ← Tous les sous-traitants
         </Link>
+        <EtapePage chemin="sous-traitance" sous="Dossier d’un sous-traitant" />
         <h2 className="font-display text-t3 text-encre">{st.raison_sociale}</h2>
         <p className="text-corps text-encre-2">
           {st.rang === 2 ? (
@@ -83,7 +84,7 @@ export default async function DossierSousTraitantPage({
           ) : (
             "Sous-traitant de rang 1"
           )}
-          {x.vigilanceObligatoire === true ? ` · relation d’au moins ${fmtEurosRond(SEUIL_VIGILANCE_HT)} HT : vigilance obligatoire` : null}
+          {x.vigilanceObligatoire === true ? ` · relation d’au moins ${fmtEurosRond(SEUIL_VIGILANCE_HT)} HT : vigilance obligatoire` : null}
           {x.vigilanceObligatoire === false ? ` · relation sous ${fmtEurosRond(SEUIL_VIGILANCE_HT)} HT` : null}
         </p>
         <dl className="mt-2 grid max-w-4xl grid-cols-2 gap-x-8 gap-y-4 border-y border-filet py-5 sm:grid-cols-4">
@@ -121,7 +122,7 @@ export default async function DossierSousTraitantPage({
         <>
       <section aria-labelledby="alertes-st" className="flex flex-col gap-5">
         <Titre n="Ce qui ressort" id="alertes-st">Alertes et points à vérifier</Titre>
-        <ListeAlertes alertes={x.alertes} vide="Aucune alerte : attestations, faisabilité et paiements sont cohérents avec ce qui est saisi." missionId={id} sousTraitantId={st.id} constatsExistants={g.nonConformites.map((n) => n.constat ?? "")} />
+        <ListeAlertes alertes={x.alertes} vide="Aucune alerte : attestations, faisabilité et paiements sont cohérents avec ce qui est saisi." missionId={id} sousTraitantId={st.id} constatsExistants={g.nonConformites.map((n) => n.constat ?? "")} />
       </section>
       <section aria-labelledby="resume-conclusion" className="flex flex-col gap-4">
         <h3 id="resume-conclusion" className="font-display text-t4 text-encre">Conclusions</h3>
@@ -144,9 +145,9 @@ export default async function DossierSousTraitantPage({
         <Titre
           n="Calcul"
           id="faisabilite"
-          sous={`Heures disponibles = salariés en équivalent temps plein sur l’attestation de vigilance × ${fmtNombre(d.parametres.heures_mensuelles_etp)} h : c’est le nombre d’heures réelles dont disposait le sous-traitant pour répondre aux commandes. Des heures facturées au-delà ne peuvent pas être produites par ses seuls salariés déclarés. Plafond SMIC (indicatif) = rémunérations déclarées ÷ SMIC horaire.`}
+          sous={`Heures disponibles = salariés en équivalent temps plein sur l’attestation de vigilance × ${fmtNombre(d.parametres.heures_mensuelles_etp)} h : c’est le nombre d’heures réelles dont disposait le sous-traitant pour répondre aux commandes. Des heures facturées au-delà ne peuvent pas être produites par ses seuls salariés déclarés. Plafond SMIC (indicatif) = rémunérations déclarées ÷ SMIC horaire.`}
         >
-          Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?
+          Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?
         </Titre>
         {x.mois.length === 0 ? (
           <p className="text-meta text-encre-2">Ce calcul apparaît dès qu’une facture a un mois de prestation.</p>
@@ -189,12 +190,12 @@ export default async function DossierSousTraitantPage({
           </div>
         )}
         <p className="max-w-3xl text-note text-gris">
-          L’effectif de l’attestation est un indicateur de cohérence : il ne dit pas quels salariés ont travaillé sur le marché, et le
+          L’effectif de l’attestation est un indicateur de cohérence : il ne dit pas quels salariés ont travaillé sur le marché, et le
           sous-traitant peut avoir d’autres clients. Un dépassement est à expliquer, pas à qualifier.
         </p>
       </section>
       <section aria-labelledby="flechage" className="flex flex-col gap-5">
-        <Titre n="Calcul" id="flechage" sous="Chaque facture rapprochée de ses paiements. Montant attendu : TTC s’il est saisi, sinon HT.">
+        <Titre n="Calcul" id="flechage" sous="Chaque facture rapprochée de ses paiements. Montant attendu : TTC s’il est saisi, sinon HT.">
           Fléchage des factures vers les paiements
         </Titre>
         {x.flechage.length === 0 && x.paiementsSansFacture.length === 0 ? (
@@ -258,7 +259,7 @@ export default async function DossierSousTraitantPage({
         <Titre
           n="2"
           id="attestations"
-          sous="Chaque attestation de vigilance URSSAF, avec l’effectif et les rémunérations qu’elle indique, et le mois de déclaration auquel ils se rapportent. Elle vaut 6 mois : elle doit être renouvelée pendant toute la relation."
+          sous="Chaque attestation de vigilance URSSAF, avec l’effectif et les rémunérations qu’elle indique, et le mois de déclaration auquel ils se rapportent. Elle vaut 6 mois : elle doit être renouvelée pendant toute la relation."
         >
           Attestations de vigilance
         </Titre>
@@ -274,7 +275,7 @@ export default async function DossierSousTraitantPage({
       </section>
 
       <section aria-labelledby="factures" className="flex flex-col gap-5">
-        <Titre n="3" id="factures" sous="Les factures du sous-traitant, avec le nombre d’heures et le mois de prestation : c’est ce qui permet de contrôler la faisabilité.">
+        <Titre n="3" id="factures" sous="Les factures du sous-traitant, avec le nombre d’heures et le mois de prestation : c’est ce qui permet de contrôler la faisabilité.">
           Factures du sous-traitant
         </Titre>
         <TableauSaisie
@@ -305,7 +306,7 @@ export default async function DossierSousTraitantPage({
         <Titre
           n="5"
           id="agents"
-          sous="Pour chaque agent vu sur le marché : est-il dans les documents du sous-traitant, sa carte est-elle valide, est-il rattaché dans Dracar Ultimate et présent sur le planning ?"
+          sous="Pour chaque agent vu sur le marché : est-il dans les documents du sous-traitant, sa carte est-elle valide, est-il rattaché dans Dracar Ultimate et présent sur le planning ?"
         >
           Agents contrôlés
         </Titre>
@@ -321,7 +322,7 @@ export default async function DossierSousTraitantPage({
           <div className="flex flex-col gap-3">
             <h4 className="text-corps font-medium text-encre">Identité et titre de travail</h4>
             <p className="-mt-2 max-w-2xl text-meta text-encre-2">
-              Carte d’identité, passeport ou titre de séjour : sa fin de validité, et pour un titre de séjour, l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen).
+              Carte d’identité, passeport ou titre de séjour : sa fin de validité, et pour un titre de séjour, l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen).
             </p>
             <TableauSaisie
               missionId={id}
@@ -344,8 +345,8 @@ export default async function DossierSousTraitantPage({
         <div>
           <h3 id="controle" className="font-display text-t4 text-encre">Contrôle du sous-traitant</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Les points de tes grilles 02 et 05. Ouvre une partie, réponds au toucher ; ajoute une observation quand c’est utile.
-            Les parties « points d’alerte » se lisent à l’envers : « oui » veut dire que l’anomalie est constatée.
+            Les points de tes grilles 02 et 05. Ouvre une partie, réponds au toucher ; ajoute une observation quand c’est utile.
+            Les parties « points d’alerte » se lisent à l’envers : « oui » veut dire que l’anomalie est constatée.
           </p>
         </div>
         <GrilleSaisie missionId={id} grille="st" cible={st.id} sections={GRILLE_SOUS_TRAITANT.sections} reponses={g.reponses} />

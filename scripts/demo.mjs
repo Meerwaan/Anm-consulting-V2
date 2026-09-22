@@ -32,9 +32,11 @@ const verifier = (r, quoi) => {
   if (r.error) throw new Error(`${quoi} : ${r.error.message}`);
   return r.data;
 };
+// Les libellés des grilles portent des espaces insécables : la comparaison les ignore.
+const meme = (a, b) => a.replace(/\s/g, " ") === b.replace(/\s/g, " ");
 const code = (grille, libelle) => {
   for (const s of grille.sections) {
-    const i = s.items.find((x) => x.libelle === libelle);
+    const i = s.items.find((x) => meme(x.libelle, libelle));
     if (i) return i.code;
   }
   throw new Error(`Question introuvable : ${libelle}`);

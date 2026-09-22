@@ -18,7 +18,7 @@ export const GET = async (_req: Request, { params }: { params: Promise<{ id: str
     pdf = await renderToBuffer(DocumentRapport({ r, version: "aperçu", dateEmission: date }));
   } catch (e) {
     console.error("[rapport] PDF", (e as Error).stack);
-    return new NextResponse("Le rapport n’a pas pu être produit. Réessaie ; si l’erreur persiste, préviens Merwan.", { status: 500 });
+    return new NextResponse("Le rapport n’a pas pu être produit. Réessaie ; si l’erreur persiste, préviens Merwan.", { status: 500 });
   }
   const nom = `Rapport-${r.mission.client.replace(/[^\p{L}\p{N}]+/gu, "-")}-apercu.pdf`;
   return new NextResponse(new Uint8Array(pdf), {

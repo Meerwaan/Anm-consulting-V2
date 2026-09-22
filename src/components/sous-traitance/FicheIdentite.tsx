@@ -83,7 +83,7 @@ const FicheIdentite = ({ missionId, st }: { missionId: string; st: SousTraitant 
       <div className="border-t border-filet pt-4">
         {confirmer ? (
           <p className="flex flex-wrap items-center gap-3 text-meta text-encre">
-            Supprimer ce sous-traitant, ses attestations, factures et paiements ?
+            Supprimer ce sous-traitant, ses attestations, factures et paiements ?
             <button type="button" onClick={supprimer} className="min-h-11 rounded-[5px] border border-critique px-4 font-medium text-critique">
               Oui, supprimer le dossier
             </button>
