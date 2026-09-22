@@ -58,7 +58,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
         <EnTeteSection id="chiffres" titre="Ce que disent les heures" texte="Heures vendues, réalisées et payées, saisies dans la sous-traitance." />
         <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-y border-filet py-5 sm:grid-cols-4">
           {[
-            ["A − B · à expliquer", fmtHeures(bouclage.totalEcart), "text-encre"],
+            ["Capacitaire de sous-traitance", fmtHeures(bouclage.totalEcart), "text-encre"],
             ["Couvert par la sous-traitance", fmtHeures(bouclage.totalDocumentees), "text-encre"],
             ["Reste inexpliqué", fmtHeures(bouclage.totalReste), bouclage.totalReste > 0.5 ? "text-critique" : "text-encre"],
             ["Réalisées non payées", fmtHeures(nonPayees), nonPayees > 0.5 ? "text-critique" : "text-encre"],
