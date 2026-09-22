@@ -35,7 +35,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           {[
             ["A · Heures vendues", fmtHeures(ecart.totalVendues)],
             ["B · Heures payées", fmtHeures(ecart.totalPayees)],
-            ["A − B", fmtHeures(ecart.totalEcart)],
+            ["A − B · Capacitaire", fmtHeures(ecart.totalEcart)],
             ["Part de A", fmtPct(ecart.totalEcartPct)],
           ].map(([t, v]) => (
             <div key={t} className="flex flex-col gap-1">

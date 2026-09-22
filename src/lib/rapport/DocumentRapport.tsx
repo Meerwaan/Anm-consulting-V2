@@ -251,7 +251,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           items={[
             { t: "A · Heures vendues", v: fmtHeures(r.ecart.totalVendues) },
             { t: "B · Heures payées", v: fmtHeures(r.ecart.totalPayees) },
-            { t: "A − B · À expliquer", v: fmtHeures(r.bouclage.totalEcart) },
+            { t: "A − B · Capacitaire de sous-traitance", v: fmtHeures(r.bouclage.totalEcart) },
             { t: "Facturées par les sous-traitants", v: fmtHeures(r.bouclage.totalDocumentees) },
             { t: "Reste inexpliqué", v: fmtHeures(r.bouclage.totalReste), c: r.bouclage.totalReste > 0.5 ? C.critique : undefined },
             { t: "Facturé en trop", v: fmtHeures(r.bouclage.totalExcedent), c: r.bouclage.totalExcedent > 0.5 ? C.critique : undefined },
@@ -278,10 +278,10 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           <Text style={s.etiquette}>3</Text>
           <Text style={s.h2}>Le rapprochement des heures</Text>
           <Text style={s.para}>
-            Heures vendues aux clients (A), heures réalisées selon le planning ou le pointage, heures payées sur les bulletins (B) ; l’écart A − B doit être couvert par la sous-traitance facturée. Les mois ne se compensent pas entre eux.
+            Heures vendues aux clients (A), heures réalisées selon le planning ou le pointage, heures payées sur les bulletins (B) ; A − B est le capacitaire de sous-traitance, le maximum d’heures que l’entreprise a pu sous-traiter ; il doit être couvert par la sous-traitance facturée, sans la dépasser. Les mois ne se compensent pas entre eux.
           </Text>
           <Tableau
-            colonnes={[{ t: "Mois", w: "17%" }, { t: "A · Vendues", w: "14%" }, { t: "Réalisées", w: "14%" }, { t: "B · Payées", w: "14%" }, { t: "A − B", w: "13%" }, { t: "Sous-traitants", w: "14%" }, { t: "Reste", w: "14%" }]}
+            colonnes={[{ t: "Mois", w: "17%" }, { t: "A · Vendues", w: "14%" }, { t: "Réalisées", w: "14%" }, { t: "B · Payées", w: "14%" }, { t: "Capacitaire", w: "13%" }, { t: "Sous-traitants", w: "14%" }, { t: "Reste", w: "14%" }]}
             alignDroite={[1, 2, 3, 4, 5, 6]}
             lignes={r.ecart.lignes.map((l, i) => {
               const b = r.bouclage.lignes[i];
@@ -516,7 +516,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           ) : null}
           <Text style={s.h3} minPresenceAhead={70}>Méthode de calcul</Text>
           <Text style={s.para}>
-            A − B : heures vendues moins heures payées sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance ; elle est due à la conclusion du contrat de sous-traitance, puis tous les six mois jusqu’à sa fin. Prix de l’heure : montant hors taxe ÷ heures facturées, comparé au coût de revient horaire de référence{r.coutRevient ? ` retenu : ${r.coutRevient}` : ", lorsqu’il est renseigné"}.
+            Capacitaire de sous-traitance (A − B) : heures facturées aux clients moins heures payées aux salariés sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance ; elle est due à la conclusion du contrat de sous-traitance, puis tous les six mois jusqu’à sa fin. Prix de l’heure : montant hors taxe ÷ heures facturées, comparé au coût de revient horaire de référence{r.coutRevient ? ` retenu : ${r.coutRevient}` : ", lorsqu’il est renseigné"}.
           </Text>
           <View style={{ marginTop: 28, borderTopWidth: 0.5, borderTopColor: C.filet, paddingTop: 10 }} wrap={false}>
             <Text style={{ fontFamily: "Instrument Serif", fontSize: 14 }}>{r.mission.auditeur}</Text>

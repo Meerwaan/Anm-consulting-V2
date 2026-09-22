@@ -7,7 +7,8 @@ import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
 import TableauSaisie from "@/components/sous-traitance/TableauSaisie";
 import EcheancierVigilance from "@/components/sous-traitance/EcheancierVigilance";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
-import { SEUIL_VIGILANCE_HT, analyserSousTraitant } from "@/lib/sous-traitance/calculs";
+import { SEUIL_VIGILANCE_HT, analyserSousTraitant, boucler, calculerEcart } from "@/lib/sous-traitance/calculs";
+import Capacitaire from "@/components/sous-traitance/Capacitaire";
 import { versLigneInitiale } from "@/lib/sous-traitance/tables";
 import { fmtDate, fmtEuros, fmtEurosRond, fmtHeures, fmtMois, fmtNombre, fmtPct } from "@/lib/sous-traitance/format";
 import GrilleSaisie from "@/components/grilles/GrilleSaisie";
@@ -52,6 +53,8 @@ export default async function DossierSousTraitantPage({
   const st = d.sousTraitants.find((s) => s.id === stId);
   if (!st) notFound();
   const x = analyserSousTraitant(st, d.attestations, d.factures, d.paiements, d.parametres, d.smics, d.agents);
+  const ecartMission = calculerEcart(d.ventes, d.paie, d.parametres);
+  const bouclageMission = boucler(ecartMission, d.sousTraitants, d.factures);
   const agentsST = d.agents.filter((a) => a.sous_traitant_id === st.id);
   const donneur = st.donneur_id ? d.sousTraitants.find((s) => s.id === st.donneur_id) : null;
   const facturesST = d.factures.filter((f) => f.sous_traitant_id === st.id);
@@ -100,9 +103,18 @@ export default async function DossierSousTraitantPage({
             </div>
           ))}
         </dl>
+        {/* La base de travail, rappelée dans chaque dossier (Sofia, 22/09/2026). */}
+        <div className="mt-2">
+          <Capacitaire
+            missionId={id}
+            ecart={ecartMission}
+            bouclage={bouclageMission}
+            sousTraitant={{ nom: st.raison_sociale, heures: x.totalHeures, rang: st.rang }}
+          />
+        </div>
       </div>
       {/* Quatre vues : on ne voit jamais tout le dossier d'un coup. */}
-      <nav aria-label="Parties du dossier" className="-mt-6 flex gap-1 overflow-x-auto border-b border-filet">
+      <nav aria-label="Parties du dossier" className="flex gap-1 overflow-x-auto border-b border-filet">
         {VUES.map((v) => (
           <Link
             key={v.cle}

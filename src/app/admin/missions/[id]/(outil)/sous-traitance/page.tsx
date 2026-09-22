@@ -4,6 +4,7 @@ import EtapePage from "@/components/portail/EtapePage";
 import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import AjoutSousTraitant from "@/components/sous-traitance/AjoutSousTraitant";
 import ListeAlertes from "@/components/sous-traitance/ListeAlertes";
+import Capacitaire from "@/components/sous-traitance/Capacitaire";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
 import { analyserEntreprise, analyserSousTraitant, boucler, calculerEcart } from "@/lib/sous-traitance/calculs";
 import { fmtHeures, fmtMois, fmtPct } from "@/lib/sous-traitance/format";
@@ -37,7 +38,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
   const chiffres: [string, string, string?][] = [
     ["A · Heures vendues", fmtHeures(ecart.totalVendues)],
     ["B · Heures payées", fmtHeures(ecart.totalPayees)],
-    ["A − B · À expliquer", fmtHeures(bouclage.totalEcart), ecart.totalEcartPct !== null ? `${fmtPct(ecart.totalEcartPct)} de A` : undefined],
+    ["A − B · Capacitaire", fmtHeures(bouclage.totalEcart), ecart.totalEcartPct !== null ? `${fmtPct(ecart.totalEcartPct)} de A` : undefined],
     ["Facturées par les sous-traitants", fmtHeures(bouclage.totalDocumentees)],
     ["Reste inexpliqué", fmtHeures(bouclage.totalReste)],
     ["Facturé en trop par les sous-traitants", fmtHeures(bouclage.totalExcedent)],
@@ -53,6 +54,8 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
           réaliser, déclarés, facturés et payés. Ce qui n’est couvert par rien est le point à investiguer.
         </p>
       </div>
+
+      <Capacitaire missionId={id} ecart={ecart} bouclage={bouclage} />
 
       {/* Le chemin, dans l'ordre où on le parcourt. */}
       <ol className="grid gap-px overflow-hidden rounded-[5px] border border-filet bg-filet md:grid-cols-2">
@@ -109,7 +112,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
                   <th scope="col" className="py-2 pr-3 text-right font-medium">A · Vendues</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Réalisées</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">B · Payées</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">A − B</th>
+                  <th scope="col" className="py-2 pr-3 text-right font-medium">Capacitaire</th>
                   <th scope="col" className="py-2 pr-3 text-right font-medium">Sous-traitants</th>
                   <th scope="col" className="py-2 text-right font-medium">Reste à expliquer</th>
                 </tr>
@@ -148,7 +151,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
           </div>
         )}
         <p className="max-w-3xl text-note text-gris">
-          L’écart A − B est un indicateur de contrôle, pas une preuve : il se rapproche des plannings, des factures des sous-traitants,
+          Le capacitaire (A − B) est un indicateur de contrôle, pas une preuve : il se rapproche des plannings, des factures des sous-traitants,
           des paiements et des documents sociaux. Seuls les sous-traitants de rang 1 comptent ici, les heures du rang 2 étant déjà
           facturées à travers eux.
         </p>
