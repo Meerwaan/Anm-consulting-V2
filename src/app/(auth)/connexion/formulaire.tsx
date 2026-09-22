@@ -77,8 +77,8 @@ const FormulaireConnexion = () => {
       </button>
 
       <p className="text-meta text-gris">
-        Mot de passe oublié : demande à Merwan de le réinitialiser. Tu pourras ensuite le changer
-        depuis « Mon compte ».
+        Mot de passe oublié : demande à Merwan de le réinitialiser. Tu pourras ensuite le changer
+        depuis « Mon compte ».
       </p>
     </form>
   );

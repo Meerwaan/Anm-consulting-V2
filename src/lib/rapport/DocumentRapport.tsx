@@ -49,7 +49,8 @@ const C = {
 // interligne héritée de la page s'y remultiplie jusqu'à casser le rendu vers la treizième page.
 const s = StyleSheet.create({
   page: { paddingTop: 64, paddingBottom: 60, paddingHorizontal: 52, fontFamily: "Archivo", fontSize: 9.5, color: C.encre },
-  corps: { lineHeight: 1.5 },
+  // La taille est répétée ici : sans elle, react-pdf calcule l'interligne sur sa taille par défaut (18).
+  corps: { fontSize: 9.5, lineHeight: 1.5 },
   entete: { position: "absolute", top: 26, left: 52, right: 52, flexDirection: "row", justifyContent: "space-between", fontFamily: "Plex Mono", fontSize: 7, color: C.gris, borderBottomWidth: 0.5, borderBottomColor: C.filet, paddingBottom: 6 },
   pied: { position: "absolute", bottom: 26, left: 52, right: 52, flexDirection: "row", justifyContent: "space-between", fontFamily: "Plex Mono", fontSize: 7, color: C.gris },
   filigrane: { position: "absolute", top: 380, left: 60, fontFamily: "Instrument Serif", fontSize: 60, color: C.filet2, transform: "rotate(-30deg)" },
@@ -277,7 +278,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           <Text style={s.etiquette}>3</Text>
           <Text style={s.h2}>Le rapprochement des heures</Text>
           <Text style={s.para}>
-            Heures vendues aux clients (A), heures réalisées selon le planning ou le pointage, heures payées sur les bulletins (B) ; l’écart A − B doit être couvert par la sous-traitance facturée. Les mois ne se compensent pas entre eux.
+            Heures vendues aux clients (A), heures réalisées selon le planning ou le pointage, heures payées sur les bulletins (B) ; l’écart A − B doit être couvert par la sous-traitance facturée. Les mois ne se compensent pas entre eux.
           </Text>
           <Tableau
             colonnes={[{ t: "Mois", w: "17%" }, { t: "A · Vendues", w: "14%" }, { t: "Réalisées", w: "14%" }, { t: "B · Payées", w: "14%" }, { t: "A − B", w: "13%" }, { t: "Sous-traitants", w: "14%" }, { t: "Reste", w: "14%" }]}
@@ -331,7 +332,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
 
               {x.mois.length ? (
                 <>
-                  <Text style={s.h3} minPresenceAhead={70}>Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?</Text>
+                  <Text style={s.h3} minPresenceAhead={70}>Faisabilité : l’effectif déclaré peut-il produire les heures facturées ?</Text>
                   <Tableau
                     colonnes={[{ t: "Mois", w: "16%" }, { t: "Facturées", w: "14%" }, { t: "Attestation", w: "18%" }, { t: "Effectif", w: "11%" }, { t: "Disponibles", w: "14%" }, { t: "Utilisée", w: "12%" }, { t: "Plafond SMIC", w: "15%" }]}
                     alignDroite={[1, 3, 4, 5, 6]}
@@ -400,7 +401,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
         <Module
           n="5"
           titre="URSSAF · Travail dissimulé, prêt illicite, marchandage"
-          intro="L’entreprise contrôlée pour elle-même : dissimulation d’emploi salarié, dissimulation d’activité, recours à des travailleurs présentés comme indépendants, prêt illicite de main-d’œuvre et marchandage. Les sous-traitants le sont chacun dans leur chapitre."
+          intro="L’entreprise contrôlée pour elle-même : dissimulation d’emploi salarié, dissimulation d’activité, recours à des travailleurs présentés comme indépendants, prêt illicite de main-d’œuvre et marchandage. Les sous-traitants le sont chacun dans leur chapitre."
           m={r.urssaf}
           avant={r.sousTraitants.length ? (
             <Tableau
@@ -466,7 +467,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
         <View break>
           <Text style={s.etiquette}>8</Text>
           <Text style={s.h2}>Plan d’actions correctives</Text>
-          <Text style={s.para}>Chaque anomalie : constat, risque, action corrective, justificatif à produire, responsable, échéance, contrôle de régularisation.</Text>
+          <Text style={s.para}>Chaque anomalie : constat, risque, action corrective, justificatif à produire, responsable, échéance, contrôle de régularisation.</Text>
           {r.nonConformites.length === 0 ? (
             <Text style={s.para}>Aucune action formalisée.</Text>
           ) : (

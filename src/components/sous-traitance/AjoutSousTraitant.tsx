@@ -42,8 +42,8 @@ const AjoutSousTraitant = ({ missionId, rang1 }: { missionId: string; rang1: { i
         <label className="flex flex-col gap-2">
           <span className="text-meta font-medium text-encre">Rang</span>
           <select value={rang} onChange={(e) => setRang(e.target.value as "1" | "2")} className={champ}>
-            <option value="1">Rang 1 : travaille directement pour le client</option>
-            <option value="2" disabled={rang1.length === 0}>Rang 2 : sous-traitant d’un sous-traitant (cascade)</option>
+            <option value="1">Rang 1 : travaille directement pour le client</option>
+            <option value="2" disabled={rang1.length === 0}>Rang 2 : sous-traitant d’un sous-traitant (cascade)</option>
           </select>
         </label>
         {rang === "2" ? (

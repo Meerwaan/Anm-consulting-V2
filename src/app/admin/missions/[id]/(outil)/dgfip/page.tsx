@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import Link from "next/link";
 import GrilleSaisie from "@/components/grilles/GrilleSaisie";
 import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
@@ -40,6 +41,7 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="dgfip" />
         <h2 className="font-display text-t3 text-encre">Contrôle DGFiP</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Factures fictives et factures de complaisance. Une facture doit reposer sur une commande, une prestation réellement
@@ -65,7 +67,7 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
         <EnTeteSection id="emises" titre="Factures émises aux clients" texte="Commande, numérotation, TVA, règlement, prix de l’heure, et sous-traitance facturée au-delà de ce que les ventes demandent." />
         <ListeAlertes alertes={m.dgfip.emises} vide="Les ventes saisies ne font ressortir aucune alerte." missionId={id} constatsExistants={constats} />
         <p className="text-meta text-encre-2">
-          Pour corriger une vente : <Link href={`/admin/missions/${id}/sous-traitance/heures`} className="text-vert underline underline-offset-4">heures vendues et payées</Link>.
+          Pour corriger une vente : <Link href={`/admin/missions/${id}/sous-traitance/heures`} className="text-vert underline underline-offset-4">heures vendues et payées</Link>.
         </p>
       </section>
 
@@ -111,10 +113,10 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
         <EnTeteSection
           id="taux"
           titre="Taux horaires"
-          texte="Le coût de revient d’une heure d’agent publié par la branche sert de plancher : une heure vendue ou achetée en dessous est à justifier. Saisis la valeur de l’année et sa source ; l’outil n’en propose aucune."
+          texte="Le coût de revient d’une heure d’agent publié par la branche sert de plancher : une heure vendue ou achetée en dessous est à justifier. Saisis la valeur de l’année et sa source ; l’outil n’en propose aucune."
         />
         <CoutRevient missionId={id} valeur={d.parametres.cout_revient_horaire ?? null} source={d.parametres.cout_revient_source ?? null} />
-        <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-y border-filet py-5 sm:grid-cols-3">
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-y border-filet py-5 sm:grid-cols-4">
           <div className="flex flex-col gap-1">
             <dt className="text-note text-gris">Heure vendue, en moyenne</dt>
             <dd className="font-display text-t4 tabular-nums text-encre">{prixVente === null ? "—" : fmtEuros(prixVente)}</dd>
@@ -133,7 +135,7 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
       </section>
 
       <section aria-labelledby="points" className="flex flex-col gap-5">
-        <EnTeteSection id="points" titre="Points de contrôle" texte="Dans la section des indices, réponds « oui » quand l’indice est constaté." />
+        <EnTeteSection id="points" titre="Points de contrôle" texte="Dans la section des indices, réponds « oui » quand l’indice est constaté." />
         <BilanGrille b={bilan} />
         <GrilleSaisie missionId={id} grille="dgfip" cible="mission" sections={GRILLE_DGFIP.sections} reponses={g.reponses} />
       </section>

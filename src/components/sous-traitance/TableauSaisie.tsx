@@ -144,9 +144,9 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
   const [retourCollage, setRetourCollage] = useState<string | null>(null);
   const courantes = useRef(lignes);
   courantes.current = lignes;
-  // Enregistrements d'une même ligne mis en file : sans cela, deux champs quittés coup sur coup
+  // Enregistrements d'une même ligne mis en file : sans cela, deux champs quittés coup sur coup
   // sur une ligne neuve partaient avant que la première réponse donne son identifiant, et
-  // créaient la ligne deux fois. Chaque modification incrémente une version ; on n'envoie que
+  // créaient la ligne deux fois. Chaque modification incrémente une version ; on n'envoie que
   // si la version courante n'est pas déjà enregistrée.
   const file = useRef(new Map<string, Promise<boolean>>());
   const version = useRef(new Map<string, number>());

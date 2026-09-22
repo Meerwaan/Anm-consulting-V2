@@ -194,8 +194,10 @@ export interface DossierSousTraitant {
   alertes: Alerte[];
 }
 
-const h = (n: number) => `${Math.round(n).toLocaleString("fr-FR")} h`;
-const eur = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+/** Espace insécable à la place de l'espace fine de toLocaleString : les polices du PDF ne l'ont pas. */
+const nombreFr = (n: number, options?: Intl.NumberFormatOptions): string => n.toLocaleString("fr-FR", options).replace(/\u202f/g, "\u00a0");
+const h = (n: number) => `${nombreFr(Math.round(n))}\u00a0h`;
+const eur = (n: number) => `${nombreFr(n, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\u00a0€`;
 const moisLisible = (m: string) =>
   new Date(`${m}-01T12:00:00Z`).toLocaleDateString("fr-FR", { month: "long", year: "numeric", timeZone: "UTC" });
 
@@ -299,7 +301,7 @@ export const analyserSousTraitant = (
     }
     if (m.heuresFacturees !== null && m.capacite !== null && m.heuresFacturees > m.capacite) {
       alertes.push({ code: "capacite_depassee", niveau: "alerte", grille: "03",
-        texte: `${lib} : ${h(m.heuresFacturees)} facturées pour ${h(m.capacite)} disponibles (${m.attestation?.effectif_etp} ETP × ${p.heures_mensuelles_etp.toLocaleString("fr-FR")} h). L’effectif de l’attestation ne peut pas produire ces heures à lui seul.` });
+        texte: `${lib} : ${h(m.heuresFacturees)} facturées pour ${h(m.capacite)} disponibles (${m.attestation?.effectif_etp} ETP × ${nombreFr(p.heures_mensuelles_etp)} h). L’effectif de l’attestation ne peut pas produire ces heures à lui seul.` });
     }
     if (m.heuresFacturees !== null && m.plafondSmic !== null && m.heuresFacturees > m.plafondSmic) {
       alertes.push({ code: "plafond_smic_depasse", niveau: "alerte", grille: "03",
@@ -319,7 +321,7 @@ export const analyserSousTraitant = (
   if (at.length === 0) {
     alertes.push({ code: "aucune_attestation", niveau: vigilanceObligatoire === false ? "a_verifier" : "alerte", grille: "05",
       texte: vigilanceObligatoire
-        ? `Aucune attestation de vigilance, pour une relation de ${eur(montantRef!)} HT : au-delà de ${eur(SEUIL_VIGILANCE_HT)} HT, la vérification est obligatoire.`
+        ? `Aucune attestation de vigilance, pour une relation de ${eur(montantRef!)} HT : au-delà de ${eur(SEUIL_VIGILANCE_HT)} HT, la vérification est obligatoire.`
         : "Aucune attestation de vigilance saisie." });
   }
   for (const a of at) {
@@ -334,14 +336,14 @@ export const analyserSousTraitant = (
     }
     if (!a.date_delivrance) {
       alertes.push({ code: "attestation_sans_date", niveau: "a_verifier", grille: "05",
-        texte: "Une attestation n’a pas de date de délivrance : sa validité ne peut pas être contrôlée." });
+        texte: "Une attestation n’a pas de date de délivrance : sa validité ne peut pas être contrôlée." });
     }
   }
   const datees = at.filter((a) => a.date_delivrance).map((a) => a.date_delivrance!).sort();
   for (let i = 1; i < datees.length; i++) {
     if (ajouterMois(datees[i - 1], VALIDITE_ATTESTATION_MOIS) < datees[i]) {
       alertes.push({ code: "renouvellement_tardif", niveau: "alerte", grille: "05",
-        texte: `Plus de 6 mois entre les attestations du ${new Date(`${datees[i - 1]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} et du ${new Date(`${datees[i]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} : la vigilance n’a pas été renouvelée à temps.` });
+        texte: `Plus de 6 mois entre les attestations du ${new Date(`${datees[i - 1]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} et du ${new Date(`${datees[i]}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })} : la vigilance n’a pas été renouvelée à temps.` });
     }
   }
 
@@ -353,7 +355,7 @@ export const analyserSousTraitant = (
     const date = new Date(`${e.date}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" });
     if (e.statut === "manquante") {
       alertes.push({ code: "echeance_vigilance_manquee", niveau: "alerte", grille: "05",
-        texte: `Échéance de vigilance du ${date} : aucune attestation délivrée dans les 6 mois qui la précèdent.` });
+        texte: `Échéance de vigilance du ${date} : aucune attestation délivrée dans les 6 mois qui la précèdent.` });
     }
   }
 
@@ -479,7 +481,7 @@ export const boucler = (ecart: EcartHeures, sousTraitants: SousTraitant[], factu
       // Plus d'heures de sous-traitance facturées que les ventes n'en demandent : des factures
       // sans prestation correspondante, le profil que la DGFiP examine en premier.
       alertes.push({ code: "sous_traitance_excedentaire", niveau: "alerte", grille: "04",
-        texte: `${moisLisible(l.mois)} : les sous-traitants facturent ${h(l.documentees)}, soit ${h(-l.reste!)} de plus que les heures vendues non couvertes par la paie (${h(Math.max(0, l.ecart!))}). Ces heures ne correspondent à aucune vente : vérifier la réalité des prestations facturées.` });
+        texte: `${moisLisible(l.mois)} : les sous-traitants facturent ${h(l.documentees)}, soit ${h(-l.reste!)} de plus que les heures vendues non couvertes par la paie (${h(Math.max(0, l.ecart!))}). Ces heures ne correspondent à aucune vente : vérifier la réalité des prestations facturées.` });
     }
   }
   return {
@@ -520,7 +522,7 @@ export const analyserEntreprise = (ventes: Vente[], paie: Paie[], smics: Smic[])
     }
     if (v.montant_ht !== null && v.tva !== null && Math.abs(v.tva - v.montant_ht * TAUX_TVA) > TOLERANCE_EUROS) {
       av.push({ code: "tva_incoherente", niveau: "a_verifier", grille: "dgfip",
-        texte: `${ref} : TVA de ${eur(v.tva)} pour ${eur(v.montant_ht)} HT, soit ${((v.tva / v.montant_ht) * 100).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}\u00A0% au lieu de 20\u00A0%.` });
+        texte: `${ref} : TVA de ${eur(v.tva)} pour ${eur(v.montant_ht)} HT, soit ${nombreFr((v.tva / v.montant_ht) * 100, { maximumFractionDigits: 1 })}\u00A0% au lieu de 20\u00A0%.` });
     }
     if (v.montant_ht !== null && v.tva !== null && v.montant_ttc !== null && Math.abs(v.montant_ht + v.tva - v.montant_ttc) > TOLERANCE_EUROS) {
       av.push({ code: "ttc_incoherent", niveau: "alerte", grille: "dgfip",
@@ -629,7 +631,7 @@ export const analyserFacturation = (
       const prix = v.montant_ht / v.heures_facturees;
       if (prix < ref - 0.005) {
         alertes.push({ code: "prix_vente_sous_revient", niveau: "a_verifier", grille: "dgfip",
-          texte: `${v.numero_facture ? `Facture ${v.numero_facture}` : "Une vente"}${v.client ? ` (${v.client})` : ""} : l’heure vendue ${eur(prix)} HT, sous le coût de revient horaire de référence (${eur(ref)} HT${p.cout_revient_source ? `, ${p.cout_revient_source}` : ""}). Un prix inférieur est à justifier.` });
+          texte: `${v.numero_facture ? `Facture ${v.numero_facture}` : "Une vente"}${v.client ? ` (${v.client})` : ""} : l’heure vendue ${eur(prix)} HT, sous le coût de revient horaire de référence (${eur(ref)} HT). Un prix inférieur est à justifier.` });
       }
     }
   }
@@ -659,13 +661,13 @@ export const analyserFacturation = (
     const ref = p.cout_revient_horaire ?? null;
     if (ref && cout < ref - 0.005) {
       alertes.push({ code: "cout_st_sous_revient", niveau: "alerte", grille: "dgfip", sousTraitantId: st.id,
-        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le coût de revient horaire de référence (${eur(ref)} HT${p.cout_revient_source ? `, ${p.cout_revient_source}` : ""}). À ce prix, les charges d’un agent ne sont pas couvertes : la réalité des heures et la déclaration des salariés sont à vérifier.` });
+        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le coût de revient horaire de référence (${eur(ref)} HT). À ce prix, les charges d’un agent ne sont pas couvertes : la réalité des heures et la déclaration des salariés sont à vérifier.` });
     }
     const derniere = chiffrees.map((f) => f.mois ?? f.date_facture).filter((x): x is string => Boolean(x)).sort().pop();
     const smic = derniere ? smicA(smics, `${cleMois(derniere)}-01`) : null;
     if (smic && cout < smic.taux_brut) {
       alertes.push({ code: "cout_st_sous_smic", niveau: "alerte", grille: "dgfip", sousTraitantId: st.id,
-        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le SMIC horaire brut (${eur(smic.taux_brut)}). À ce prix, le salaire d’un agent n’est pas couvert : la réalité des heures facturées est à vérifier.` });
+        texte: `${st.raison_sociale} facture l’heure ${eur(cout)} HT en moyenne, sous le SMIC horaire brut (${eur(smic.taux_brut)}). À ce prix, le salaire d’un agent n’est pas couvert : la réalité des heures facturées est à vérifier.` });
     }
   }
   return alertes;

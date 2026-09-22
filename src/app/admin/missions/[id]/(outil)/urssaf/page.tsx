@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import Link from "next/link";
 import GrilleSaisie from "@/components/grilles/GrilleSaisie";
 import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
@@ -45,10 +46,11 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="urssaf" />
         <h2 className="font-display text-t3 text-encre">Contrôle URSSAF</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Travail dissimulé, dissimulation d’activité, prêt illicite de main-d’œuvre et marchandage. L’entreprise est contrôlée ici pour
-          elle-même ; chaque sous-traitant l’est dans son dossier, dont les conclusions sont reprises plus bas.
+          elle-même ; chaque sous-traitant l’est dans son dossier, dont les conclusions sont reprises plus bas.
         </p>
       </div>
 
@@ -69,7 +71,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
         </dl>
         <ListeAlertes alertes={m.urssaf.entreprise} vide="Les heures saisies ne font ressortir aucune alerte pour l’entreprise." missionId={id} constatsExistants={constats} />
         <p className="text-meta text-encre-2">
-          Pour corriger une donnée : <Link href={`/admin/missions/${id}/sous-traitance/heures`} className="text-vert underline underline-offset-4">heures vendues et payées</Link>.
+          Pour corriger une donnée : <Link href={`/admin/missions/${id}/sous-traitance/heures`} className="text-vert underline underline-offset-4">heures vendues et payées</Link>.
         </p>
       </section>
 
@@ -77,7 +79,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
         <EnTeteSection
           id="salaries"
           titre="Les salariés de l’entreprise"
-          texte="Un salarié par ligne, tel qu’il figure au registre unique du personnel : contrat, entrée, DPAE, sortie. La liste est la même que celle des agents dans CNAPS."
+          texte="Un salarié par ligne, tel qu’il figure au registre unique du personnel : contrat, entrée, DPAE, sortie. La liste est la même que celle des agents dans CNAPS."
         />
         <TableauSaisie
           missionId={id}
@@ -90,7 +92,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
           <>
             {([
               ["salaries_registre", "Contrat, registre du personnel et médecine du travail", null],
-              ["salaries_identite", "Identité et titre de travail", "Carte d’identité, passeport ou titre de séjour : sa fin de validité, et pour un titre de séjour, l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen)."],
+              ["salaries_identite", "Identité et titre de travail", "Carte d’identité, passeport ou titre de séjour : sa fin de validité, et pour un titre de séjour, l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen)."],
             ] as const).map(([table, titre, texte]) => (
               <div key={table} className="flex flex-col gap-3">
                 <h4 className="text-corps font-medium text-encre">{titre}</h4>
@@ -140,7 +142,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
       </section>
 
       <section aria-labelledby="points" className="flex flex-col gap-5">
-        <EnTeteSection id="points" titre="Points de contrôle de l’entreprise" texte="« Sans objet » pour ce qui ne concerne pas l’entreprise." />
+        <EnTeteSection id="points" titre="Points de contrôle de l’entreprise" texte="« Sans objet » pour ce qui ne concerne pas l’entreprise." />
         <BilanGrille b={bilan} />
         <GrilleSaisie missionId={id} grille="urssaf" cible="mission" sections={GRILLE_URSSAF.sections} reponses={g.reponses} />
       </section>

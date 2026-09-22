@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import GrilleSaisie from "@/components/grilles/GrilleSaisie";
 import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
 import { GRILLE_CNAPS, RAPPEL_DRACAR } from "@/content/grilles";
@@ -28,6 +29,7 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="flex flex-col gap-12">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="cnaps" />
         <h2 className="font-display text-t3 text-encre">Contrôle CNAPS · Dracar Ultimate</h2>
         <p className="max-w-2xl text-corps text-encre-2">{RAPPEL_DRACAR}</p>
       </div>
@@ -36,7 +38,7 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
 
       <section aria-labelledby="points" className="flex flex-col gap-5">
         <h3 id="points" className="font-display text-t4 text-encre">Obligations de vérification</h3>
-        <p className="-mt-3 max-w-2xl text-meta text-encre-2">Une section par fiche Dracar Ultimate. « Sans objet » pour ce que l’entreprise ne fait pas.</p>
+        <p className="-mt-3 max-w-2xl text-meta text-encre-2">Une section par fiche Dracar Ultimate. « Sans objet » pour ce que l’entreprise ne fait pas.</p>
         <GrilleSaisie missionId={id} grille="cnaps" cible="mission" sections={GRILLE_CNAPS.sections} reponses={g.reponses} />
       </section>
 
@@ -44,8 +46,8 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
         <div>
           <h3 id="cartes" className="font-display text-t4 text-encre">Suivi des cartes professionnelles</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Les agents de l’entreprise : validité de la carte, déclaration dans Dracar Ultimate, présence au planning, affectation
-            conforme. Une carte qui expire dans les 30 jours est signalée.
+            Les agents de l’entreprise : validité de la carte, déclaration dans Dracar Ultimate, présence au planning, affectation
+            conforme. Une carte qui expire dans les 30 jours est signalée.
           </p>
         </div>
         <TableauSaisie
@@ -59,7 +61,7 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
           <div className="flex flex-col gap-3">
             <h4 className="text-corps font-medium text-encre">Identité et titre de travail</h4>
             <p className="-mt-2 max-w-2xl text-meta text-encre-2">
-              Les mêmes agents : pièce d’identité ou titre de séjour, sa fin de validité, et l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen). Aussi visible dans URSSAF.
+              Les mêmes agents : pièce d’identité ou titre de séjour, sa fin de validité, et l’autorisation de travailler (« Sans objet » pour un ressortissant français ou européen). Aussi visible dans URSSAF.
             </p>
             <TableauSaisie
               missionId={id}

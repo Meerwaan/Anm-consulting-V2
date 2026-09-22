@@ -1,3 +1,4 @@
+import EtapePage from "@/components/portail/EtapePage";
 import type { FichierPiece, ValiditePiece } from "@/lib/types";
 import LignePiece from "./LignePiece";
 import CopierPiecesManquantes from "./CopierPiecesManquantes";
@@ -45,9 +46,9 @@ const ListePieces = ({ missionId, ordre, pieces, fichiers }: Props) => {
   return (
     <section className="flex flex-col gap-8">
       <header className="flex flex-col gap-5 border-b border-filet pb-6">
-        <div>
-          <p className="etiquette">Collecte</p>
-          <h2 className="mt-2 font-display text-t3 text-encre">Pièces justificatives</h2>
+        <div className="flex flex-col gap-3">
+          <EtapePage chemin="pieces" />
+          <h2 className="font-display text-t3 text-encre">Pièces justificatives</h2>
         </div>
         <p className="text-corps text-encre-2">
           <strong className="font-medium text-encre">{recues}</strong> reçue{recues > 1 ? "s" : ""} sur {applicables}
@@ -71,7 +72,7 @@ const ListePieces = ({ missionId, ordre, pieces, fichiers }: Props) => {
         )}
         {perimees.length > 0 ? (
           <p className="rounded-[5px] border border-majeur/30 bg-majeur-l/50 px-4 py-3 text-meta text-encre">
-            Une pièce reçue mais dépassée ne vaut rien le jour du contrôle : redemande la version à jour.
+            Une pièce reçue mais dépassée ne vaut rien le jour du contrôle : redemande la version à jour.
           </p>
         ) : null}
       </header>

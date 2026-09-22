@@ -138,7 +138,7 @@ const Question = ({
           onChange={(e) => setObservation(e.target.value)}
           onBlur={enregistrerObservation}
           rows={2}
-          placeholder="Observation : ce qui a été vu, le document consulté, ce qui manque…"
+          placeholder="Observation : ce qui a été vu, le document consulté, ce qui manque…"
           aria-label={`Observation : ${libelle}`}
           className="w-full rounded-[5px] border border-gris/60 bg-papier px-3 py-2.5 text-meta text-encre outline-none focus:border-vert"
         />

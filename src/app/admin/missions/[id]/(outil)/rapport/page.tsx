@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import EtapePage from "@/components/portail/EtapePage";
 import { notFound } from "next/navigation";
 import { ArrowRight, DownloadSimple, FilePdf } from "@phosphor-icons/react/dist/ssr";
 import TexteRapport from "@/components/rapport/TexteRapport";
@@ -34,6 +35,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
   return (
     <div className="flex flex-col gap-14">
       <div className="flex flex-col gap-3">
+        <EtapePage chemin="rapport" />
         <h2 className="font-display text-t3 text-encre">Rapport</h2>
         <p className="max-w-2xl text-corps text-encre-2">
           Le rapport se construit tout seul à partir de ce que tu as saisi et conclu. Ici, tu relis les textes et tu émets la version qui part chez le client.
@@ -42,7 +44,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
 
       <section aria-labelledby="etat" className="flex flex-col gap-5">
         <h3 id="etat" className="font-display text-t4 text-encre">
-          {r.manques.length ? `Avant la version définitive : ${r.manques.length} point${r.manques.length > 1 ? "s" : ""}` : "Le rapport est complet"}
+          {r.manques.length ? `Avant la version définitive : ${r.manques.length} point${r.manques.length > 1 ? "s" : ""}` : "Le rapport est complet"}
         </h3>
         {r.manques.length ? (
           <>
@@ -58,7 +60,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
               ))}
             </ul>
             <p className="text-meta text-encre-2">
-              Tu peux émettre le rapport dès maintenant : tant qu’il manque un point, il porte la mention « version de travail ».
+              Tu peux émettre le rapport dès maintenant : tant qu’il manque un point, il porte la mention « version de travail ».
             </p>
           </>
         ) : (

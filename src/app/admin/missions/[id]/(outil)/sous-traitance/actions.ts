@@ -32,19 +32,19 @@ const convertir = (table: NomTable, ligne: Record<string, string>): { valeurs: R
       }
       case "mois": {
         const m = lireMois(brut);
-        if (m === "invalide") return { erreur: `« ${brut} » n’est pas un mois lisible (${c.libelle}). Exemple : 03/2026.` };
+        if (m === "invalide") return { erreur: `« ${brut} » n’est pas un mois lisible (${c.libelle}). Exemple : 03/2026.` };
         v = m;
         break;
       }
       case "date": {
         const d = lireDate(brut);
-        if (d === "invalide") return { erreur: `« ${brut} » n’est pas une date lisible (${c.libelle}). Exemple : 31/03/2026.` };
+        if (d === "invalide") return { erreur: `« ${brut} » n’est pas une date lisible (${c.libelle}). Exemple : 31/03/2026.` };
         v = d;
         break;
       }
       case "verif": {
         const r = lireVerif(brut);
-        if (r === "invalide") return { erreur: `« ${brut} » : réponds oui, non ou à vérifier (${c.libelle}).` };
+        if (r === "invalide") return { erreur: `« ${brut} » : réponds oui, non ou à vérifier (${c.libelle}).` };
         v = r;
         break;
       }
@@ -181,7 +181,7 @@ export const enregistrerParametres = async (entree: {
   const fin = lireMois(entree.periode_fin);
   const taux = lireNombre(entree.taux_horaire_vendu);
   const etp = lireNombre(entree.heures_mensuelles_etp);
-  if (debut === "invalide" || fin === "invalide") return { ok: false, erreur: "Période illisible. Exemple : 01/2026." };
+  if (debut === "invalide" || fin === "invalide") return { ok: false, erreur: "Période illisible. Exemple : 01/2026." };
   if (Number.isNaN(taux) || (taux !== null && taux <= 0)) return { ok: false, erreur: "Le taux horaire vendu doit être un montant positif." };
   if (Number.isNaN(etp) || etp === null || etp <= 0) return { ok: false, erreur: "La base mensuelle d’un temps plein doit être un nombre d’heures positif." };
   if (debut && fin && fin < debut) return { ok: false, erreur: "La fin de la période est avant son début." };
@@ -213,7 +213,7 @@ export const creerSousTraitant = async (entree: {
   const nom = entree.raison_sociale.trim();
   if (!nom) return { ok: false, erreur: "Indique la raison sociale." };
   if (entree.rang === "2" && !entree.donneur_id) {
-    return { ok: false, erreur: "Un sous-traitant de rang 2 travaille pour un sous-traitant de rang 1 : choisis lequel." };
+    return { ok: false, erreur: "Un sous-traitant de rang 2 travaille pour un sous-traitant de rang 1 : choisis lequel." };
   }
   const supabase = await createClient();
   const { data, error } = await supabase
