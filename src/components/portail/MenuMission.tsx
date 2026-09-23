@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckCircle, Circle, CircleHalf } from "@phosphor-icons/react";
+import { CheckCircle, Circle, CircleHalf, Receipt } from "@phosphor-icons/react";
 import type { Avancement, CheminEtape } from "@/lib/modules/avancement";
 import { ETAPES, GROUPES, etapeCourante } from "./etapes";
 
@@ -16,6 +16,8 @@ export interface PropsMenu {
   missionId: string;
   sousTraitants: { id: string; nom: string; rang: number }[];
   avancement: Record<CheminEtape, Avancement>;
+  /** Où en sont le contrat et les factures, en quelques mots. */
+  facturation: string;
 }
 
 const LIBELLE_ETAT = { a_faire: "à faire", en_cours: "en cours", fait: "fait" } as const;
@@ -29,7 +31,7 @@ const Marque = ({ etat }: { etat: Avancement["etat"] }) =>
     <Circle size={18} className="shrink-0 text-gris/60" aria-hidden />
   );
 
-export const MenuComplet = ({ missionId, sousTraitants, avancement }: PropsMenu) => {
+export const MenuComplet = ({ missionId, sousTraitants, avancement, facturation }: PropsMenu) => {
   const chemin = usePathname();
   const racine = `/admin/missions/${missionId}`;
   const courante = etapeCourante(chemin, missionId);
@@ -88,6 +90,22 @@ export const MenuComplet = ({ missionId, sousTraitants, avancement }: PropsMenu)
           </ul>
         </div>
       ))}
+      <div className="flex flex-col gap-0.5 border-t border-filet pt-3">
+        <p className="etiquette px-2.5 pb-0.5">Administratif</p>
+        <Link
+          href={`${racine}/contrat`}
+          aria-current={chemin === `${racine}/contrat` ? "page" : undefined}
+          className={`flex min-h-11 items-center gap-2.5 rounded-[5px] px-2.5 py-1 transition-colors ${
+            chemin === `${racine}/contrat` ? "bg-menthe text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+          }`}
+        >
+          <Receipt size={16} className="w-3.5 shrink-0 text-gris" aria-hidden />
+          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+            <span className={`text-meta ${chemin === `${racine}/contrat` ? "font-medium" : ""}`}>Contrat et factures</span>
+            <span className="truncate text-note text-gris">{facturation}</span>
+          </span>
+        </Link>
+      </div>
     </nav>
   );
 };
@@ -117,6 +135,17 @@ export const MenuRail = ({ missionId, avancement }: Pick<PropsMenu, "missionId" 
             </li>
           );
         })}
+        <li className="mt-1 border-t border-filet pt-1">
+          <Link
+            href={`/admin/missions/${missionId}/contrat`}
+            aria-label="Contrat et factures"
+            className={`flex h-14 w-11 items-center justify-center rounded-[5px] transition-colors ${
+              chemin === `/admin/missions/${missionId}/contrat` ? "bg-menthe text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+            }`}
+          >
+            <Receipt size={20} aria-hidden />
+          </Link>
+        </li>
       </ul>
     </nav>
   );

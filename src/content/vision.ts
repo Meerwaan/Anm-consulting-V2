@@ -39,7 +39,7 @@ export const OBJECTIFS = [
 
 /** Ce qu'elle n'est pas — à afficher sur la vitrine et à rappeler dans chaque rapport. */
 export const LIGNE_DE_CRETE = {
-  phrase: "Je ne remplace ni l’avocat ni l’expert-comptable. Je prépare le terrain, je reconstitue les faits et je structure le dossier.",
+  phrase: "Nous ne remplaçons ni l’avocat ni l’expert-comptable. Nous préparons le terrain, nous reconstituons les faits et nous structurons le dossier.",
   exclusions: [
     "Consultation juridique ou fiscale réglementée",
     "Représentation et stratégie contentieuse",

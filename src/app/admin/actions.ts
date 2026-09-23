@@ -13,6 +13,7 @@ import {
   TRAITEMENT_PAR_PRIORITE,
   cequiManque,
 } from "@/content/constat";
+import { completerDepuisAnnuaire } from "./missions/[id]/(outil)/contrat/actions";
 
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
@@ -90,6 +91,9 @@ export const creerMission = async (_etat: EtatCreation, formData: FormData): Pro
       periode_fin: fin ? `${fin}-01` : null,
     });
   }
+
+  // Le client est complété depuis l'annuaire des entreprises (forme, siège, dirigeant) pour le contrat.
+  if (siren) await completerDepuisAnnuaire(org.id);
 
   revalidatePath("/admin");
   redirect(`${chemin(mission.id)}/pieces`);

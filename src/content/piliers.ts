@@ -9,8 +9,8 @@ export const POSITIONNEMENT = {
   sousTitre:
     "CNAPS • URSSAF • DGFiP / Fiscal • Inspection du travail • Sous-traitance • Exploitation",
   signature:
-    "20 ans d’expérience de direction dans la sécurité privée au service de votre conformité opérationnelle.",
-  phraseCle: "Je fais le lien entre le dirigeant, le terrain et ses conseils spécialisés.",
+    "21 ans d’expérience de direction dans la sécurité privée au service de votre conformité opérationnelle.",
+  phraseCle: "Nous faisons le lien entre le dirigeant, le terrain et ses conseils spécialisés.",
   /** Ton imposé par le pack : jamais de promesse de garantie contre un redressement. */
   limite:
     "Ces outils servent à l’audit, au diagnostic, à la préparation et à l’accompagnement organisationnel. Les consultations juridiques ou fiscales réglementées, le contentieux, les rectifications fiscales et les missions comptables sont orientés vers avocat, avocat fiscaliste et/ou expert-comptable.",

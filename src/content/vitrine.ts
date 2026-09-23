@@ -13,30 +13,42 @@ export const A_COMPLETER = (libelle: string) => `[${libelle}]`;
 
 /**
  * La dirigeante — décision 08 : le site porte son nom et son parcours.
- * Bio et chiffres reçus le 15/09/2026 (présentation de Sofia, transmise par Merwan), légèrement
- * retravaillés pour le web. Les dates 1998 et 2024 sont déduites de « cinq années comme directrice
- * d'exploitation » avant 2003 et de « 21 ans » de direction : à confirmer par Sofia.
+ * Présentation réécrite par Sofia le 23/09/2026 (transmise par Merwan) : son texte est repris tel quel,
+ * il remplace la version du 15/09. Son entreprise n'est plus qualifiée de « PME » (400 collaborateurs
+ * au pic). Seule date non écrite par elle : 2024, soit 2003 + vingt et un ans.
  */
 export const CONSULTANTE = {
   prenomNom: "Sofia Aoun",
-  titre: "Fondatrice d’ANM Consulting · ancienne dirigeante de PME de sécurité privée",
+  titre: "Fondatrice d’ANM Consulting · ancienne dirigeante d’une entreprise de sécurité privée",
   anneesDirection: 21,
-  accroche: "J’ai été dirigeante. Aujourd’hui, je mets cette expérience au service des PME.",
-  /** La bio, paragraphe par paragraphe (page À propos). */
+  /** Titre de sa présentation (page À propos). */
+  enTete: "Une expertise née du terrain.",
+  /** Sa présentation en une phrase, à la troisième personne (accueil) : le site parle au nom d'ANM, en « nous ». */
+  accroche:
+    "Après cinq années comme directrice d’exploitation, elle a créé sa propre société de sécurité privée en 2003 et l’a dirigée pendant vingt et un ans. Cette expérience est aujourd’hui au cœur d’ANM Consulting.",
+  /** Sa présentation, paragraphe par paragraphe (page À propos) : d'abord le parcours… */
   bio: [
-    "En 2003, j’ai créé ma société de sécurité privée, après cinq années comme directrice d’exploitation. Pendant vingt et un ans, j’ai dirigé cette PME : jusqu’à 400 collaborateurs lors des pics d’activité, des clients privés, des institutionnels et des marchés publics.",
-    "J’ai aussi connu la réalité des contrôles, du côté de celle qui les reçoit : URSSAF, DGFiP, travail dissimulé, Inspection du travail, et des dizaines de contrôles du CNAPS.",
-    "Avec l’expérience, j’ai compris qu’en entreprise, le problème que l’on voit n’est pas toujours celui qu’il faut traiter en premier. Il faut prendre de la hauteur, élargir son regard et anticiper les conséquences avant de décider.",
-    "Aujourd’hui, j’accompagne les PME de sécurité privée dans leur conformité et leur préparation face aux organismes de contrôle. Mon approche vient de l’intérieur : comprendre comment l’entreprise fonctionne vraiment, repérer les points de vigilance, structurer l’information, et donner au dirigeant une méthode pour aborder ces sujets sans les subir.",
-    "Mon objectif : que le dirigeant ne subisse plus l’administratif, mais le comprenne et l’anticipe.",
+    "Après cinq années comme directrice d’exploitation dans le secteur de la sécurité privée, j’ai créé ma propre société en 2003.",
+    "Pendant vingt et un ans, j’ai dirigé cette entreprise, jusqu’à 400 collaborateurs lors des pics d’activité, avec des clients privés, institutionnels et des marchés publics.",
   ],
+  /** … puis ce que ce parcours donne à ANM Consulting. */
+  bioSuite: [
+    "Au cours de ces années, j’ai été directement confrontée aux exigences de conformité du secteur et à différents contrôles : URSSAF (notamment sur les questions de travail dissimulé), DGFiP, Inspection du travail, ainsi que de nombreux contrôles du CNAPS.",
+    "Cette expérience est aujourd’hui au cœur d’ANM Consulting.",
+  ],
+  objectif:
+    "Notre objectif : permettre aux dirigeants d’identifier leurs vulnérabilités avant qu’elles ne deviennent des redressements, des sanctions ou des difficultés d’exploitation.",
+  intervention:
+    "ANM Consulting intervient pour auditer, identifier les écarts, proposer les actions correctives et accompagner leur mise en œuvre, avec une approche concrète et adaptée à la réalité de chaque entreprise.",
   parcours: [
-    { periode: "1998 – 2003", poste: "Directrice d’exploitation, sécurité privée", detail: "Cinq années sur le terrain : plannings, agents, sites, clients. Là où les écarts naissent, et où un contrôleur va les chercher." },
-    { periode: "2003 – 2024", poste: "Fondatrice et dirigeante d’une PME de sécurité privée", detail: "Vingt et un ans de direction. Jusqu’à 400 collaborateurs lors des pics d’activité. Clients privés, institutionnels et marchés publics." },
+    { periode: "Avant 2003", poste: "Directrice d’exploitation, sécurité privée", detail: "Cinq années sur le terrain : plannings, agents, sites, clients. Là où les écarts naissent, et où un contrôleur va les chercher." },
+    { periode: "2003 – 2024", poste: "Fondatrice et dirigeante d’une entreprise de sécurité privée", detail: "Vingt et un ans de direction. Jusqu’à 400 collaborateurs lors des pics d’activité. Clients privés, institutionnels et marchés publics." },
     { periode: "2026", poste: "Création d’ANM Consulting", detail: "Audit, préparation aux contrôles et formation pour les dirigeants de sécurité privée." },
   ],
   citation: "Le problème que l’on voit n’est pas toujours celui qu’il faut traiter en premier. Il faut prendre de la hauteur et anticiper les conséquences avant de décider.",
-  invitation: "Une question de conformité ? Un contrôle à préparer ? Parlons-en.",
+  /** Son appel à l'action, en fin de présentation. */
+  invitation: "Vous dirigez une entreprise de sécurité privée ? Repérez vos écarts avant qu’un contrôleur ne les trouve.",
+  invitationTexte: "Contactez ANM Consulting pour réaliser un premier diagnostic de vos principaux points de vigilance.",
 } as const;
 
 /**
@@ -46,9 +58,9 @@ export const CONSULTANTE = {
  * le sixième est à préciser par Sofia avant mise en ligne.
  */
 export const CONTROLES_VECUS = {
-  titre: "Les contrôles, je les ai vécus du côté du dirigeant.",
+  titre: "Les contrôles, notre fondatrice les a vécus du côté du dirigeant.",
   intro:
-    "Vingt et un ans à la tête d’une PME de sécurité privée, c’est aussi une quarantaine de contrôles reçus, subis, préparés. Voilà ce qu’ils ont donné.",
+    "Vingt et un ans à la tête d’une entreprise de sécurité privée, c’est aussi une quarantaine de contrôles reçus, subis, préparés. Voilà ce qu’ils ont donné.",
   items: [
     { organisme: "CNAPS", nombre: "≈ 30", label: "contrôles", resultat: "Aucune sanction." },
     { organisme: "DGFiP", nombre: "6", label: "contrôles fiscaux", resultat: "4 sans redressement. 1 redressement annulé au tribunal administratif, décharge à 100 %." },
@@ -56,7 +68,7 @@ export const CONTROLES_VECUS = {
     { organisme: "Inspection du travail", nombre: "3", label: "contrôles", resultat: "0 redressement." },
   ],
   reserve:
-    "Ce sont mes résultats de dirigeante, pas une promesse pour votre entreprise : personne ne peut garantir l’issue d’un contrôle. Ce que j’apporte, c’est la méthode qui a produit ces résultats, et l’habitude de préparer avant qu’on frappe à la porte.",
+    "Ce sont les résultats de notre fondatrice comme dirigeante, pas une promesse pour votre entreprise : personne ne peut garantir l’issue d’un contrôle. Ce que nous apportons, c’est la méthode qui a produit ces résultats, et l’habitude de préparer avant qu’on frappe à la porte.",
 } as const;
 
 /** Accueil — au-dessus de la ligne de flottaison. */
@@ -69,7 +81,7 @@ export const HERO = {
   ctaPrincipal: { label: "Demander un diagnostic flash", href: "/contact?offre=flash" },
   ctaSecondaire: { label: "Voir la méthode en 15 étapes", href: "/audit#methode" },
   chiffres: [
-    { valeur: 21, suffixe: " ans", label: "à la tête d’une PME de sécurité privée" },
+    { valeur: 21, suffixe: " ans", label: "à la tête d’une entreprise de sécurité privée" },
     { valeur: 400, suffixe: "", label: "collaborateurs lors des pics d’activité" },
     { valeur: 40, suffixe: "+", label: "contrôles vécus comme dirigeante" },
     { valeur: 208, suffixe: "", label: "points de contrôle vérifiés" },
@@ -208,17 +220,17 @@ export const FAQ = [
   {
     question: "Est-ce que vous garantissez que je n’aurai pas de redressement ?",
     reponse:
-      "Non, et personne ne peut le faire honnêtement. Ce que je garantis, c’est une photographie factuelle de votre situation, des preuves identifiées, des risques hiérarchisés et un plan d’actions daté. Ce qu’un contrôleur trouvera, vous l’aurez vu avant lui.",
+      "Non, et personne ne peut le faire honnêtement. Ce que nous garantissons, c’est une photographie factuelle de votre situation, des preuves identifiées, des risques hiérarchisés et un plan d’actions daté. Ce qu’un contrôleur trouvera, vous l’aurez vu avant lui.",
   },
   {
     question: "J’ai déjà un expert-comptable et un avocat.",
     reponse:
-      "Tant mieux, vous en aurez besoin. Je ne les remplace pas : je prépare le terrain pour eux. Un dossier reconstitué, indexé et daté leur fait gagner des heures, et leur analyse part de faits vérifiés au lieu de suppositions. Les questions juridiques ou fiscales réglementées leur reviennent.",
+      "Tant mieux, vous en aurez besoin. Nous ne les remplaçons pas : nous préparons le terrain pour eux. Un dossier reconstitué, indexé et daté leur fait gagner des heures, et leur analyse part de faits vérifiés au lieu de suppositions. Les questions juridiques ou fiscales réglementées leur reviennent.",
   },
   {
     question: "Combien de temps ça prend, et qu’est-ce que je dois fournir ?",
     reponse:
-      "De une demi-journée pour un diagnostic flash à cinq jours pour un audit 360° d’une PME multi-sites. La liste des pièces vous est envoyée dès le cadrage, et je travaille sur copies, jamais sur vos originaux. Le portail vous dit à tout moment ce qui manque.",
+      "De une demi-journée pour un diagnostic flash à cinq jours pour un audit 360° d’une PME multi-sites. La liste des pièces vous est envoyée dès le cadrage, et nous travaillons sur copies, jamais sur vos originaux. Le portail vous dit à tout moment ce qui manque.",
   },
   {
     question: "Le contrôle est déjà annoncé. C’est trop tard ?",
@@ -258,7 +270,7 @@ export const CHECKLISTS: {
     organisme: "CNAPS",
     titre: "Êtes-vous prêt pour un contrôle CNAPS ?",
     texte:
-      "Dix points, dix minutes. La checklist que je passe en premier chez un client : autorisation, agrément, cartes, Dracar, contrats, sous-traitance, terrain.",
+      "Dix points, dix minutes. La checklist que nous passons en premier chez un client : autorisation, agrément, cartes, Dracar, contrats, sous-traitance, terrain.",
     points: [
       "Autorisation d’exercer à jour pour chaque établissement",
       "Agrément dirigeant valide et affiché",

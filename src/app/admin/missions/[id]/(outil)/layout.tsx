@@ -16,12 +16,14 @@ export default async function LayoutMission({ children, params }: { children: Re
   await exigerRole("consultant");
   const { id } = await params;
   const supabase = await createClient();
-  const [mission, d, g, pieces, versions] = await Promise.all([
+  const [mission, d, g, pieces, versions, contrat, factures] = await Promise.all([
     lireMission(id),
     lireDonneesST(id),
     lireGrilles(id),
     lireValiditePieces(id),
     supabase.from("reports").select("version").eq("mission_id", id).order("generated_at", { ascending: false }),
+    supabase.from("contrats").select("signe_le").eq("mission_id", id).maybeSingle(),
+    supabase.from("factures").select("nature, payee_le, facture_origine, id").eq("mission_id", id),
   ]);
   if (!mission) notFound();
 
@@ -41,8 +43,22 @@ export default async function LayoutMission({ children, params }: { children: Re
     </div>
   );
 
+  // Le résumé du menu « Contrat et factures » : où en est l'administratif de la mission.
+  const lf = (factures.data ?? []) as { id: string; nature: string; payee_le: string | null; facture_origine: string | null }[];
+  const annulees = new Set(lf.filter((f) => f.nature === "avoir").map((f) => f.facture_origine));
+  const valables = lf.filter((f) => f.nature !== "avoir" && !annulees.has(f.id));
+  const facturation = !contrat.data
+    ? "contrat à préparer"
+    : [
+        contrat.data.signe_le ? "contrat signé" : "contrat à signer",
+        valables.length ? `${valables.filter((f) => f.payee_le).length}/${valables.length} facture${valables.length > 1 ? "s" : ""} payée${valables.length > 1 ? "s" : ""}` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
   return (
     <CadreMission
+      facturation={facturation}
       entete={entete}
       missionId={id}
       sousTraitants={d.sousTraitants.map((s) => ({ id: s.id, nom: s.raison_sociale, rang: s.rang }))}
