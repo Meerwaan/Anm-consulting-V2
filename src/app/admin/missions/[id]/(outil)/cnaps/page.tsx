@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import EtapePage from "@/components/portail/EtapePage";
 import GrilleSaisie from "@/components/grilles/GrilleSaisie";
 import ConclusionsSaisie from "@/components/grilles/ConclusionsSaisie";
-import { GRILLE_CNAPS, RAPPEL_DRACAR } from "@/content/grilles";
+import { GRILLE_CNAPS, RAPPEL_DRACAR, SECTIONS_DRACAR } from "@/content/grilles";
 import BilanGrille from "@/components/grilles/BilanGrille";
 import { bilanGrille } from "@/lib/modules/analyse";
 import { lireGrilles } from "@/lib/grilles/lecture";
@@ -37,9 +37,18 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
       <BilanGrille b={bilan} />
 
       <section aria-labelledby="points" className="flex flex-col gap-5">
-        <h3 id="points" className="font-display text-t4 text-encre">Obligations de vérification</h3>
+        <h3 id="points" className="font-display text-t4 text-encre">Obligations Dracar Ultimate</h3>
         <p className="-mt-3 max-w-2xl text-meta text-encre-2">Une section par fiche Dracar Ultimate. « Sans objet » pour ce que l’entreprise ne fait pas.</p>
-        <GrilleSaisie missionId={id} grille="cnaps" cible="mission" sections={GRILLE_CNAPS.sections} reponses={g.reponses} />
+        <GrilleSaisie missionId={id} grille="cnaps" cible="mission" sections={GRILLE_CNAPS.sections.filter((s) => SECTIONS_DRACAR.includes(s.code))} reponses={g.reponses} />
+      </section>
+
+      <section aria-labelledby="autres" className="flex flex-col gap-5">
+        <h3 id="autres" className="font-display text-t4 text-encre">Le reste du contrôle CNAPS</h3>
+        <p className="-mt-3 max-w-2xl text-meta text-encre-2">
+          Agents, missions et sites, activités particulières, sous-traitance et déontologie (grille 01). Les activités que l’entreprise
+          n’exerce pas se passent en « Sans objet ».
+        </p>
+        <GrilleSaisie missionId={id} grille="cnaps" cible="mission" sections={GRILLE_CNAPS.sections.filter((s) => !SECTIONS_DRACAR.includes(s.code))} reponses={g.reponses} />
       </section>
 
       <section aria-labelledby="cartes" className="flex flex-col gap-5">

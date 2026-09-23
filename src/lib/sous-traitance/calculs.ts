@@ -72,6 +72,8 @@ export interface LigneEcart {
   ecart: number | null;
   /** (A − B) ÷ A, en pourcentage. */
   ecartPct: number | null;
+  /** Capacitaire réel : heures vendues − heures réalisées par les salariés (planning, pointage). */
+  ecartReel: number | null;
 }
 
 export interface EcartHeures {
@@ -82,6 +84,11 @@ export interface EcartHeures {
   totalEcart: number;
   totalEcartPct: number | null;
   moisIncomplets: string[];
+  totalRealisees: number;
+  /** Somme des capacitaires réels des mois où vendues et réalisées sont connues. */
+  totalEcartReel: number;
+  /** Au moins un mois porte des heures réalisées : le second calcul est possible. */
+  avecRealisees: boolean;
 }
 
 export const calculerEcart = (ventes: Vente[], paie: Paie[], p: ParametresST): EcartHeures => {
@@ -107,6 +114,7 @@ export const calculerEcart = (ventes: Vente[], paie: Paie[], p: ParametresST): E
       effectif: b?.effectif ?? null,
       ecart,
       ecartPct: ecart !== null && vendues ? arrondi((ecart / vendues) * 100, 1) : null,
+      ecartReel: vendues !== null && b?.heures_realisees != null ? arrondi(vendues - b.heures_realisees) : null,
     };
   });
 
@@ -120,6 +128,9 @@ export const calculerEcart = (ventes: Vente[], paie: Paie[], p: ParametresST): E
     totalEcart,
     totalEcartPct: totalVenduesComplets ? arrondi((totalEcart / totalVenduesComplets) * 100, 1) : null,
     moisIncomplets: lignes.filter((l) => l.ecart === null).map((l) => l.mois),
+    totalRealisees: arrondi(somme(lignes.map((l) => l.realisees))),
+    totalEcartReel: arrondi(somme(lignes.map((l) => l.ecartReel))),
+    avecRealisees: lignes.some((l) => l.ecartReel !== null),
   };
 };
 
@@ -445,6 +456,8 @@ export interface LigneBouclage {
   documentees: number;
   /** Écart − heures documentées : ce qui reste à expliquer. */
   reste: number | null;
+  /** Même calcul sur le capacitaire réel (heures réalisées). */
+  resteReel: number | null;
 }
 
 export interface Bouclage {
@@ -455,6 +468,10 @@ export interface Bouclage {
   totalReste: number;
   /** Heures facturées par les sous-traitants au-delà de l'écart (mois où le reste est négatif). */
   totalExcedent: number;
+  /** Le même bouclage sur le capacitaire réel (heures réalisées par les salariés). */
+  totalEcartReel: number;
+  totalResteReel: number;
+  totalExcedentReel: number;
   alertes: Alerte[];
 }
 
@@ -464,7 +481,13 @@ export const boucler = (ecart: EcartHeures, sousTraitants: SousTraitant[], factu
     const documentees = arrondi(
       somme(factures.filter((f) => rang1.has(f.sous_traitant_id) && f.mois && cleMois(f.mois) === l.mois).map((f) => f.heures)),
     );
-    return { mois: l.mois, ecart: l.ecart, documentees, reste: l.ecart !== null ? arrondi(l.ecart - documentees) : null };
+    return {
+      mois: l.mois,
+      ecart: l.ecart,
+      documentees,
+      reste: l.ecart !== null ? arrondi(l.ecart - documentees) : null,
+      resteReel: l.ecartReel !== null ? arrondi(l.ecartReel - documentees) : null,
+    };
   });
   const complets = lignes.filter((l) => l.reste !== null);
   // Les mois ne se compensent pas : un excédent en mars n'explique pas un manque en avril.
@@ -484,8 +507,26 @@ export const boucler = (ecart: EcartHeures, sousTraitants: SousTraitant[], factu
         texte: `${moisLisible(l.mois)} : les sous-traitants facturent ${h(l.documentees)}, soit ${h(-l.reste!)} de plus que les heures vendues non couvertes par la paie (${h(Math.max(0, l.ecart!))}). Ces heures ne correspondent à aucune vente : vérifier la réalité des prestations facturées.` });
     }
   }
+  // Second contrôle (Sofia, 23/09/2026) : le capacitaire calculé sur les heures réalisées par les
+  // salariés. Une alerte seulement quand il dit autre chose que le calcul sur la paie.
+  const reels = lignes.filter((l) => l.resteReel !== null);
+  for (const l of reels) {
+    const ecartReel = ecart.lignes.find((x) => x.mois === l.mois)!.ecartReel!;
+    if (l.resteReel! < -0.5 && !(l.reste !== null && l.reste < -0.5)) {
+      alertes.push({ code: "sous_traitance_excedentaire_reel", niveau: "a_verifier", grille: "04",
+        texte: `${moisLisible(l.mois)} : d’après les heures réalisées par les salariés, le capacitaire n’est que de ${h(Math.max(0, ecartReel))} ; les sous-traitants en facturent ${h(l.documentees)}, soit ${h(-l.resteReel!)} de plus. Les salariés et les sous-traitants auraient produit plus d’heures qu’il n’en a été vendu.` });
+    }
+    if (l.resteReel! > 0.5 && !(l.reste !== null && l.reste > 0.5)) {
+      alertes.push({ code: "ecart_non_explique_reel", niveau: "a_verifier", grille: "04",
+        texte: `${moisLisible(l.mois)} : d’après les heures réalisées par les salariés, ${h(l.resteReel!)} vendues ne sont produites ni par eux ni par un sous-traitant. Des heures sont payées sans être réalisées, ou le planning est incomplet.` });
+    }
+  }
+
   return {
     lignes,
+    totalEcartReel: arrondi(somme(reels.map((l) => ecart.lignes.find((x) => x.mois === l.mois)!.ecartReel))),
+    totalResteReel: arrondi(somme(reels.map((l) => Math.max(0, l.resteReel!)))),
+    totalExcedentReel: arrondi(somme(reels.map((l) => Math.max(0, -l.resteReel!)))),
     totalEcart: arrondi(somme(complets.map((l) => l.ecart))),
     totalDocumentees: arrondi(somme(complets.map((l) => l.documentees))),
     totalReste,
