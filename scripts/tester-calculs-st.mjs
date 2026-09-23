@@ -180,3 +180,14 @@ test("DGFiP : prix de vente et prix d'achat sous le coût de revient de référe
   assert.deepEqual(codes.sort(), ["cout_st_sous_revient", "prix_vente_sous_revient"]);
   assert.deepEqual(analyserFacturation([v], [f], [st], [], P).map((x) => x.code), []);
 });
+
+test("capacitaire réel : sur les heures réalisées, en plus du calcul sur la paie", () => {
+  const e = calculerEcart([vente("2026-03-01", 1000)], [{ mois: "2026-03-01", effectif: 5, heures_realisees: 800, heures_payees: 600, note: null }], P);
+  assert.equal(e.lignes[0].ecart, 400);
+  assert.equal(e.lignes[0].ecartReel, 200);
+  const f = { id: "f", sous_traitant_id: "st1", numero: "F", date_facture: null, mois: "2026-03-01", heures: 350, montant_ht: null, montant_ttc: null, note: null };
+  const b = boucler(e, [st], [f]);
+  assert.equal(b.totalReste, 50);
+  assert.equal(b.totalExcedentReel, 150);
+  assert.deepEqual(b.alertes.map((a) => a.code).sort(), ["ecart_non_explique", "sous_traitance_excedentaire_reel"]);
+});

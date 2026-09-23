@@ -105,15 +105,16 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
           </p>
         ) : (
           <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[44rem] border-collapse text-meta">
+            <table className="w-full min-w-[40rem] border-collapse text-meta">
               <thead>
                 <tr className="border-b-[1.5px] border-encre text-left text-note text-encre-2">
-                  <th scope="col" className="py-2 pr-3 font-medium">Mois</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">A · Vendues</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">Réalisées</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">B · Payées</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">Capacitaire</th>
-                  <th scope="col" className="py-2 pr-3 text-right font-medium">Sous-traitants</th>
+                  <th scope="col" className="py-2 pr-2 font-medium">Mois</th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">A · Vendues</th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">Réalisées</th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">B · Payées</th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">Capacitaire<span className="block font-normal">paie</span></th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">Capacitaire<span className="block font-normal">réel</span></th>
+                  <th scope="col" className="py-2 pr-2 text-right font-medium">Sous-traitants</th>
                   <th scope="col" className="py-2 text-right font-medium">Reste à expliquer</th>
                 </tr>
               </thead>
@@ -122,15 +123,16 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
                   const b = bouclage.lignes[i];
                   return (
                     <tr key={l.mois} className="border-b border-filet">
-                      <th scope="row" className="py-3 pr-3 text-left font-normal capitalize text-encre">{fmtMois(l.mois)}</th>
-                      <td className="py-3 pr-3 text-right tabular-nums">
+                      <th scope="row" className="py-3 pr-2 text-left font-normal capitalize text-encre">{fmtMois(l.mois)}</th>
+                      <td className="py-3 pr-2 text-right tabular-nums">
                         {fmtHeures(l.vendues)}
                         {l.avecConversion ? <span className="block text-note text-gris">dont montants convertis</span> : null}
                       </td>
-                      <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.realisees)}</td>
-                      <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.payees)}</td>
-                      <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(l.ecart)}</td>
-                      <td className="py-3 pr-3 text-right tabular-nums">{fmtHeures(b.documentees)}</td>
+                      <td className="py-3 pr-2 text-right tabular-nums">{fmtHeures(l.realisees)}</td>
+                      <td className="py-3 pr-2 text-right tabular-nums">{fmtHeures(l.payees)}</td>
+                      <td className="py-3 pr-2 text-right tabular-nums">{fmtHeures(l.ecart)}</td>
+                      <td className="py-3 pr-2 text-right tabular-nums">{fmtHeures(l.ecartReel)}</td>
+                      <td className="py-3 pr-2 text-right tabular-nums">{fmtHeures(b.documentees)}</td>
                       <td className={`py-3 text-right tabular-nums ${b.reste !== null && Math.abs(b.reste) > 0.5 ? "font-medium text-critique" : "text-encre"}`}>
                         {b.reste === null ? (
                           <span className="text-gris">incomplet</span>

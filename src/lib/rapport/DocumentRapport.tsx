@@ -251,7 +251,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           items={[
             { t: "A · Heures vendues", v: fmtHeures(r.ecart.totalVendues) },
             { t: "B · Heures payées", v: fmtHeures(r.ecart.totalPayees) },
-            { t: "A − B · Capacitaire de sous-traitance", v: fmtHeures(r.bouclage.totalEcart) },
+            { t: "A − B · Capacitaire (paie)", v: fmtHeures(r.bouclage.totalEcart) },
             { t: "Facturées par les sous-traitants", v: fmtHeures(r.bouclage.totalDocumentees) },
             { t: "Reste inexpliqué", v: fmtHeures(r.bouclage.totalReste), c: r.bouclage.totalReste > 0.5 ? C.critique : undefined },
             { t: "Facturé en trop", v: fmtHeures(r.bouclage.totalExcedent), c: r.bouclage.totalExcedent > 0.5 ? C.critique : undefined },
@@ -281,12 +281,12 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
             Heures vendues aux clients (A), heures réalisées selon le planning ou le pointage, heures payées sur les bulletins (B) ; A − B est le capacitaire de sous-traitance, le maximum d’heures que l’entreprise a pu sous-traiter ; il doit être couvert par la sous-traitance facturée, sans la dépasser. Les mois ne se compensent pas entre eux.
           </Text>
           <Tableau
-            colonnes={[{ t: "Mois", w: "17%" }, { t: "A · Vendues", w: "14%" }, { t: "Réalisées", w: "14%" }, { t: "B · Payées", w: "14%" }, { t: "Capacitaire", w: "13%" }, { t: "Sous-traitants", w: "14%" }, { t: "Reste", w: "14%" }]}
-            alignDroite={[1, 2, 3, 4, 5, 6]}
+            colonnes={[{ t: "Mois", w: "14%" }, { t: "A · Vendues", w: "11%" }, { t: "Réalisées", w: "11%" }, { t: "B · Payées", w: "11%" }, { t: "Capacitaire paie", w: "13%" }, { t: "Capacitaire réel", w: "13%" }, { t: "Sous-traitants", w: "12%" }, { t: "Reste", w: "15%" }]}
+            alignDroite={[1, 2, 3, 4, 5, 6, 7]}
             lignes={r.ecart.lignes.map((l, i) => {
               const b = r.bouclage.lignes[i];
               const reste = b.reste === null ? { t: "incomplet", c: C.gris } : b.reste < -0.5 ? { t: `${fmtHeures(-b.reste)} en trop`, c: C.critique } : { t: fmtHeures(b.reste), c: b.reste > 0.5 ? C.critique : C.encre };
-              return [fmtMois(l.mois), fmtHeures(l.vendues), fmtHeures(l.realisees), fmtHeures(l.payees), fmtHeures(l.ecart), fmtHeures(b.documentees), reste];
+              return [fmtMois(l.mois), fmtHeures(l.vendues), fmtHeures(l.realisees), fmtHeures(l.payees), fmtHeures(l.ecart), fmtHeures(l.ecartReel), fmtHeures(b.documentees), reste];
             })}
           />
           <Text style={s.h3} minPresenceAhead={70}>Ce qui ressort</Text>
@@ -516,7 +516,7 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
           ) : null}
           <Text style={s.h3} minPresenceAhead={70}>Méthode de calcul</Text>
           <Text style={s.para}>
-            Capacitaire de sous-traitance (A − B) : heures facturées aux clients moins heures payées aux salariés sur les bulletins, mois par mois. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance ; elle est due à la conclusion du contrat de sous-traitance, puis tous les six mois jusqu’à sa fin. Prix de l’heure : montant hors taxe ÷ heures facturées, comparé au coût de revient horaire de référence{r.coutRevient ? ` retenu : ${r.coutRevient}` : ", lorsqu’il est renseigné"}.
+            Capacitaire de sous-traitance (A − B) : heures facturées aux clients moins heures payées aux salariés sur les bulletins, mois par mois ; le capacitaire réel retranche les heures réalisées par les salariés (planning, pointage) au lieu des heures payées. Heures disponibles d’un sous-traitant : salariés en équivalent temps plein sur l’attestation de vigilance × 151,67 h, durée mensuelle d’un temps plein ; c’est le volume d’heures réelles dont il disposait pour répondre aux commandes. Plafond SMIC : rémunérations déclarées ÷ SMIC horaire brut en vigueur. Une attestation est retenue six mois à compter de sa délivrance ; elle est due à la conclusion du contrat de sous-traitance, puis tous les six mois jusqu’à sa fin. Prix de l’heure : montant hors taxe ÷ heures facturées, comparé au coût de revient horaire de référence{r.coutRevient ? ` retenu : ${r.coutRevient}` : ", lorsqu’il est renseigné"}.
           </Text>
           <View style={{ marginTop: 28, borderTopWidth: 0.5, borderTopColor: C.filet, paddingTop: 10 }} wrap={false}>
             <Text style={{ fontFamily: "Instrument Serif", fontSize: 14 }}>{r.mission.auditeur}</Text>

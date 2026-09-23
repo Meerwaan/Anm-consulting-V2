@@ -258,6 +258,9 @@ export const GRILLE_RAPPROCHEMENT: Grille = {
 // CNAPS pour Dracar Ultimate (compte administrateur, gestionnaires, rattachement des salariés,
 // demandes par activité, vérification et renouvellement des cartes) et sa grille 01 §1, §5 et §10.
 
+/** Les sections Dracar Ultimate ; les autres sont le reste du contrôle CNAPS (grille 01). */
+export const SECTIONS_DRACAR = ["entreprise", "comptes", "salaries", "cartes", "demarches", "tiers"];
+
 export const GRILLE_CNAPS: Grille = {
   code: "cnaps",
   titre: "Contrôle CNAPS : Dracar Ultimate",
@@ -310,6 +313,26 @@ export const GRILLE_CNAPS: Grille = {
       "L’entreprise agit comme tiers de confiance pour ses salariés",
       "Accord écrit de chaque salarié concerné conservé",
     ], { intro: "Sans objet si l’entreprise n’effectue pas les démarches à la place de ses salariés." }),
+    section("agents", "Agents", "Grille 01 §3", [
+      "Carte professionnelle valide",
+      "Activité correspondant à la carte détenue",
+      "Agent correctement rattaché dans Dracar Ultimate",
+      "Qualification requise vérifiée",
+      "Formation / maintien des compétences à jour",
+      "Contrat de travail disponible",
+      "Affectation conforme à l’activité autorisée",
+      "Planning disponible et cohérent",
+    ], { intro: "Sur l’échantillon d’agents contrôlés ; le détail agent par agent est dans le suivi des cartes, plus bas." }),
+    section("sites", "Missions et sites", "Grille 01 §4", [
+      "Contrat client disponible",
+      "Consignes écrites",
+      "Consignes connues des agents",
+      "Planning des agents",
+      "Main courante / traçabilité des événements",
+      "Procédures d’urgence",
+      "Effectifs conformes au contrat",
+      "Matériel adapté à la mission",
+    ]),
     section("evenements", "Grands événements", "Grille 01 §5", [
       "Entreprise concernée par la surveillance de grands événements",
       "Agents concernés titulaires du titre / de la spécialité correspondant à l’activité",
@@ -317,6 +340,35 @@ export const GRILLE_CNAPS: Grille = {
       "Validité des cartes contrôlée avant affectation",
       "Procédure spécifique grands événements mise en place",
     ], { intro: "Sans objet si l’entreprise n’intervient pas sur de grands événements." }),
+    section("vehicules", "Inspection visuelle des véhicules", "Grille 01 §6", [
+      "Procédure interne définie",
+      "Agents concernés identifiés",
+      "Conditions légales d’intervention vérifiées",
+      "Agents informés de leurs limites d’intervention",
+      "Traçabilité des interventions prévue",
+    ], { intro: "Sans objet si l’entreprise n’exerce pas cette activité." }),
+    section("cameras", "Caméras individuelles", "Grille 01 §7", [
+      "Activité concernée identifiée",
+      "Conditions réglementaires vérifiées",
+      "Procédure d’utilisation définie",
+      "Agents concernés identifiés",
+      "Gestion et conservation des enregistrements encadrées",
+      "Information des agents sur les conditions d’utilisation",
+    ], { intro: "Sans objet si l’entreprise n’est pas concernée par l’expérimentation." }),
+    section("cynophile", "Activités cynophiles et armées", "Grille 01 §8", [
+      "Autorisations correspondantes vérifiées",
+      "Qualifications des agents vérifiées",
+      "Documents relatifs au chien disponibles",
+      "Conditions d’exercice de l’activité respectées",
+      "Procédures spécifiques mises en place",
+    ], { intro: "Sans objet si l’entreprise n’exerce pas cette activité." }),
+    section("drones", "Drones", "Grille 01 §9", [
+      "Activité identifiée",
+      "Cadre réglementaire applicable vérifié",
+      "Agents concernés identifiés",
+      "Formations / habilitations vérifiées",
+      "Procédures opérationnelles conformes aux textes applicables",
+    ], { intro: "Sans objet si l’entreprise n’exerce pas cette activité." }),
     section("sous-traitance", "Sous-traitance", "Grille 01 §10", [
       "Sous-traitants identifiés",
       "Autorisations CNAPS vérifiées",
@@ -324,6 +376,14 @@ export const GRILLE_CNAPS: Grille = {
       "Agents rattachés dans Dracar Ultimate lorsque requis",
       "Contrats de sous-traitance disponibles",
       "Conditions réglementaires de recours à la sous-traitance respectées",
+    ]),
+    section("deontologie", "Déontologie", "Grille 01 §11", [
+      "Code de déontologie connu des agents",
+      "Respect des règles professionnelles",
+      "Identification claire des agents",
+      "Absence de confusion avec les forces publiques",
+      "Procédure de traitement des incidents",
+      "Sensibilisation des agents aux obligations déontologiques",
     ]),
   ],
   conclusions: [
@@ -555,6 +615,8 @@ export const NATURE_PAR_ALERTE: Record<string, string> = {
   heures_non_payees: "travail_dissimule",
   cout_horaire_sous_smic: "travail_dissimule",
   sous_traitance_excedentaire: "facturation",
+  sous_traitance_excedentaire_reel: "facturation",
+  ecart_non_explique_reel: "travail_dissimule",
   numero_vente_double: "facturation",
   numero_st_double: "facturation",
   cout_st_superieur_vente: "facturation",
