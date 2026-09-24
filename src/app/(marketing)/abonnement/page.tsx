@@ -26,7 +26,7 @@ const CYCLE = [
   },
   {
     titre: "Plan d’actions suivi",
-    texte: "Les actions P1 → P4 issues de l’audit vivent dans votre espace. Vous cochez, je suis notifiée, on ajuste à la revue suivante.",
+    texte: "Les actions P1 → P4 issues de l’audit vivent dans votre espace. Vous cochez, nous sommes notifiés, nous ajustons à la revue suivante.",
   },
   {
     titre: "Point dirigeant",
@@ -46,7 +46,7 @@ const FAQ_ABO = [
   {
     question: "Que se passe-t-il si un contrôle arrive pendant l’abonnement ?",
     reponse:
-      "Vous m’appelez. La préparation de la remise des pièces et le cadrage de la réponse font partie du suivi, dans la limite du périmètre de la formule. Au-delà, une mission dédiée est proposée en priorité.",
+      "Vous nous appelez. La préparation de la remise des pièces et le cadrage de la réponse font partie du suivi, dans la limite du périmètre de la formule. Au-delà, une mission dédiée est proposée en priorité.",
   },
   {
     question: "Et pour plusieurs établissements ?",

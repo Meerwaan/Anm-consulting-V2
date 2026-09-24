@@ -10,17 +10,17 @@ import { CONSULTANTE, CONTROLES_VECUS } from "@/content/vitrine";
 export const metadata: Metadata = {
   title: `À propos — ${CONSULTANTE.prenomNom}`,
   description:
-    "Vingt et un ans à la tête d’une PME de sécurité privée, une quarantaine de contrôles vécus, une méthode, une ligne de crête : ce que je fais, ce que je ne fais pas, et pourquoi.",
+    "Vingt et un ans à la tête d’une entreprise de sécurité privée, une quarantaine de contrôles vécus, une méthode, une ligne de crête : ce que nous faisons, ce que nous ne faisons pas, et pourquoi.",
   alternates: { canonical: "/a-propos" },
 };
 
 const ENGAGEMENTS = [
   { titre: "Des faits, pas des impressions", texte: "Chaque constat cite la pièce, la date, le salarié ou le site. Ce qui n’est pas prouvé n’est pas écrit." },
   { titre: "Une référence vérifiée, datée", texte: "Le texte applicable est cité et vérifié le jour de la mission. Pas de « il me semble que »." },
-  { titre: "Jamais de promesse impossible", texte: "Personne ne garantit l’absence de redressement. Je garantis que vous saurez où vous en êtes, et quoi faire d’abord." },
-  { titre: "Le renvoi au bon professionnel", texte: "Une question juridique ou fiscale réglementée va à l’avocat ou à l’expert-comptable. Je prépare le dossier, ils tranchent." },
+  { titre: "Jamais de promesse impossible", texte: "Personne ne garantit l’absence de redressement. Nous garantissons que vous saurez où vous en êtes, et quoi faire d’abord." },
+  { titre: "Le renvoi au bon professionnel", texte: "Une question juridique ou fiscale réglementée va à l’avocat ou à l’expert-comptable. Nous préparons le dossier, ils tranchent." },
   { titre: "Vos données restent les vôtres", texte: "Travail sur copies, hébergement en France, avenant RGPD à la lettre de mission, restitution ou suppression à la fin." },
-  { titre: "Le code de déontologie de la profession", texte: "Celui de la sécurité privée, que j’ai appliqué comme dirigeante, et que j’applique comme consultante." },
+  { titre: "Le code de déontologie de la profession", texte: "Celui de la sécurité privée, que notre fondatrice a appliqué comme dirigeante, et que nous appliquons dans chaque mission." },
 ] as const;
 
 export default function AProposPage() {
@@ -46,12 +46,12 @@ export default function AProposPage() {
             </Reveal>
             <Reveal delay={0.05}>
               <h1 className="font-display text-t1 text-encre md:text-t1-lg">
-                {CONSULTANTE.prenomNom}. <em className="text-vert">J’ai été dirigeante. Aujourd’hui, je mets cette expérience au service des PME.</em>
+                {CONSULTANTE.prenomNom}. <em className="text-vert">{CONSULTANTE.enTete}</em>
               </h1>
             </Reveal>
             <Reveal delay={0.1}>
               <div className="max-w-xl space-y-4 text-chapo text-encre-2">
-                {CONSULTANTE.bio.slice(0, 2).map((paragraphe) => (
+                {CONSULTANTE.bio.map((paragraphe) => (
                   <p key={paragraphe}>{paragraphe}</p>
                 ))}
               </div>
@@ -81,11 +81,11 @@ export default function AProposPage() {
               <SectionHead index="02" eyebrow="Parcours" titre={<>Ce que j’ai dirigé, <em className="text-vert">avant de l’auditer.</em></>} />
               <Reveal delay={0.05}>
                 <div className="space-y-4 text-corps text-encre-2">
-                  {CONSULTANTE.bio.slice(2).map((paragraphe, i) => (
-                    <p key={paragraphe} className={i === CONSULTANTE.bio.length - 3 ? "font-medium text-encre" : ""}>
-                      {paragraphe}
-                    </p>
+                  {CONSULTANTE.bioSuite.map((paragraphe) => (
+                    <p key={paragraphe}>{paragraphe}</p>
                   ))}
+                  <p className="font-medium text-encre">{CONSULTANTE.objectif}</p>
+                  <p>{CONSULTANTE.intervention}</p>
                 </div>
               </Reveal>
             </div>
@@ -117,7 +117,7 @@ export default function AProposPage() {
             eyebrow="Pourquoi ce métier"
             titre={<>Cinq objectifs, <em className="text-vert">dans cet ordre.</em></>}
             aligne="deux"
-            sous="Ce que j’ai vu manquer aux dirigeants pendant vingt et un ans, et ce que je veux leur apporter maintenant."
+            sous="Ce que notre fondatrice a vu manquer aux dirigeants pendant vingt et un ans, et ce que nous voulons leur apporter aujourd’hui."
           />
           <div className="mt-14">
             <Filet epais />
@@ -137,7 +137,7 @@ export default function AProposPage() {
       {/* ENGAGEMENTS */}
       <section className="bg-encre text-papier">
         <Conteneur className="py-24 md:py-32">
-          <SectionHead index="04" eyebrow="Engagements" titre={<>Ce que vous pouvez <em className="text-menthe">exiger de moi.</em></>} sombre aligne="deux" sous="Six règles, écrites dans la lettre de mission et rappelées dans chaque rapport." />
+          <SectionHead index="04" eyebrow="Engagements" titre={<>Ce que vous pouvez <em className="text-menthe">exiger de nous.</em></>} sombre aligne="deux" sous="Six règles, écrites dans la lettre de mission et rappelées dans chaque rapport." />
           <Cascade className="mt-14 grid gap-px overflow-hidden rounded-[5px] border border-nuit bg-nuit sm:grid-cols-2 lg:grid-cols-3" pas={0.08}>
             {ENGAGEMENTS.map((e, i) => (
               <Element key={e.titre} className="space-y-3 bg-encre p-6 md:p-7">
@@ -160,7 +160,7 @@ export default function AProposPage() {
           <SectionHead
             index="05"
             eyebrow="Pour qui, et jusqu’où"
-            titre={<>Ma ligne de crête, <em className="text-vert">noir sur blanc.</em></>}
+            titre={<>Notre ligne de crête, <em className="text-vert">noir sur blanc.</em></>}
             aligne="deux"
             sous={POSITIONNEMENT.limite}
           />
@@ -173,14 +173,14 @@ export default function AProposPage() {
                 Découvrir l’audit 360°
               </Bouton>
               <Bouton href="/contact" variante="lien">
-                Me contacter directement
+                Nous contacter directement
               </Bouton>
             </div>
           </Reveal>
         </Conteneur>
       </section>
 
-      <CtaFinal titre={CONSULTANTE.invitation} texte="Trente minutes pour comprendre votre situation. Je vous dis honnêtement si je peux vous aider, et par quoi commencer." />
+      <CtaFinal titre={CONSULTANTE.invitation} texte={CONSULTANTE.invitationTexte} />
     </>
   );
 }

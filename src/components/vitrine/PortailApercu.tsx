@@ -110,7 +110,7 @@ export function PortailApercu() {
             <p className="etiquette mb-3">Fil d’échange</p>
             <ul className="space-y-3 text-meta">
               {[
-                { qui: "Consultante", t: "Les attestations de vigilance de votre sous-traitant datent de février. Il m’en faut une de moins de six mois.", i: 0 },
+                { qui: "ANM Consulting", t: "Les attestations de vigilance de votre sous-traitant datent de février. Il nous en faut une de moins de six mois.", i: 0 },
                 { qui: "Vous", t: "Demandée ce matin, je la dépose dès réception.", i: 1 },
                 { qui: "Système", t: "Relance automatique envoyée au sous-traitant · J+3", i: 2 },
               ].map((m) => (
@@ -137,7 +137,7 @@ export function PortailApercu() {
         <div className="px-5 py-4">
           <div className="mb-3 flex items-center justify-between">
             <p className="etiquette">Plan d’actions · après le rapport</p>
-            <span className="font-mono text-etiquette text-gris">vous cochez, elle est notifiée</span>
+            <span className="font-mono text-etiquette text-gris">vous cochez, nous sommes notifiés</span>
           </div>
           <ul className="divide-y divide-filet-2">
             {[

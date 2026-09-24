@@ -236,7 +236,7 @@ export function PourQui() {
           <p className="etiquette !text-encre">Ligne de crête</p>
           <p className="font-display text-t3 text-encre">{LIGNE_DE_CRETE.phrase}</p>
           <div className="space-y-2">
-            <p className="etiquette">Ce que je ne fais pas</p>
+            <p className="etiquette">Ce que nous ne faisons pas</p>
             <ul className="space-y-1.5 text-corps text-encre-2">
               {LIGNE_DE_CRETE.exclusions.map((e) => (
                 <li key={e} className="flex gap-3">

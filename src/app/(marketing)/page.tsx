@@ -113,7 +113,7 @@ export default function HomePage() {
             eyebrow="Le vécu"
             titre={
               <>
-                Les contrôles, <em className="text-vert">je les ai vécus du côté du dirigeant.</em>
+                Les contrôles, <em className="text-vert">notre fondatrice les a vécus du côté du dirigeant.</em>
               </>
             }
             sous={CONTROLES_VECUS.intro}
@@ -156,7 +156,7 @@ export default function HomePage() {
                 Un regard que ni l’avocat ni l’expert-comptable ne peuvent avoir : <em className="text-vert">celui du terrain.</em>
               </>
             }
-            sous="Vingt et un ans à diriger une PME du secteur : ce qui est tenable sur un site, ce qui ne l’est pas, ce qu’un contrôleur regarde en premier. Les questions juridiques et fiscales réglementées restent à vos conseils, qui partent d’un dossier propre au lieu de reconstituer les faits."
+            sous="Vingt et un ans à diriger une entreprise du secteur : ce qui est tenable sur un site, ce qui ne l’est pas, ce qu’un contrôleur regarde en premier. Les questions juridiques et fiscales réglementées restent à vos conseils, qui partent d’un dossier propre au lieu de reconstituer les faits."
             aligne="deux"
           />
           <div className="mt-14">
@@ -322,7 +322,7 @@ export default function HomePage() {
             <div className="space-y-7">
               <SectionHead
                 index="09"
-                eyebrow="Qui je suis"
+                eyebrow="La fondatrice"
                 titre={
                   <>
                     {CONSULTANTE.prenomNom}, <em className="text-vert">vingt et un ans de l’autre côté de la table.</em>
@@ -337,7 +337,7 @@ export default function HomePage() {
               </Reveal>
               <Reveal delay={0.15}>
                 <Bouton href="/a-propos" variante="lien">
-                  Mon parcours et ma ligne de crête
+                  Son parcours et notre ligne de crête
                 </Bouton>
               </Reveal>
             </div>
@@ -354,7 +354,7 @@ export default function HomePage() {
               eyebrow="Vos questions"
               titre={
                 <>
-                  Les objections qu’on m’oppose, <em className="text-vert">et ce que je réponds.</em>
+                  Les objections qu’on nous oppose, <em className="text-vert">et ce que nous répondons.</em>
                 </>
               }
             />

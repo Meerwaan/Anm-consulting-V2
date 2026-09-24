@@ -220,7 +220,7 @@ export default function AuditPage() {
                 <h3 className="font-display text-t2 text-encre">Estimez votre mission.</h3>
                 <p className="text-corps text-encre-2">
                   Majoration selon l’effectif (jusqu’à 1 800 € au-delà de 200 salariés), 180 € par site au-delà de deux,
-                  20 % en cas d’urgence. Le fiscal n’est pas chiffrable ici : contactez-moi.
+                  20 % en cas d’urgence. Le fiscal n’est pas chiffrable ici : contactez-nous.
                 </p>
               </div>
             </Reveal>
@@ -235,7 +235,7 @@ export default function AuditPage() {
       <section>
         <Conteneur className="py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-            <SectionHead index="08" eyebrow="Vos questions" titre={<>Ce qu’on me demande <em className="text-vert">avant de signer.</em></>} />
+            <SectionHead index="08" eyebrow="Vos questions" titre={<>Ce qu’on nous demande <em className="text-vert">avant de signer.</em></>} />
             <Reveal delay={0.1}>
               <FAQ items={FAQ_ITEMS} />
             </Reveal>

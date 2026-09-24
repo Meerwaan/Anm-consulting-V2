@@ -17,7 +17,7 @@ const colonnes = [
     liens: [
       { href: "/#checklist", label: "Checklists : CNAPS, URSSAF, Inspection, DGFiP" },
       { href: "/audit#methode", label: "La méthode en 15 étapes" },
-      { href: "/a-propos#ligne-de-crete", label: "Ce que je ne fais pas" },
+      { href: "/a-propos#ligne-de-crete", label: "Ce que nous ne faisons pas" },
       { href: "/connexion", label: "Espace client" },
     ],
   },

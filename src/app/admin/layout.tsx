@@ -13,6 +13,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="hidden text-meta text-gris sm:inline">Espace de travail</span>
           </Link>
           <nav className="flex items-center gap-1 text-meta">
+            {[
+              ["/admin", "Missions"],
+              ["/admin/commercial", "Commercial"],
+              ["/admin/cabinet", "Cabinet"],
+            ].map(([href, libelle]) => (
+              <Link key={href} href={href} className="hidden min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline md:flex">
+                {libelle}
+              </Link>
+            ))}
             <Link href="/admin/compte" className="flex min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline">
               {session.profil?.full_name ?? "Mon compte"}
             </Link>
