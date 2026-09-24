@@ -1,7 +1,7 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { LIBELLE_NATURE, type Facture, type PartieFacture } from "./donnees";
-import { C, Pied, s, typo } from "./pdf-commun";
+import { C, Filigrane, Pied, s, typo } from "./pdf-commun";
 
 /**
  * Une facture ou un avoir, produit depuis la ligne figée en base : le même PDF à chaque fois.
@@ -41,6 +41,7 @@ export const DocumentFacture = ({ facture: f, origine, iban, bic, delaiJours }: 
   return (
     <Document title={titre} author={f.vendeur.nom} language="fr">
       <Page size="A4" style={s.page}>
+        <Filigrane actif={f.numero.startsWith("EXEMPLE")} />
         <Pied gauche={`${f.vendeur.nom} · ${titre}`} />
         <View style={s.corps}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 }}>

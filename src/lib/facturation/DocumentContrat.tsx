@@ -3,7 +3,7 @@ import { ARTICLES_CONTRAT, ARTICLE_PRESTATION, CHAINE_METHODE, type Bloc } from 
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { tvaIntracom } from "./annuaire";
 import type { Cabinet, ClientFiche, Contrat, MissionFacturation } from "./donnees";
-import { C, EnTete, Pied, Puces, Valeur, s, typo } from "./pdf-commun";
+import { C, EnTete, Filigrane, Pied, Puces, Valeur, s, typo } from "./pdf-commun";
 
 /**
  * Le contrat de prestation de services : le texte de Sofia (content/contrat.ts), les crochets
@@ -64,6 +64,7 @@ export const DocumentContrat = ({ cabinet, client, mission, contrat }: Props) =>
   return (
     <Document title={titreDoc} author={cabinet.raison_sociale} language="fr">
       <Page size="A4" style={s.page}>
+        <Filigrane actif={Boolean(client.exemple)} />
         <EnTete gauche={cabinet.raison_sociale} droite={titreDoc} />
         <Pied gauche={`${cabinet.raison_sociale} · ${client.name}`} />
         <View style={s.corps}>
@@ -127,13 +128,18 @@ export const DocumentContrat = ({ cabinet, client, mission, contrat }: Props) =>
       </Page>
 
       <Page size="A4" style={s.page}>
+        <Filigrane actif={Boolean(client.exemple)} />
         <EnTete gauche={cabinet.raison_sociale} droite={titreDoc} />
         <Pied gauche={`${cabinet.raison_sociale} · ${client.name}`} />
         <View style={s.corps}>
           <Text style={s.etiquette}>Annexe au contrat du {fmtDate(contrat.date_contrat)}</Text>
           <Text style={[s.h1, { fontSize: 22, marginTop: 6, marginBottom: 6 }]}>Conditions particulières de la mission</Text>
           <Text style={[s.p, { color: C.encre2 }]}>
-            {typo("La présente annexe précise la prestation souscrite au sens des articles 1, 2, 4, 12, 13 et 15 du contrat. Elle tient lieu de proposition commerciale acceptée (article 23).")}
+            {typo(
+              contrat.devis
+                ? `La présente annexe reprend le devis n° ${contrat.devis.numero} du ${fmtDate(contrat.devis.cree_le)}${contrat.devis.accepte_le ? `, accepté par le Client le ${fmtDate(contrat.devis.accepte_le)}` : ""}. Elle précise la prestation souscrite au sens des articles 1, 2, 4, 12, 13 et 15 du contrat.`
+                : "La présente annexe précise la prestation souscrite au sens des articles 1, 2, 4, 12, 13 et 15 du contrat. Elle tient lieu de proposition commerciale acceptée (article 23).",
+            )}
           </Text>
           <View style={s.filet} />
 

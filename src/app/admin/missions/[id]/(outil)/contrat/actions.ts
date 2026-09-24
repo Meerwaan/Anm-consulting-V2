@@ -60,13 +60,14 @@ export const completerDepuisAnnuaire = async (
   };
 };
 
-export const actionAnnuaire = async (missionId: string, orgId: string, _e: EtatFormulaire, _fd: FormData): Promise<EtatFormulaire> => {
-  const r = await completerDepuisAnnuaire(orgId, true);
-  revalidatePath(chemin(missionId));
-  return r;
+/** `page` : l'adresse à rafraîchir (contrat d'une mission ou devis). */
+export const actionAnnuaire = async (page: string, orgId: string, _e: EtatFormulaire, _fd: FormData): Promise<EtatFormulaire> => {
+  const { ok, message } = await completerDepuisAnnuaire(orgId, true);
+  revalidatePath(page);
+  return { ok, message };
 };
 
-export const enregistrerClient = async (missionId: string, orgId: string, _e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
+export const enregistrerClient = async (page: string, orgId: string, _e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
   await exigerRole("consultant");
   const siren = (texte(fd, "siren") ?? "").replace(/\s/g, "") || null;
   if (siren && !/^\d{9}(\d{5})?$/.test(siren)) return { ok: false, message: "Le SIREN compte 9 chiffres (14 pour un SIRET)." };
@@ -86,7 +87,7 @@ export const enregistrerClient = async (missionId: string, orgId: string, _e: Et
     })
     .eq("id", orgId);
   if (error) return { ok: false, message: "La fiche du client n’a pas pu être enregistrée. Réessaie." };
-  revalidatePath(chemin(missionId));
+  revalidatePath(page);
   return { ok: true, message: "Fiche du client enregistrée." };
 };
 
@@ -108,6 +109,7 @@ export const enregistrerContrat = async (missionId: string, _e: EtatFormulaire, 
 
   const ligne = {
     mission_id: missionId,
+    devis_id: d.contrat?.devis?.id ?? null,
     prestation: d.contrat?.prestation ?? contratPropose(d).prestation,
     intitule,
     description: texte(fd, "description"),

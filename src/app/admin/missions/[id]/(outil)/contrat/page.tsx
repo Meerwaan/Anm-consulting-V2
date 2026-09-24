@@ -92,8 +92,8 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
             <p className="text-meta font-medium text-encre">Le client</p>
             <FicheClient
               client={mission.organisation}
-              enregistrer={enregistrerClient.bind(null, id, mission.organisation.id)}
-              annuaire={actionAnnuaire.bind(null, id, mission.organisation.id)}
+              enregistrer={enregistrerClient.bind(null, `/admin/missions/${id}/contrat`, mission.organisation.id)}
+              annuaire={actionAnnuaire.bind(null, `/admin/missions/${id}/contrat`, mission.organisation.id)}
             />
           </div>
           <div className="flex flex-col gap-3">
@@ -124,6 +124,15 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
           <h3 id="contrat" className="font-display text-t4 text-encre">Le contrat</h3>
           <p className="text-meta text-encre-2">
             {contrat ? `Enregistré${contrat.signe_le ? `, signé le ${fmtDate(contrat.signe_le)}` : ", pas encore signé"}.` : "Pas encore enregistré : voici ce que l’outil propose."}
+            {contrat?.devis ? (
+              <>
+                {" "}Rempli avec le{" "}
+                <Link href={`/admin/commercial/devis/${contrat.devis.id}`} className="underline underline-offset-4 hover:text-vert">
+                  devis {contrat.devis.numero}
+                </Link>
+                {contrat.devis.accepte_le ? ` accepté le ${fmtDate(contrat.devis.accepte_le)}` : ""}.
+              </>
+            ) : null}
           </p>
         </div>
         <FormContrat
@@ -144,7 +153,7 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
           <h3 id="factures" className="font-display text-t4 text-encre">Les factures</h3>
           <p className="text-meta text-encre-2">
             {contrat && contrat.montant_ht !== null
-              ? `Numérotées à la suite (F${new Date().getFullYear()}-0001, 0002…), sans trou. Toutes les factures du cabinet sont dans l’onglet Factures.`
+              ? `Numérotées à la suite (F${new Date().getFullYear()}-0001, 0002…), sans trou. Toutes les factures du cabinet sont dans la page Commercial.`
               : "Enregistre d’abord le contrat avec son prix : les factures se calculent dessus."}
           </p>
         </div>

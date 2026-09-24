@@ -39,7 +39,7 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
   return (
     <form action={action} className="space-y-7" noValidate>
       <input type="hidden" name="source" value="contact" />
-      {offre ? <input type="hidden" name="offre" value={offre.nom} /> : null}
+      {offre ? <input type="hidden" name="offre" value={offre.id} /> : null}
       {prefill.urgence ? <input type="hidden" name="urgence" value="1" /> : null}
       {/* Pot de miel : invisible pour un humain, rempli par un robot. */}
       <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden>
@@ -62,8 +62,11 @@ export function FormulaireContact({ prefill = {} }: { prefill?: PrefillContact }
         <Champ label="Société" name="societe" autoComplete="organization" placeholder="Nom de l’entreprise" />
         <Champ label="Email professionnel" name="email" type="email" autoComplete="email" required placeholder="vous@entreprise.fr" />
         <Champ label="Téléphone" name="telephone" type="tel" autoComplete="tel" placeholder="06 …" />
+      </div>
+      <div className="grid gap-7 sm:grid-cols-3">
         <Champ label="Effectif" name="effectif" type="number" min={1} placeholder="ex. 45" defaultValue={prefill.effectif} />
         <Champ label="Nombre de sites" name="sites" type="number" min={1} placeholder="ex. 6" defaultValue={prefill.sites} />
+        <Champ label="SIREN (facultatif)" name="siren" placeholder="9 chiffres" inputMode="numeric" />
       </div>
 
       <div className="space-y-2">
@@ -123,6 +126,7 @@ function Champ({
   autoComplete,
   min,
   defaultValue,
+  inputMode,
 }: {
   label: string;
   name: string;
@@ -132,6 +136,7 @@ function Champ({
   autoComplete?: string;
   min?: number;
   defaultValue?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 }) {
   return (
     <div className="space-y-2">
@@ -148,6 +153,7 @@ function Champ({
         autoComplete={autoComplete}
         min={min}
         defaultValue={defaultValue}
+        inputMode={inputMode}
         className="champ"
       />
     </div>

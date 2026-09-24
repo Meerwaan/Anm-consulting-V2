@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import type { EtatLead } from "@/lib/vitrine/lead";
+import { OFFRES, chiffrer } from "@/content/offres";
 
 const CHECKLISTS: Record<string, string> = {
   "checklist-cnaps": "CNAPS",
@@ -50,19 +51,20 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
   const effectifBrut = Number.parseInt(texte(formData, "effectif", 6), 10);
   const effectif = Number.isFinite(effectifBrut) && effectifBrut > 0 ? effectifBrut : null;
 
-  const contexte: string[] = [];
-  const telephone = texte(formData, "telephone", 40);
-  const sites = texte(formData, "sites", 6);
-  const situation = texte(formData, "situation", 40);
-  const offre = texte(formData, "offre", 40);
-  const urgence = texte(formData, "urgence", 4);
-  if (telephone) contexte.push(`Téléphone : ${telephone}`);
-  if (sites) contexte.push(`Sites : ${sites}`);
-  if (situation) contexte.push(`Situation : ${situation}`);
-  if (offre) contexte.push(`Offre : ${offre}`);
-  if (urgence) contexte.push("Urgence : contrôle sous 7 jours");
-  const corps = texte(formData, "message", 3000);
-  const message = [corps, contexte.length ? contexte.join(" · ") : ""].filter(Boolean).join("\n\n") || null;
+  // Le contexte en colonnes : il alimente directement le devis dans l'outil (page Commercial).
+  const telephone = texte(formData, "telephone", 40) || null;
+  const sitesBrut = Number.parseInt(texte(formData, "sites", 6), 10);
+  const sites = Number.isFinite(sitesBrut) && sitesBrut > 0 ? sitesBrut : null;
+  const situation = texte(formData, "situation", 40) || null;
+  const offre = OFFRES.find((o) => o.id === texte(formData, "offre", 40)) ?? null;
+  // Urgence = contrôle sous 7 jours, cochée dans l'estimateur ; un contrôle annoncé ne l'est pas forcément.
+  const urgence = texte(formData, "urgence", 4) === "1";
+  const siren = texte(formData, "siren", 20).replace(/\s/g, "") || null;
+  const estimation =
+    offre?.baseHT != null && offre.id !== "suivi_conformite"
+      ? chiffrer({ baseHT: offre.baseHT, effectif: effectif ?? 0, sites: sites ?? 0, urgence }).totalHT
+      : null;
+  const message = texte(formData, "message", 3000) || null;
 
   if (source === "contact" && !nom) return { ok: false, message: null, erreur: "Indiquez votre nom." };
 
@@ -75,6 +77,13 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
       headcount: effectif,
       source,
       message,
+      telephone,
+      sites,
+      situation,
+      offre: offre?.id ?? null,
+      urgence,
+      siren: siren && /^\d{9}(\d{5})?$/.test(siren) ? siren.slice(0, 9) : null,
+      estimation_ht: estimation,
     });
     if (error) throw error;
   } catch {

@@ -25,12 +25,25 @@ export default async function AdminPage() {
     .select("id, reference, type, opened_on, control_in_progress, control_body, control_deadline, organisation:organizations (name)")
     .order("opened_on", { ascending: false });
   const missions = (data as LigneMission[] | null) ?? [];
+  const { count: nouvelles } = await supabase.from("leads").select("id", { count: "exact", head: true }).eq("statut", "nouvelle");
   const annee = new Date().getFullYear();
   const numeros = missions.map((m) => Number(m.reference.match(new RegExp(`^${annee}-(\\d+)$`))?.[1] ?? 0));
   const referenceProposee = `${annee}-${String(Math.max(0, ...numeros) + 1).padStart(2, "0")}`;
 
   return (
     <div className="flex flex-col gap-14">
+      {nouvelles ? (
+        <Link
+          href="/admin/commercial#demandes"
+          className="flex min-h-14 items-center justify-between gap-4 rounded-[5px] border border-vert bg-menthe px-5 py-3 text-corps text-vert transition-colors hover:bg-papier"
+        >
+          <span>
+            <span className="font-medium">{nouvelles} nouvelle{nouvelles > 1 ? "s" : ""} demande{nouvelles > 1 ? "s" : ""}</span> reçue{nouvelles > 1 ? "s" : ""} du site :
+            prépare le devis en un geste.
+          </span>
+          <CaretRight size={20} aria-hidden />
+        </Link>
+      ) : null}
       <section className="flex flex-col gap-6">
         <div>
           <h1 className="font-display text-t2 text-encre">Missions</h1>

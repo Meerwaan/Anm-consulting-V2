@@ -74,6 +74,14 @@ export const Puces = ({ items, numerotee = false }: { items: string[]; numerotee
   </View>
 );
 
+/** « EXEMPLE » en travers de chaque page d'un document du client d'exemple. */
+export const Filigrane = ({ actif }: { actif: boolean }) =>
+  actif ? (
+    <Text fixed style={{ position: "absolute", top: 360, left: 40, fontFamily: "Instrument Serif", fontSize: 72, color: "#e6eae7", transform: "rotate(-30deg)" }}>
+      Exemple, sans valeur
+    </Text>
+  ) : null;
+
 export const EnTete = ({ gauche, droite }: { gauche: string; droite: string }) => (
   <View style={s.entete} fixed>
     <Text>{typo(gauche)}</Text>

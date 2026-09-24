@@ -44,6 +44,8 @@ export interface ClientFiche {
   representant: string | null;
   representant_fonction: string | null;
   annuaire_le: string | null;
+  /** Client d'exemple : numéros « EXEMPLE-… », filigrane sur les PDF, effaçable. */
+  exemple?: boolean;
 }
 
 export interface MissionFacturation {
@@ -73,6 +75,8 @@ export interface Contrat {
   date_contrat: string;
   signe_le: string | null;
   archive_path: string | null;
+  /** Le devis accepté dont vient le contrat, s'il y en a un. */
+  devis?: { id: string; numero: string; cree_le: string; accepte_le: string | null } | null;
 }
 
 export interface LigneFacture {
@@ -116,7 +120,7 @@ export interface PartieFacture {
 }
 
 const CHAMPS_CLIENT =
-  "id, name, siren, headcount, establishments, client_sites, forme_juridique, adresse, code_postal, ville, representant, representant_fonction, annuaire_le";
+  "id, name, siren, headcount, establishments, client_sites, forme_juridique, adresse, code_postal, ville, representant, representant_fonction, annuaire_le, exemple";
 
 export const lireCabinet = async (): Promise<Cabinet> => {
   const supabase = await createClient();
@@ -143,7 +147,7 @@ export const lireFacturation = async (missionId: string) => {
       .select(`id, reference, type, control_in_progress, control_body, control_deadline, intervention_on, restitution_on, organisation:organizations (${CHAMPS_CLIENT})`)
       .eq("id", missionId)
       .maybeSingle(),
-    supabase.from("contrats").select("*").eq("mission_id", missionId).maybeSingle(),
+    supabase.from("contrats").select("*, devis:devis!contrats_devis_id_fkey (id, numero, cree_le, accepte_le)").eq("mission_id", missionId).maybeSingle(),
     supabase.from("factures").select("*").eq("mission_id", missionId).order("cree_le"),
   ]);
   if (!m.data) return null;
@@ -240,6 +244,8 @@ export const partieClient = (o: ClientFiche): PartieFacture => ({
 /** Ce qui manque avant de pouvoir émettre une facture (mentions obligatoires). */
 export const manquesFacture = (d: DonneesFacturation): string[] => {
   const m: string[] = [];
+  // L'exemple montre les documents même si le cabinet n'est pas encore complet.
+  if (d.mission.organisation.exemple) return !d.contrat || d.contrat.montant_ht === null ? ["le prix de la mission (contrat)"] : [];
   if (!d.cabinet.siren) m.push("le SIREN d’ANM Consulting (page Cabinet)");
   if (!d.cabinet.adresse || !d.cabinet.code_postal) m.push("l’adresse d’ANM Consulting (page Cabinet)");
   const o = d.mission.organisation;
