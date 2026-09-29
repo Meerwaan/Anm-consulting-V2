@@ -7,6 +7,7 @@ import { lireGrilles } from "@/lib/grilles/lecture";
 import { lireDonneesST } from "@/lib/sous-traitance/lecture";
 import { avancementMission } from "@/lib/modules/avancement";
 import CadreMission from "@/components/portail/CadreMission";
+import { resumeEspaceClient } from "@/lib/espace-client/resume";
 
 /**
  * Une mission : la barre latérale à gauche (le client, puis les étapes de l'audit dans l'ordre,
@@ -26,6 +27,7 @@ export default async function LayoutMission({ children, params }: { children: Re
     supabase.from("factures").select("nature, payee_le, facture_origine, id").eq("mission_id", id),
   ]);
   if (!mission) notFound();
+  const espaceClient = await resumeEspaceClient(id, mission.org_id);
 
   const entete = (
     <div className="flex flex-col gap-1">
@@ -59,6 +61,7 @@ export default async function LayoutMission({ children, params }: { children: Re
   return (
     <CadreMission
       facturation={facturation}
+      espaceClient={espaceClient}
       entete={entete}
       missionId={id}
       sousTraitants={d.sousTraitants.map((s) => ({ id: s.id, nom: s.raison_sociale, rang: s.rang }))}

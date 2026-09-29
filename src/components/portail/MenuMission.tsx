@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckCircle, Circle, CircleHalf, Receipt } from "@phosphor-icons/react";
+import { CheckCircle, Circle, CircleHalf, Receipt, UsersThree } from "@phosphor-icons/react";
 import type { Avancement, CheminEtape } from "@/lib/modules/avancement";
 import { ETAPES, GROUPES, etapeCourante } from "./etapes";
 
@@ -18,6 +18,8 @@ export interface PropsMenu {
   avancement: Record<CheminEtape, Avancement>;
   /** Où en sont le contrat et les factures, en quelques mots. */
   facturation: string;
+  /** Accès du client et messages non lus, en quelques mots (écran Espace client). */
+  espaceClient?: string;
 }
 
 const LIBELLE_ETAT = { a_faire: "à faire", en_cours: "en cours", fait: "fait" } as const;
@@ -31,7 +33,7 @@ const Marque = ({ etat }: { etat: Avancement["etat"] }) =>
     <Circle size={18} className="shrink-0 text-gris/60" aria-hidden />
   );
 
-export const MenuComplet = ({ missionId, sousTraitants, avancement, facturation }: PropsMenu) => {
+export const MenuComplet = ({ missionId, sousTraitants, avancement, facturation, espaceClient }: PropsMenu) => {
   const chemin = usePathname();
   const racine = `/admin/missions/${missionId}`;
   const courante = etapeCourante(chemin, missionId);
@@ -105,6 +107,19 @@ export const MenuComplet = ({ missionId, sousTraitants, avancement, facturation 
             <span className="truncate text-note text-gris">{facturation}</span>
           </span>
         </Link>
+        <Link
+          href={`${racine}/client`}
+          aria-current={chemin === `${racine}/client` ? "page" : undefined}
+          className={`flex min-h-11 items-center gap-2.5 rounded-[5px] px-2.5 py-1 transition-colors ${
+            chemin === `${racine}/client` ? "bg-menthe text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+          }`}
+        >
+          <UsersThree size={16} className="w-3.5 shrink-0 text-gris" aria-hidden />
+          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+            <span className={`text-meta ${chemin === `${racine}/client` ? "font-medium" : ""}`}>Espace client</span>
+            {espaceClient ? <span className="truncate text-note text-gris">{espaceClient}</span> : null}
+          </span>
+        </Link>
       </div>
     </nav>
   );
@@ -144,6 +159,17 @@ export const MenuRail = ({ missionId, avancement }: Pick<PropsMenu, "missionId" 
             }`}
           >
             <Receipt size={20} aria-hidden />
+          </Link>
+        </li>
+        <li>
+          <Link
+            href={`/admin/missions/${missionId}/client`}
+            aria-label="Espace client"
+            className={`flex h-14 w-11 items-center justify-center rounded-[5px] transition-colors ${
+              chemin === `/admin/missions/${missionId}/client` ? "bg-menthe text-vert" : "text-encre-2 hover:bg-fond hover:text-encre"
+            }`}
+          >
+            <UsersThree size={20} aria-hidden />
           </Link>
         </li>
       </ul>
