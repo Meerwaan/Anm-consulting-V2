@@ -61,7 +61,7 @@ const FormCabinet = ({ cabinet: c, tva }: { cabinet: Cabinet; tva: string | null
         </div>
         <Champ nom="bic" libelle="BIC" valeur={c.bic} autoCapitalize="characters" />
         <Champ nom="delai_paiement_jours" libelle="Délai de paiement (jours)" valeur={c.delai_paiement_jours} type="number" min={0} max={60} inputMode="numeric" aide="30 jours par défaut entre professionnels." />
-        <Champ nom="acompte_pct" libelle="Acompte proposé (%)" valeur={c.acompte_pct} type="number" min={0} max={100} inputMode="numeric" aide="Ton contrat prévoit 50 % à la commande." />
+        <Champ nom="acompte_pct" libelle="Acompte proposé (%)" valeur={c.acompte_pct} type="number" min={0} max={100} inputMode="numeric" aide="Votre contrat prévoit 50 % à la commande." />
       </fieldset>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

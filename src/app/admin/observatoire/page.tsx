@@ -26,7 +26,7 @@ export default async function ObservatoireAdminPage() {
           <h1 className="font-display text-t2 text-encre">Observatoire</h1>
           <p className="max-w-3xl text-corps text-encre-2">
             {typographie(
-              "Le blog du site. L’outil range ton analyse dans la structure de ta note méthodologique et la publie proprement pour Google ; le choix de la décision, sa lecture et le point ANM restent les tiens. Rien ne part en ligne sans les cinq questions avant diffusion.",
+              "Le blog du site. L’outil range votre analyse dans la structure de votre note méthodologique et la publie proprement pour Google ; le choix de la décision, sa lecture et le point ANM restent les vôtres. Rien ne part en ligne sans les cinq questions avant diffusion.",
             )}
           </p>
           <p className="text-meta text-encre-2">

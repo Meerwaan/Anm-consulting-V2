@@ -29,7 +29,7 @@ export const GET = async (_req: Request, { params }: { params: Promise<{ id: str
     );
   } catch (e) {
     console.error("[devis] PDF", (e as Error).stack);
-    return new NextResponse("Le devis n’a pas pu être produit. Réessaie ; si l’erreur persiste, préviens Merwan.", { status: 500 });
+    return new NextResponse("Le devis n’a pas pu être produit. Réessayez ; si l’erreur persiste, prévenez Merwan.", { status: 500 });
   }
   const nom = `Devis-${devis.numero}-${org.name.replace(/[^\p{L}\p{N}]+/gu, "-")}.pdf`;
   return new NextResponse(new Uint8Array(pdf), {

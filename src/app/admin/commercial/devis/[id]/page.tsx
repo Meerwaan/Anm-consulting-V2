@@ -5,10 +5,11 @@ import { ArrowRight, CheckCircle, PaperPlaneTilt, XCircle } from "@phosphor-icon
 import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 import FicheClient from "@/components/facturation/FicheClient";
+import BoutonConfirme from "@/components/facturation/BoutonConfirme";
 import FormDevis from "@/components/facturation/FormDevis";
-import { boutonPrincipal, boutonSecondaire } from "@/components/facturation/styles";
+import { boutonCritique, boutonPrincipal, boutonSecondaire } from "@/components/facturation/styles";
 import { OFFRES } from "@/content/offres";
-import { lireCabinet, type ClientFiche } from "@/lib/facturation/donnees";
+import { aujourdHui, lireCabinet, type ClientFiche } from "@/lib/facturation/donnees";
 import { LIBELLE_SITUATION, LIBELLE_STATUT_DEVIS, normaliserDevis, type Demande, type Devis } from "@/lib/facturation/devis";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { actionAnnuaire, completerDepuisAnnuaire, enregistrerClient } from "@/app/admin/missions/[id]/(outil)/contrat/actions";
@@ -38,6 +39,12 @@ export default async function DevisPage({ params }: { params: Promise<{ id: stri
   }
 
   const accepte = devis.statut === "accepte";
+  const expire = devis.valable_jusquau < aujourdHui();
+  // La référence que prendra la mission si le devis est accepté (même règle que l'action serveur).
+  const { data: refs } = accepte ? { data: [] } : await supabase.from("missions").select("reference");
+  const annee = Number(aujourdHui().slice(0, 4));
+  const rang = Math.max(0, ...((refs ?? []) as { reference: string }[]).map((m) => Number(m.reference.match(new RegExp(`^${annee}-(\\d+)$`))?.[1] ?? 0)));
+  const referenceProposee = `${annee}-${String(rang + 1).padStart(2, "0")}`;
   const offreDemandee = OFFRES.find((o) => o.id === demande?.offre);
 
   return (
@@ -70,36 +77,61 @@ export default async function DevisPage({ params }: { params: Promise<{ id: stri
           <>
             <p className="text-meta text-encre-2">
               {devis.statut === "brouillon"
-                ? "Relis le chiffrage, ouvre le PDF, envoie-le au client, puis indique ici qu’il est parti."
+                ? "Relisez le chiffrage, ouvrez le PDF, envoyez-le au client, puis indiquez ici qu’il est parti. Même remis en main propre, marquez-le comme envoyé : c’est ensuite seulement qu’il peut être accepté."
                 : devis.statut === "envoye"
-                  ? "Quand le client renvoie le devis signé « Bon pour accord », accepte-le : la mission et son contrat se créent tout seuls, déjà remplis."
-                  : "Ce devis est refusé. Tu peux le remettre en brouillon pour le retravailler."}
+                  ? "Quand le client renvoie le devis signé « Bon pour accord », acceptez-le : la mission et son contrat se créent tout seuls, déjà remplis."
+                  : accepte
+                    ? "Ce devis est marqué accepté, mais sa mission n’a pas été créée (création interrompue). Rechargez la page ; si rien ne change, contactez Merwan."
+                    : "Ce devis est refusé. Vous pouvez le remettre en brouillon pour le retravailler."}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-start gap-2">
               {devis.statut === "brouillon" ? (
                 <form action={changerStatutDevis.bind(null, id, "envoye")}>
-                  <button type="submit" className={boutonSecondaire}>
+                  <button type="submit" className={boutonPrincipal}>
                     <PaperPlaneTilt size={18} aria-hidden /> Marquer comme envoyé
                   </button>
                 </form>
               ) : null}
-              {devis.statut !== "refuse" ? (
-                <form action={accepterDevis.bind(null, id)}>
-                  <button type="submit" className={boutonPrincipal}>
-                    <CheckCircle size={18} aria-hidden /> Accepté : créer la mission et le contrat
-                  </button>
-                </form>
+              {devis.statut === "envoye" ? (
+                <BoutonConfirme
+                  action={accepterDevis.bind(null, id)}
+                  classe={boutonPrincipal}
+                  confirmer="Confirmer : créer la mission et le contrat"
+                  consequence={
+                    <>
+                      Crée la mission {referenceProposee} et son contrat, remplis avec ce devis ({fmtEuros(devis.total_ht)} HT). Le devis {devis.numero} devient
+                      « Accepté » et ne se modifie plus. Irréversible depuis l’outil : à faire seulement avec le devis signé « Bon pour accord » en main.
+                      {expire ? (
+                        <span className="mt-2 block font-medium text-critique">
+                          Attention : la validité du devis a expiré le {fmtDate(devis.valable_jusquau)}. Vérifiez que le client l’a bien signé à temps, ou
+                          établissez un nouveau devis.
+                        </span>
+                      ) : null}
+                    </>
+                  }
+                >
+                  <CheckCircle size={18} aria-hidden /> Accepté : créer la mission et le contrat
+                </BoutonConfirme>
               ) : null}
               {devis.statut === "refuse" ? (
                 <form action={changerStatutDevis.bind(null, id, "brouillon")}>
                   <button type="submit" className={boutonSecondaire}>Remettre en brouillon</button>
                 </form>
-              ) : (
-                <form action={changerStatutDevis.bind(null, id, "refuse")}>
-                  <button type="submit" className={`${boutonSecondaire} text-critique`}>
-                    <XCircle size={18} aria-hidden /> Refusé
-                  </button>
-                </form>
+              ) : accepte ? null : (
+                <BoutonConfirme
+                  action={changerStatutDevis.bind(null, id, "refuse")}
+                  classe={`${boutonSecondaire} text-critique`}
+                  classeConfirmer={boutonCritique}
+                  confirmer="Confirmer : devis refusé"
+                  consequence={
+                    <>
+                      Le devis {devis.numero} passe en « Refusé »{demande ? " et la demande d’origine est classée sans suite" : ""}. Son numéro reste
+                      pris. Vous pourrez le remettre en brouillon pour le retravailler.
+                    </>
+                  }
+                >
+                  <XCircle size={18} aria-hidden /> Refusé
+                </BoutonConfirme>
               )}
             </div>
           </>

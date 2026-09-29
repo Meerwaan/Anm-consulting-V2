@@ -8,20 +8,10 @@ import { OFFRES } from "@/content/offres";
 import { LIBELLE_NATURE, aujourdHui } from "@/lib/facturation/donnees";
 import { LIBELLE_SITUATION, LIBELLE_STATUT_DEVIS, lireCommercial } from "@/lib/facturation/devis";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
+import { LIBELLE_SOURCE, estInscription } from "@/lib/vitrine/lead";
 import { classerDemande, creerExemple, effacerExemple, preparerDevisDepuisDemande } from "./actions";
 
 export const metadata: Metadata = { title: "Commercial — ANM Consulting", robots: { index: false } };
-
-const SOURCES: Record<string, string> = {
-  contact: "Formulaire de contact",
-  abonnement: "Page abonnement",
-  formation: "Liste d’attente formation",
-  "checklist-cnaps": "Checklist CNAPS",
-  "checklist-urssaf": "Checklist URSSAF",
-  "checklist-inspection": "Checklist Inspection",
-  "checklist-fiscal": "Checklist DGFiP",
-  observatoire: "Alerte Observatoire",
-};
 
 const Exemple = () => <span className="rounded-full bg-fond px-2.5 py-0.5 text-note font-medium text-majeur ring-1 ring-majeur/30">Exemple</span>;
 
@@ -41,8 +31,11 @@ const Titre = ({ id, n, titre, sous }: { id: string; n: string; titre: string; s
 export default async function CommercialPage() {
   await exigerRole("consultant");
   const { demandes, devis, contratsASigner, factures } = await lireCommercial();
-  const aTraiter = demandes.filter((d) => d.statut === "nouvelle" || d.statut === "en_cours");
-  const traitees = demandes.filter((d) => !(d.statut === "nouvelle" || d.statut === "en_cours"));
+  // Les inscriptions (checklists, Observatoire) sont rangées à part : elles n'appellent pas de devis.
+  const inscriptions = demandes.filter((d) => estInscription(d.source));
+  const vraies = demandes.filter((d) => !estInscription(d.source));
+  const aTraiter = vraies.filter((d) => d.statut === "nouvelle" || d.statut === "en_cours");
+  const traitees = vraies.filter((d) => !(d.statut === "nouvelle" || d.statut === "en_cours"));
   const devisOuverts = devis.filter((d) => d.statut === "brouillon" || d.statut === "envoye");
   const devisClos = devis.filter((d) => d.statut === "accepte" || d.statut === "refuse");
   const annulees = new Set(factures.filter((f) => f.nature === "avoir").map((f) => f.facture_origine));
@@ -73,12 +66,12 @@ export default async function CommercialPage() {
           {exempleEnCours ? (
             <>
               <span className="font-medium text-encre">Un client d’exemple est en cours.</span> Ses documents portent un numéro « EXEMPLE » et la mention en filigrane :
-              ils n’entament pas la vraie numérotation. Efface-le quand tu as fini, ou recommence depuis le début.
+              ils n’entament pas la vraie numérotation. Effacez-le quand vous avez fini, ou recommencez depuis le début.
             </>
           ) : (
             <>
-              <span className="font-medium text-encre">Pas encore de client ?</span> Crée un client d’exemple : une demande arrive comme si elle venait du site, et tu
-              déroules tout, devis, mission, contrat, factures. Rien ne compte, tout s’efface d’un bouton.
+              <span className="font-medium text-encre">Pas encore de client ?</span> Créez un client d’exemple : une demande arrive comme si elle venait du site, et vous
+              déroulez tout, devis, mission, contrat, factures. Rien ne compte, tout s’efface d’un bouton.
             </>
           )}
         </p>
@@ -127,7 +120,7 @@ export default async function CommercialPage() {
                       <span className="font-display text-t4 text-encre">{d.company || d.full_name || d.email}</span>
                       {d.exemple ? <Exemple /> : d.statut === "nouvelle" ? <span className="rounded-full bg-menthe px-2.5 py-0.5 text-note font-medium text-vert">Nouvelle</span> : null}
                       <span className="text-note text-gris">
-                        {SOURCES[d.source ?? ""] ?? d.source} · le {new Date(d.created_at).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })}
+                        {LIBELLE_SOURCE[d.source ?? ""] ?? d.source} · le {new Date(d.created_at).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })}
                       </span>
                     </p>
                     <p className="text-meta text-encre-2">
@@ -189,6 +182,31 @@ export default async function CommercialPage() {
             </ul>
           </details>
         ) : null}
+        {inscriptions.length ? (
+          <details id="inscriptions" className="scroll-mt-6 text-meta text-encre-2">
+            <summary className="flex min-h-11 cursor-pointer items-center text-encre">
+              Inscriptions (checklists, Observatoire) · {inscriptions.length}
+            </summary>
+            <div className="mt-2 flex flex-col gap-3">
+              <p className="max-w-2xl">
+                Des emails laissés pour recevoir une checklist ou être prévenu d’une parution. Ce ne sont pas des demandes de devis. Si l’un d’eux vous appelle pour une mission, créez son devis avec « Un client
+                qui a appelé directement », plus bas.
+              </p>
+              <ul className="flex flex-col border-t border-filet">
+                {inscriptions.map((d) => (
+                  <li key={d.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-filet py-2">
+                    <a href={`mailto:${d.email}`} className="flex min-h-11 items-center text-encre underline underline-offset-4">
+                      {d.email}
+                    </a>
+                    <span className="text-note text-gris">
+                      {LIBELLE_SOURCE[d.source ?? ""] ?? d.source} · le {new Date(d.created_at).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </details>
+        ) : null}
       </section>
 
       {/* 2. DEVIS */}
@@ -240,7 +258,7 @@ export default async function CommercialPage() {
 
       {/* 3. CONTRATS */}
       <section id="contrats" aria-labelledby="t-contrats" className="flex scroll-mt-6 flex-col gap-6">
-        <Titre id="t-contrats" n="3" titre="Les contrats à signer" sous="Ton modèle de contrat, rempli avec le devis accepté. Une fois signé, il s’archive dans la mission." />
+        <Titre id="t-contrats" n="3" titre="Les contrats à signer" sous="Votre modèle de contrat, rempli avec le devis accepté. Une fois signé, il s’archive dans la mission." />
         {contratsASigner.length ? (
           <ul className="flex flex-col border-t-[1.5px] border-encre">
             {contratsASigner.map((c) => (

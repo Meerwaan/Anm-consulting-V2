@@ -4,6 +4,7 @@ import { CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { createClient } from "@/lib/supabase/server";
 import { OFFRES } from "@/content/offres";
 import NouvelleMission from "@/components/portail/NouvelleMission";
+import { estInscription } from "@/lib/vitrine/lead";
 
 export const metadata: Metadata = { title: "Missions — ANM Consulting", robots: { index: false } };
 
@@ -25,7 +26,9 @@ export default async function AdminPage() {
     .select("id, reference, type, opened_on, control_in_progress, control_body, control_deadline, organisation:organizations (name)")
     .order("opened_on", { ascending: false });
   const missions = (data as LigneMission[] | null) ?? [];
-  const { count: nouvelles } = await supabase.from("leads").select("id", { count: "exact", head: true }).eq("statut", "nouvelle");
+  // Seules les vraies demandes comptent : les inscriptions (checklists, Observatoire) n'appellent pas de devis.
+  const { data: leadsNouveaux } = await supabase.from("leads").select("source").eq("statut", "nouvelle");
+  const nouvelles = ((leadsNouveaux ?? []) as { source: string | null }[]).filter((l) => !estInscription(l.source)).length;
   const annee = new Date().getFullYear();
   const numeros = missions.map((m) => Number(m.reference.match(new RegExp(`^${annee}-(\\d+)$`))?.[1] ?? 0));
   const referenceProposee = `${annee}-${String(Math.max(0, ...numeros) + 1).padStart(2, "0")}`;
@@ -39,7 +42,7 @@ export default async function AdminPage() {
         >
           <span>
             <span className="font-medium">{nouvelles} nouvelle{nouvelles > 1 ? "s" : ""} demande{nouvelles > 1 ? "s" : ""}</span> reçue{nouvelles > 1 ? "s" : ""} du site :
-            prépare le devis en un geste.
+            préparez le devis en un geste.
           </span>
           <CaretRight size={20} aria-hidden />
         </Link>
@@ -48,7 +51,7 @@ export default async function AdminPage() {
         <div>
           <h1 className="font-display text-t2 text-encre">Missions</h1>
           <p className="mt-2 text-corps text-encre-2">
-            {missions.length === 0 ? "Aucune mission pour l’instant. Crée la première ci-dessous." : `${missions.length} mission${missions.length > 1 ? "s" : ""}.`}
+            {missions.length === 0 ? "Aucune mission pour l’instant. Créez la première ci-dessous." : `${missions.length} mission${missions.length > 1 ? "s" : ""}.`}
           </p>
         </div>
         {missions.length ? (
@@ -100,7 +103,7 @@ export default async function AdminPage() {
           ))}
         </ol>
         <p className="text-meta text-encre-2">
-          Pour t’entraîner : ouvre la mission « Démo — Horizon Sécurité Privée ». Elle contient de vraies anomalies à trouver, et tu peux tout
+          Pour vous entraîner : ouvrez la mission « Démo — Horizon Sécurité Privée ». Elle contient de vraies anomalies à trouver, et vous pouvez tout
           y modifier sans risque.
         </p>
       </section>

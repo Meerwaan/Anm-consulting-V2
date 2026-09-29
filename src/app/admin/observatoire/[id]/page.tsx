@@ -4,16 +4,21 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
-import { boutonSecondaire } from "@/components/facturation/styles";
+import { messageParution } from "@/lib/email/parution";
+import BoutonConfirme from "@/components/facturation/BoutonConfirme";
+import { boutonCritique, boutonSecondaire } from "@/components/facturation/styles";
 import FormArticle from "@/components/observatoire/FormArticle";
 import { COLONNES_ARTICLE, dateLongue, type Article } from "@/lib/observatoire/article";
 import { supprimerBrouillon } from "../actions";
 
 export const metadata: Metadata = { title: "Publication — Observatoire", robots: { index: false } };
 
-export default async function ArticleAdminPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cree?: string }> }) {
+export default async function ArticleAdminPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cree?: string; email?: string }> }) {
   await exigerRole("consultant");
-  const [{ id }, { cree }] = await Promise.all([params, searchParams]);
+  const [{ id }, { cree, email }] = await Promise.all([params, searchParams]);
+  // Résultat de l’avis de parution envoyé à la création d’un article publié d’emblée : « envoyés-inscrits-ok ».
+  const [envoyes, inscrits, emailOk] = (email ?? "").split("-").map(Number);
+  const parution = email && Number.isFinite(envoyes) && Number.isFinite(inscrits) ? messageParution({ envoyes, inscrits, ok: emailOk === 1 }) : null;
   const supabase = await createClient();
   const { data: article } = await supabase.from("observatoire_articles").select(COLONNES_ARTICLE).eq("id", id).maybeSingle<Article>();
   if (!article) notFound();
@@ -35,7 +40,7 @@ export default async function ArticleAdminPage({ params, searchParams }: { param
           </p>
           {cree ? (
             <p className="text-meta text-vert" role="status">
-              {cree === "publie" ? "Publié. La page est en ligne." : "Brouillon créé. Il n’est visible que dans l’espace de travail."}
+              {cree === "publie" ? `Publié. La page est en ligne.${parution ? ` ${parution}` : ""}` : "Brouillon créé. Il n’est visible que dans l’espace de travail."}
             </p>
           ) : null}
         </div>
@@ -54,13 +59,19 @@ export default async function ArticleAdminPage({ params, searchParams }: { param
       <FormArticle initial={article} enLigne={enLigne} />
 
       {!enLigne ? (
-        <form action={supprimerBrouillon} className="flex flex-col gap-2 border-t border-filet pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <input type="hidden" name="id" value={article.id} />
+        <div className="flex flex-col gap-3 border-t border-filet pt-6 sm:flex-row sm:items-start sm:justify-between">
           <p className="text-meta text-encre-2">Supprimer ce brouillon efface tout son contenu, sans retour possible.</p>
-          <button type="submit" className={`${boutonSecondaire} text-critique hover:border-critique`}>
+          <BoutonConfirme
+            action={supprimerBrouillon}
+            champs={{ id: article.id }}
+            classe={`${boutonSecondaire} text-critique hover:border-critique`}
+            classeConfirmer={boutonCritique}
+            confirmer="Confirmer : supprimer le brouillon"
+            consequence={`« ${article.titre} » sera effacé, avec tout son contenu. Il ne pourra pas être récupéré.`}
+          >
             Supprimer le brouillon
-          </button>
-        </form>
+          </BoutonConfirme>
+        </div>
       ) : null}
     </div>
   );

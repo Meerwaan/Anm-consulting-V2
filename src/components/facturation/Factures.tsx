@@ -24,6 +24,8 @@ export interface FactureProposee {
   detail: string;
   ht: number;
   ttc: number;
+  /** Pourquoi elle ne peut pas encore être émise (contrat non signé), ou null. */
+  blocage: string | null;
 }
 
 const eur = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
@@ -53,6 +55,7 @@ const Factures = ({
   const [etat, setEtat] = useState<EtatFormulaire>({ ok: false, message: null });
   const [enCours, demarrer] = useTransition();
   const aujourdHui = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" });
+  const blocages = [...new Set(possibles.map((p) => p.blocage).filter((b): b is string => Boolean(b)))];
 
   return (
     <div className="flex flex-col gap-6">
@@ -103,7 +106,7 @@ const Factures = ({
           <p className="text-corps text-encre">
             Émettre un avoir de <span className="font-medium tabular-nums">{eur(-avoirAConfirmer.net_a_payer)} TTC</span> qui annule la facture {avoirAConfirmer.numero} ?
           </p>
-          <p className="text-meta text-encre-2">L’avoir reçoit son propre numéro (série AV). Il ne se supprime pas. Tu pourras ensuite émettre une facture corrigée.</p>
+          <p className="text-meta text-encre-2">L’avoir reçoit son propre numéro (série AV). Il ne se supprime pas. Vous pourrez ensuite émettre une facture corrigée.</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
@@ -136,7 +139,7 @@ const Factures = ({
               <span className="tabular-nums">{eur(aConfirmer.ht)} HT</span> · <span className="font-medium tabular-nums">{eur(aConfirmer.ttc)} TTC</span>
             </p>
             <p className="text-meta text-encre-2">
-              Elle reçoit le numéro suivant de la série et ne se modifie plus : une erreur se corrige par un avoir. Vérifie l’aperçu du contrat avant si tu as un doute.
+              Elle reçoit le numéro suivant de la série et ne se modifie plus : une erreur se corrige par un avoir. Vérifiez l’aperçu du contrat avant si vous avez un doute.
             </p>
             <div className="flex flex-wrap gap-2">
               <button
@@ -152,19 +155,30 @@ const Factures = ({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            {possibles.map((p) => (
-              <button
-                key={p.nature}
-                type="button"
-                disabled={manques.length > 0}
-                onClick={() => { setAConfirmer(p); setAvoirAConfirmer(null); setEtat({ ok: false, message: null }); }}
-                className={p.nature === "totale" && possibles.length > 1 ? boutonSecondaire : boutonPrincipal}
-              >
-                <Receipt size={18} aria-hidden />
-                {p.titre} · {eur(p.ttc)} TTC
-              </button>
-            ))}
+          <div className="flex flex-col gap-3">
+            {blocages.length ? (
+              <div id="factures-blocage" className="rounded-[5px] border border-majeur/40 bg-papier p-4 text-meta text-encre-2">
+                {blocages.map((b) => <p key={b}>{b}</p>)}
+                {possibles.some((p) => p.nature === "acompte" && !p.blocage) ? (
+                  <p className="mt-1">L’acompte reste possible : le devis accepté vaut commande, et l’acompte est prévu « à la commande ».</p>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {possibles.map((p) => (
+                <button
+                  key={p.nature}
+                  type="button"
+                  disabled={manques.length > 0 || Boolean(p.blocage)}
+                  aria-describedby={p.blocage ? "factures-blocage" : undefined}
+                  onClick={() => { setAConfirmer(p); setAvoirAConfirmer(null); setEtat({ ok: false, message: null }); }}
+                  className={p.nature === "totale" && possibles.length > 1 ? boutonSecondaire : boutonPrincipal}
+                >
+                  <Receipt size={18} aria-hidden />
+                  {p.titre} · {eur(p.ttc)} TTC
+                </button>
+              ))}
+            </div>
           </div>
         )
       ) : factures.length ? (

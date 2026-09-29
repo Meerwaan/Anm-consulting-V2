@@ -7,6 +7,7 @@ import FormContrat from "@/components/facturation/FormContrat";
 import Factures, { type FactureProposee } from "@/components/facturation/Factures";
 import {
   LIBELLE_NATURE,
+  blocageSignature,
   contratPropose,
   estAnnulee,
   facturesPossibles,
@@ -55,7 +56,7 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
             : nature === "solde"
               ? `La prestation entière, moins ${f.acomptes.map((a) => `l’acompte ${a.numero}`).join(" et ")}. Payable à ${cabinet.delai_paiement_jours} jours.`
               : `La prestation entière, sans acompte. Payable à ${cabinet.delai_paiement_jours} jours.`;
-        return { nature: nature as FactureProposee["nature"], titre, detail, ht: f.total_ht, ttc: f.total_ttc };
+        return { nature: nature as FactureProposee["nature"], titre, detail, ht: f.total_ht, ttc: f.total_ttc, blocage: blocageSignature(d, nature as FactureProposee["nature"]) };
       })
     : [];
 
@@ -80,7 +81,7 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
         <p className="etiquette">Administratif</p>
         <h2 className="font-display text-t3 text-encre">Contrat et factures</h2>
         <p className="max-w-2xl text-corps text-encre-2">
-          Le contrat reprend ton modèle mot pour mot ; l’outil remplit tout ce qu’il connaît déjà. Les factures se calculent sur le contrat
+          Le contrat reprend votre modèle mot pour mot ; l’outil remplit tout ce qu’il connaît déjà. Les factures se calculent sur le contrat
           et portent toutes les mentions obligatoires.
         </p>
       </div>
@@ -154,7 +155,7 @@ export default async function ContratPage({ params }: { params: Promise<{ id: st
           <p className="text-meta text-encre-2">
             {contrat && contrat.montant_ht !== null
               ? `Numérotées à la suite (F${new Date().getFullYear()}-0001, 0002…), sans trou. Toutes les factures du cabinet sont dans la page Commercial.`
-              : "Enregistre d’abord le contrat avec son prix : les factures se calculent dessus."}
+              : "Enregistrez d’abord le contrat avec son prix : les factures se calculent dessus."}
           </p>
         </div>
         <Factures

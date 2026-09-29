@@ -75,7 +75,7 @@ const FicheClient = ({ client, enregistrer, annuaire }: { client: ClientFiche; e
       <form action={actionAnnuaire} className="flex flex-col gap-2 border-t border-filet pt-4">
         <p className="text-meta text-encre-2">
           {lu
-            ? `Complétée depuis l’annuaire des entreprises le ${lu}. Les données de l’INSEE sont en majuscules et sans accents : corrige-les si besoin.`
+            ? `Complétée depuis l’annuaire des entreprises le ${lu}. Les données de l’INSEE sont en majuscules et sans accents : corrigez-les si besoin.`
             : "Avec le SIREN, l’annuaire des entreprises donne la forme juridique, le siège et le dirigeant."}
         </p>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">

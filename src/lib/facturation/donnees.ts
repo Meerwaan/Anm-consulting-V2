@@ -255,6 +255,22 @@ export const manquesFacture = (d: DonneesFacturation): string[] => {
   return m;
 };
 
+/**
+ * Pas de facture sur un contrat non signé. Une seule exception : l'acompte, quand le contrat vient
+ * d'un devis accepté. Le devis signé « Bon pour accord » vaut commande, et le devis comme le contrat
+ * (article 13) prévoient l'acompte « à la commande » : il peut donc précéder la signature du contrat.
+ * Renvoie la raison du refus, ou null si la facture peut être émise.
+ */
+export const blocageSignature = (d: DonneesFacturation, nature: Exclude<NatureFacture, "avoir">): string | null => {
+  const c = d.contrat;
+  if (!c) return "Enregistrez d’abord le contrat.";
+  if (c.signe_le) return null;
+  if (nature === "acompte" && c.devis?.accepte_le) return null;
+  return nature === "acompte"
+    ? "Le contrat n’est pas signé et ne vient pas d’un devis accepté : marquez d’abord le contrat comme signé."
+    : "Le contrat n’est pas signé : marquez-le comme signé avant d’émettre cette facture.";
+};
+
 /* ------------------------------------------------------------------ factures */
 
 const arrondi = (n: number) => Math.round(n * 100) / 100;

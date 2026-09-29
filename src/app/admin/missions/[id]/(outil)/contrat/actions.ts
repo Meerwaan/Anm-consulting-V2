@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { lireAnnuaire } from "@/lib/facturation/annuaire";
 import { DocumentContrat } from "@/lib/facturation/DocumentContrat";
 import { DocumentFacture } from "@/lib/facturation/DocumentFacture";
-import { contratPropose, facturesPossibles, lireFacturation, manquesFacture, normaliserFacture, aujourdHui, preparerAvoir, preparerFacture, type Facture, type NatureFacture } from "@/lib/facturation/donnees";
+import { blocageSignature, contratPropose, facturesPossibles, lireFacturation, manquesFacture, normaliserFacture, aujourdHui, preparerAvoir, preparerFacture, type Facture, type NatureFacture } from "@/lib/facturation/donnees";
 import { LIVRABLES } from "@/content/contrat";
 
 export interface EtatFormulaire {
@@ -37,9 +37,9 @@ export const completerDepuisAnnuaire = async (
     .select("siren, forme_juridique, adresse, code_postal, ville, representant, representant_fonction")
     .eq("id", orgId)
     .maybeSingle();
-  if (!org?.siren) return { ok: false, message: "Renseigne d’abord le SIREN du client." };
+  if (!org?.siren) return { ok: false, message: "Renseignez d’abord le SIREN du client." };
   const fiche = await lireAnnuaire(org.siren);
-  if (!fiche) return { ok: false, message: "Ce SIREN est introuvable dans l’annuaire des entreprises, ou l’annuaire ne répond pas. Vérifie le numéro, ou saisis les informations à la main." };
+  if (!fiche) return { ok: false, message: "Ce SIREN est introuvable dans l’annuaire des entreprises, ou l’annuaire ne répond pas. Vérifiez le numéro, ou saisissez les informations à la main." };
   const garder = (actuel: string | null, nouveau: string | null) => (remplacer ? (nouveau ?? actuel) : (actuel ?? nouveau));
   const maj = {
     forme_juridique: garder(org.forme_juridique, fiche.formeJuridique),
@@ -55,7 +55,7 @@ export const completerDepuisAnnuaire = async (
     fiche: maj,
     ok: true,
     message: fiche.fermee
-      ? `Attention : l’annuaire indique que ${fiche.raisonSociale} est fermée. Vérifie le SIREN avec le client.`
+      ? `Attention : l’annuaire indique que ${fiche.raisonSociale} est fermée. Vérifiez le SIREN avec le client.`
       : `Complété depuis l’annuaire des entreprises : ${fiche.raisonSociale}.`,
   };
 };
@@ -86,7 +86,7 @@ export const enregistrerClient = async (page: string, orgId: string, _e: EtatFor
       headcount: montant(fd, "headcount"),
     })
     .eq("id", orgId);
-  if (error) return { ok: false, message: "La fiche du client n’a pas pu être enregistrée. Réessaie." };
+  if (error) return { ok: false, message: "La fiche du client n’a pas pu être enregistrée. Réessayez." };
   revalidatePath(page);
   return { ok: true, message: "Fiche du client enregistrée." };
 };
@@ -95,7 +95,7 @@ export const enregistrerContrat = async (missionId: string, _e: EtatFormulaire, 
   await exigerRole("consultant");
   const d = await lireFacturation(missionId);
   if (!d) return { ok: false, message: "Mission introuvable." };
-  if (d.contrat?.signe_le) return { ok: false, message: "Le contrat est signé : rouvre-le avant de le modifier." };
+  if (d.contrat?.signe_le) return { ok: false, message: "Le contrat est signé : rouvrez-le avant de le modifier." };
   const ht = montant(fd, "montant_ht");
   const frais = montant(fd, "frais_ht") ?? 0;
   const pct = montant(fd, "acompte_pct") ?? d.cabinet.acompte_pct;
@@ -103,7 +103,7 @@ export const enregistrerContrat = async (missionId: string, _e: EtatFormulaire, 
   if (Number.isNaN(frais) || frais < 0) return { ok: false, message: "Les frais doivent être un montant positif." };
   if (Number.isNaN(pct) || pct < 0 || pct > 100) return { ok: false, message: "L’acompte est un pourcentage entre 0 et 100." };
   const intitule = texte(fd, "intitule");
-  if (!intitule) return { ok: false, message: "Indique l’intitulé de la prestation." };
+  if (!intitule) return { ok: false, message: "Indiquez l’intitulé de la prestation." };
   const autre = texte(fd, "livrable_autre");
   const livrables = [...LIVRABLES.filter((l) => fd.getAll("livrables").includes(l)), ...(autre ? [autre] : [])];
 
@@ -124,7 +124,7 @@ export const enregistrerContrat = async (missionId: string, _e: EtatFormulaire, 
   };
   const supabase = await createClient();
   const { error } = await supabase.from("contrats").upsert(ligne, { onConflict: "mission_id" });
-  if (error) return { ok: false, message: "Le contrat n’a pas pu être enregistré. Réessaie." };
+  if (error) return { ok: false, message: "Le contrat n’a pas pu être enregistré. Réessayez." };
   // Le montant de la fiche mission suit le contrat.
   await supabase.from("missions").update({ amount_ht: ht === null ? null : ht + frais }).eq("id", missionId);
   revalidatePath(chemin(missionId));
@@ -135,13 +135,13 @@ export const enregistrerContrat = async (missionId: string, _e: EtatFormulaire, 
 export const signerContrat = async (missionId: string, _e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
   await exigerRole("consultant");
   const d = await lireFacturation(missionId);
-  if (!d?.contrat) return { ok: false, message: "Enregistre d’abord le contrat." };
+  if (!d?.contrat) return { ok: false, message: "Enregistrez d’abord le contrat." };
   const date = texte(fd, "signe_le") ?? aujourdHui();
   const supabase = await createClient();
   const pdf = await renderToBuffer(DocumentContrat({ cabinet: d.cabinet, client: d.mission.organisation, mission: d.mission, contrat: d.contrat }));
   const archive = `${missionId}/contrats/contrat-${d.mission.reference}-${Date.now()}.pdf`;
   const { error: e1 } = await supabase.storage.from("pieces").upload(archive, new Uint8Array(pdf), { contentType: "application/pdf", upsert: false });
-  if (e1) return { ok: false, message: "Le PDF du contrat n’a pas pu être archivé. Réessaie." };
+  if (e1) return { ok: false, message: "Le PDF du contrat n’a pas pu être archivé. Réessayez." };
   await supabase.from("contrats").update({ signe_le: date, archive_path: archive }).eq("mission_id", missionId);
   revalidatePath(chemin(missionId));
   return { ok: true, message: "Contrat marqué comme signé. Sa version est archivée dans la mission." };
@@ -169,9 +169,11 @@ export const emettreFacture = async (missionId: string, nature: Exclude<NatureFa
   const manques = manquesFacture(d);
   if (manques.length) return { ok: false, message: `Avant d’émettre une facture, il manque : ${manques.join(", ")}.` };
   if (!facturesPossibles(d).includes(nature)) return { ok: false, message: "Cette facture a déjà été émise." };
+  const blocage = blocageSignature(d, nature);
+  if (blocage) return { ok: false, message: blocage };
   const supabase = await createClient();
   const { data, error } = await supabase.from("factures").insert(preparerFacture(d, nature)).select("*").single();
-  if (error || !data) return { ok: false, message: "La facture n’a pas pu être émise. Réessaie." };
+  if (error || !data) return { ok: false, message: "La facture n’a pas pu être émise. Réessayez." };
   await archiverFacture(normaliserFacture(data as Facture), d.cabinet.iban, d.cabinet.bic, d.cabinet.delai_paiement_jours, null);
   revalidatePath(chemin(missionId));
   revalidatePath("/admin/factures");
@@ -185,11 +187,11 @@ export const emettreAvoir = async (missionId: string, factureId: string): Promis
   if (!d || !f || f.nature === "avoir") return { ok: false, message: "Facture introuvable." };
   if (d.factures.some((a) => a.nature === "avoir" && a.facture_origine === f.id)) return { ok: false, message: "Cette facture est déjà annulée par un avoir." };
   if (f.nature === "acompte" && d.factures.some((x) => x.nature === "solde" && x.acomptes.some((a) => a.numero === f.numero) && !d.factures.some((a) => a.facture_origine === x.id))) {
-    return { ok: false, message: "Cet acompte est déduit de la facture de solde : annule d’abord le solde." };
+    return { ok: false, message: "Cet acompte est déduit de la facture de solde : annulez d’abord le solde." };
   }
   const supabase = await createClient();
   const { data, error } = await supabase.from("factures").insert(preparerAvoir(f)).select("*").single();
-  if (error || !data) return { ok: false, message: "L’avoir n’a pas pu être émis. Réessaie." };
+  if (error || !data) return { ok: false, message: "L’avoir n’a pas pu être émis. Réessayez." };
   await archiverFacture(normaliserFacture(data as Facture), null, null, d.cabinet.delai_paiement_jours, { numero: f.numero, emise_le: f.emise_le });
   revalidatePath(chemin(missionId));
   revalidatePath("/admin/factures");

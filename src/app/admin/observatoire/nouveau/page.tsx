@@ -18,8 +18,8 @@ export default async function NouvelArticlePage({ searchParams }: { searchParams
         <h1 className="font-display text-t2 text-encre">{dossier ? "Nouveau dossier" : "Nouvelle fiche"}</h1>
         <p className="max-w-3xl text-corps text-encre-2">
           {dossier
-            ? "Un contenu permanent, rédigé en sections. Il reste un brouillon tant que tu ne cliques pas sur Publier."
-            : "Une décision, lue en entier. Remplis les blocs dans l’ordre ; la fiche reste un brouillon tant que tu ne cliques pas sur Publier."}
+            ? "Un contenu permanent, rédigé en sections. Il reste un brouillon tant que vous ne cliquez pas sur Publier."
+            : "Une décision, lue en entier. Remplissez les blocs dans l’ordre ; la fiche reste un brouillon tant que vous ne cliquez pas sur Publier."}
         </p>
       </div>
       <FormArticle initial={brouillonVide(dossier ? "dossier" : "fiche")} enLigne={false} />

@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { FilePdf, LockSimple } from "@phosphor-icons/react";
 import { LIVRABLES } from "@/content/contrat";
 import type { EtatFormulaire } from "@/app/admin/missions/[id]/(outil)/contrat/actions";
+import BoutonConfirme from "./BoutonConfirme";
 import { Message, boutonPrincipal, boutonSecondaire, champ, zone } from "./FicheClient";
 
 type Action = (etat: EtatFormulaire, fd: FormData) => Promise<EtatFormulaire>;
@@ -66,13 +67,17 @@ const FormContrat = ({
             <LockSimple size={18} aria-hidden />
             Signé le {new Date(`${signeLe}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" })}. La version signée est archivée ; le contrat ne se modifie plus.
           </p>
-          <form action={rouvrir}>
-            <button type="submit" className={boutonSecondaire}>Rouvrir pour le modifier</button>
-          </form>
+          <BoutonConfirme
+            action={rouvrir}
+            confirmer="Confirmer : rouvrir le contrat"
+            consequence="Le contrat redevient « pas signé » et modifiable. La version signée reste archivée dans la mission. Tant qu’il n’est pas marqué de nouveau comme signé, aucune facture ne peut être émise, sauf l’acompte d’un devis accepté."
+          >
+            Rouvrir pour le modifier
+          </BoutonConfirme>
         </div>
       ) : propose ? (
         <p className="rounded-[5px] border border-filet bg-menthe p-4 text-meta text-encre-2">
-          Tout ce qui suit est proposé par l’outil d’après la mission : l’offre, le prix de la grille, les dates, les livrables habituels. Relis, corrige si besoin, puis enregistre.
+          Tout ce qui suit est proposé par l’outil d’après la mission : l’offre, le prix de la grille, les dates, les livrables habituels. Relisez, corrigez si besoin, puis enregistrez.
         </p>
       ) : null}
 
@@ -146,7 +151,7 @@ const FormContrat = ({
       {!fige && !propose ? (
         <form action={actionSigne} className="flex flex-col gap-3 border-t border-filet pt-5">
           <p className="text-meta text-encre-2">
-            Quand le client a signé, indique la date : la version signée est archivée dans la mission et le contrat ne bouge plus.
+            Quand le client a signé, indiquez la date : la version signée est archivée dans la mission et le contrat ne bouge plus.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <label className="flex flex-col gap-2">

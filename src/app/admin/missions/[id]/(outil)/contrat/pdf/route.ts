@@ -26,7 +26,7 @@ export const GET = async (_req: Request, { params }: { params: Promise<{ id: str
       pdf = new Uint8Array(await renderToBuffer(DocumentContrat({ cabinet: d.cabinet, client: d.mission.organisation, mission: d.mission, contrat })));
     } catch (e) {
       console.error("[contrat] PDF", (e as Error).stack);
-      return new NextResponse("Le contrat n’a pas pu être produit. Réessaie ; si l’erreur persiste, préviens Merwan.", { status: 500 });
+      return new NextResponse("Le contrat n’a pas pu être produit. Réessayez ; si l’erreur persiste, prévenez Merwan.", { status: 500 });
     }
   }
   return new NextResponse(pdf, {

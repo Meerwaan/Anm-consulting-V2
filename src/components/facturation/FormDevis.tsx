@@ -185,7 +185,7 @@ const FormDevis = ({ valeurs: v, franchise, fige, pdf, enregistrer, signalContro
               <option key={o} value={o}>Contrôle {o}</option>
             ))}
           </select>
-          {signalControle && !organisme ? <span className="text-note text-majeur">La demande signale un contrôle annoncé : précise l’organisme.</span> : null}
+          {signalControle && !organisme ? <span className="text-note text-majeur">La demande signale un contrôle annoncé : précisez l’organisme.</span> : null}
         </label>
         <label className={`flex flex-col gap-2 ${organisme ? "" : "invisible"}`} aria-hidden={!organisme}>
           <span className="text-meta font-medium text-encre">Échéance du contrôle</span>

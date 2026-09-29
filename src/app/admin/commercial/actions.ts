@@ -8,6 +8,7 @@ import { LIVRABLES } from "@/content/contrat";
 import { OFFRES, chiffrer } from "@/content/offres";
 import { aujourdHui, lireCabinet } from "@/lib/facturation/donnees";
 import { calculerDevis, devisPropose, normaliserDevis, type Demande, type Devis } from "@/lib/facturation/devis";
+import { estInscription } from "@/lib/vitrine/lead";
 import { completerDepuisAnnuaire, type EtatFormulaire } from "@/app/admin/missions/[id]/(outil)/contrat/actions";
 
 const COMMERCIAL = "/admin/commercial";
@@ -61,7 +62,9 @@ export const preparerDevisDepuisDemande = async (demandeId: string): Promise<voi
   await exigerRole("consultant");
   const supabase = await createClient();
   const { data } = await supabase.from("leads").select("*").eq("id", demandeId).single();
-  const demande = data as Demande;
+  const demande = data as Demande | null;
+  // Une inscription (checklist, Observatoire) n'est pas une demande de devis : pas de numéro D consommé.
+  if (!demande || estInscription(demande.source)) redirect(COMMERCIAL);
   let orgId = demande.org_id;
   if (!orgId) {
     const { data: org } = await supabase
@@ -84,11 +87,11 @@ export const nouveauDevis = async (_e: EtatFormulaire, fd: FormData): Promise<Et
   await exigerRole("consultant");
   const nom = texte(fd, "client");
   const siren = (texte(fd, "siren") ?? "").replace(/\s/g, "") || null;
-  if (!nom) return { ok: false, message: "Indique le nom du client." };
+  if (!nom) return { ok: false, message: "Indiquez le nom du client." };
   if (siren && !/^\d{9}(\d{5})?$/.test(siren)) return { ok: false, message: "Le SIREN compte 9 chiffres (14 pour un SIRET)." };
   const supabase = await createClient();
   const { data: org } = await supabase.from("organizations").insert({ name: nom, siren: siren?.slice(0, 9) ?? null }).select("id").single();
-  if (!org) return { ok: false, message: "Le client n’a pas pu être créé. Réessaie." };
+  if (!org) return { ok: false, message: "Le client n’a pas pu être créé. Réessayez." };
   if (siren) await completerDepuisAnnuaire(org.id);
   const devisId = await creerDevis(org.id, null);
   redirect(pageDevis(devisId));
@@ -109,9 +112,9 @@ export const enregistrerDevis = async (devisId: string, _e: EtatFormulaire, fd: 
   const prestation = texte(fd, "prestation") ?? "audit_360";
   if (!OFFRES.some((o) => o.id === prestation)) return { ok: false, message: "Prestation inconnue." };
   const intitule = texte(fd, "intitule");
-  if (!intitule) return { ok: false, message: "Indique l’intitulé de la prestation." };
+  if (!intitule) return { ok: false, message: "Indiquez l’intitulé de la prestation." };
   const base = nombre(fd, "base_ht");
-  if (base === null || Number.isNaN(base) || base < 0) return { ok: false, message: "Indique le prix de base HT." };
+  if (base === null || Number.isNaN(base) || base < 0) return { ok: false, message: "Indiquez le prix de base HT." };
   const valeurs = [nombre(fd, "effectif"), nombre(fd, "sites"), nombre(fd, "jours_comp"), nombre(fd, "frais_ht"), nombre(fd, "ajustement_ht"), nombre(fd, "acompte_pct")];
   if (valeurs.some((v) => v !== null && Number.isNaN(v))) return { ok: false, message: "Un des montants n’est pas un nombre." };
   const pct = nombre(fd, "acompte_pct") ?? 50;
@@ -145,7 +148,7 @@ export const enregistrerDevis = async (devisId: string, _e: EtatFormulaire, fd: 
       maj_le: new Date().toISOString(),
     })
     .eq("id", devisId);
-  if (error) return { ok: false, message: "Le devis n’a pas pu être enregistré. Réessaie." };
+  if (error) return { ok: false, message: "Le devis n’a pas pu être enregistré. Réessayez." };
   revalidatePath(pageDevis(devisId));
   revalidatePath(COMMERCIAL);
   return { ok: true, message: "Devis enregistré. Le PDF est à jour." };
@@ -185,6 +188,19 @@ export const accepterDevis = async (devisId: string): Promise<void> => {
   const { data } = await supabase.from("devis").select("*").eq("id", devisId).single();
   const d = normaliserDevis(data as Devis);
   if (d.mission_id) redirect(`/admin/missions/${d.mission_id}/contrat`);
+  // Seul un devis envoyé s'accepte : un brouillon n'a jamais été remis au client, il n'a donc pas pu
+  // revenir signé « Bon pour accord » ; un devis refusé repasse d'abord en brouillon.
+  if (d.statut !== "envoye") redirect(pageDevis(devisId));
+  // Le devis est réservé avant de créer quoi que ce soit : un second envoi (double toucher, deux
+  // onglets) ne trouve plus de devis « envoyé » et ne crée pas une seconde mission.
+  const { data: reserve } = await supabase
+    .from("devis")
+    .update({ statut: "accepte", accepte_le: aujourdHui() })
+    .eq("id", devisId)
+    .eq("statut", "envoye")
+    .is("mission_id", null)
+    .select("id");
+  if (!reserve?.length) redirect(pageDevis(devisId));
   const cabinet = await lireCabinet();
   const organisme = d.controle_organisme || null;
   const { data: mission, error } = await supabase
@@ -200,7 +216,10 @@ export const accepterDevis = async (devisId: string): Promise<void> => {
     })
     .select("id")
     .single();
-  if (error || !mission) throw new Error("La mission n’a pas pu être créée.");
+  if (error || !mission) {
+    await supabase.from("devis").update({ statut: "envoye", accepte_le: null }).eq("id", devisId).is("mission_id", null);
+    throw new Error("La mission n’a pas pu être créée.");
+  }
   if (d.effectif) await supabase.from("organizations").update({ headcount: d.effectif }).eq("id", d.org_id).is("headcount", null);
   await supabase.from("contrats").insert({
     mission_id: mission.id,
@@ -216,7 +235,7 @@ export const accepterDevis = async (devisId: string): Promise<void> => {
     lieu_signature: cabinet.ville,
     date_contrat: aujourdHui(),
   });
-  await supabase.from("devis").update({ statut: "accepte", accepte_le: aujourdHui(), mission_id: mission.id }).eq("id", devisId);
+  await supabase.from("devis").update({ mission_id: mission.id }).eq("id", devisId);
   if (d.lead_id) await supabase.from("leads").update({ statut: "gagnee" }).eq("id", d.lead_id);
   revalidatePath(COMMERCIAL);
   revalidatePath("/admin");
