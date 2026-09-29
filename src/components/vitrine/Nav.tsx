@@ -10,6 +10,7 @@ const LIENS = [
   { href: "/audit", label: "Audit 360°" },
   { href: "/formation", label: "Formation" },
   { href: "/abonnement", label: "Abonnement" },
+  { href: "/observatoire", label: "L’Observatoire" },
   { href: "/a-propos", label: "À propos" },
   { href: "/contact", label: "Contact" },
 ];
@@ -72,7 +73,7 @@ export function Nav() {
         <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-4 md:px-10 md:py-5">
           <Logo />
 
-          <nav className="hidden items-center gap-8 md:flex" aria-label="Navigation principale">
+          <nav className="hidden items-center gap-5 md:flex xl:gap-8" aria-label="Navigation principale">
             {LIENS.map((l) => {
               const actif = chemin === l.href || chemin.startsWith(`${l.href}/`);
               return (
@@ -89,7 +90,8 @@ export function Nav() {
           </nav>
 
           <div className="hidden items-center gap-6 md:flex">
-            <Link href="/connexion" className="souligne pb-0.5 text-corps text-gris hover:text-encre">
+            {/* Six liens tiennent de justesse entre 768 et 1280 px : l'espace client (aussi au pied de page) n'apparaît qu'au-delà. */}
+            <Link href="/connexion" className="souligne hidden pb-0.5 text-corps text-gris hover:text-encre xl:inline">
               Espace client
             </Link>
             <Bouton href="/contact" taille="sm">

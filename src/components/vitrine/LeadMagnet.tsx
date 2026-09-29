@@ -7,7 +7,7 @@ import { ETAT_LEAD_INITIAL } from "@/lib/vitrine/lead";
 import type { ChecklistId } from "@/content/vitrine";
 import { Bouton } from "./Bouton";
 
-/** Capture d'email en une ligne. `source` distingue checklist, formation, abonnement. */
+/** Capture d'email en une ligne. `source` distingue checklist, formation, abonnement, Observatoire. */
 export function LeadMagnet({
   source,
   cta,
@@ -16,7 +16,7 @@ export function LeadMagnet({
   note = "Un email, pas de relance commerciale. Désinscription en un clic.",
   onSucces,
 }: {
-  source: `checklist-${ChecklistId}` | "formation" | "abonnement";
+  source: `checklist-${ChecklistId}` | "formation" | "abonnement" | "observatoire";
   cta: string;
   sombre?: boolean;
   placeholder?: string;
