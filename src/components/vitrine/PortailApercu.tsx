@@ -58,7 +58,7 @@ export function PortailApercu() {
           {[
             { v: 27, s: " / 31", l: "pièces reçues", c: "text-encre" },
             { v: 2, s: "", l: "demandes ouvertes", c: "text-majeur" },
-            { v: 3, s: "", l: "relances automatiques", c: "text-encre" },
+            { v: 4, s: "", l: "pièces manquantes", c: "text-encre" },
             { v: 8, s: "", l: "échanges", c: "text-encre" },
           ].map((k) => (
             <div key={k.l} className="px-5 py-4">
@@ -78,7 +78,7 @@ export function PortailApercu() {
             <ul className="space-y-2.5 text-meta">
               {[
                 { t: "Export Dracar du mois en cours", s: "reçue", i: 0 },
-                { t: "Attestations de vigilance sous-traitants", s: "relancée J+3", i: 1 },
+                { t: "Attestations de vigilance sous-traitants", s: "en attente", i: 1 },
                 { t: "Plannings semaines 33 à 36", s: "reçue", i: 2 },
                 { t: "DUERP et plan de prévention site B", s: "ouverte", i: 3 },
               ].map((p) => (
@@ -92,14 +92,14 @@ export function PortailApercu() {
                   <span className="flex items-center gap-2 text-encre">
                     {p.s === "reçue" ? (
                       <CheckCircle size={16} weight="fill" className="text-mineur" />
-                    ) : p.s.startsWith("relancée") ? (
+                    ) : p.s === "en attente" ? (
                       <Bell size={16} weight="regular" className="text-majeur" />
                     ) : (
                       <FileArrowUp size={16} weight="regular" className="text-gris" />
                     )}
                     {p.t}
                   </span>
-                  <span className={`font-mono text-etiquette ${p.s === "reçue" ? "text-mineur" : p.s.startsWith("relancée") ? "text-majeur" : "text-gris"}`}>
+                  <span className={`font-mono text-etiquette ${p.s === "reçue" ? "text-mineur" : p.s === "en attente" ? "text-majeur" : "text-gris"}`}>
                     {p.s}
                   </span>
                 </motion.li>
@@ -112,7 +112,7 @@ export function PortailApercu() {
               {[
                 { qui: "ANM Consulting", t: "Les attestations de vigilance de votre sous-traitant datent de février. Il nous en faut une de moins de six mois.", i: 0 },
                 { qui: "Vous", t: "Demandée ce matin, je la dépose dès réception.", i: 1 },
-                { qui: "Système", t: "Relance automatique envoyée au sous-traitant · J+3", i: 2 },
+                { qui: "Système", t: "Pièce déposée · attestation de vigilance, vérifiée le jour même", i: 2 },
               ].map((m) => (
                 <motion.li
                   key={m.t}

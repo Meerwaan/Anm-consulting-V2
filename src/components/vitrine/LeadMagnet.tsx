@@ -13,7 +13,7 @@ export function LeadMagnet({
   cta,
   sombre = false,
   placeholder = "vous@entreprise.fr",
-  note = "Un email, pas de relance commerciale. Désinscription en un clic.",
+  note = "Un email à l’ouverture, rien d’autre. Pas de relance commerciale.",
   onSucces,
 }: {
   source: `checklist-${ChecklistId}` | "formation" | "abonnement" | "observatoire";
@@ -21,14 +21,14 @@ export function LeadMagnet({
   sombre?: boolean;
   placeholder?: string;
   note?: string;
-  /** Appelé une fois l'envoi confirmé — permet au parent de mémoriser la demande. */
-  onSucces?: () => void;
+  /** Appelé une fois la demande enregistrée, avec le fait que l’email soit parti ou non. */
+  onSucces?: (emailEnvoye: boolean) => void;
 }) {
   const [etat, action, enCours] = useActionState(envoyerLead, ETAT_LEAD_INITIAL);
 
   useEffect(() => {
-    if (etat.ok) onSucces?.();
-  }, [etat.ok, onSucces]);
+    if (etat.ok) onSucces?.(etat.emailEnvoye === true);
+  }, [etat.ok, etat.emailEnvoye, onSucces]);
 
   if (etat.ok) {
     return (

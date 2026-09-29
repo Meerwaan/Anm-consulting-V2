@@ -4,6 +4,7 @@ import { Reveal } from "@/components/vitrine/Reveal";
 import { Conteneur, SectionHead } from "@/components/vitrine/SectionHead";
 import { CtaFinal } from "@/components/vitrine/Sections";
 import { EtatVide } from "@/components/observatoire/EtatVide";
+import { EtrePrevenu } from "@/components/observatoire/EtrePrevenu";
 import { FiltreTerritoires, ListeArticles } from "@/components/observatoire/Listes";
 import { OBSERVATOIRE } from "@/content/observatoire";
 import { lireArticlesPublies } from "@/lib/observatoire/donnees";
@@ -91,7 +92,14 @@ export default async function ObservatoirePage() {
             </h2>
             <FiltreTerritoires />
           </div>
-          {articles.length ? <ListeArticles articles={articles} /> : <EtatVide />}
+          {articles.length ? (
+            <>
+              <ListeArticles articles={articles} />
+              <EtrePrevenu />
+            </>
+          ) : (
+            <EtatVide />
+          )}
         </Conteneur>
       </section>
 

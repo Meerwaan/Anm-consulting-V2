@@ -21,11 +21,12 @@ const restants = (n: number) => `${enLettres(n).replace(/^./, (c) => c.toUpperCa
  */
 export function Checklists() {
   const [actif, setActif] = useState<ChecklistId>("cnaps");
-  /** Checklists déjà demandées pendant la visite : l'onglet s'en souvient. */
-  const [demandees, setDemandees] = useState<ChecklistId[]>([]);
+  /** Checklists déjà demandées pendant la visite, et si l’email est réellement parti : l'onglet s'en souvient. */
+  const [demandees, setDemandees] = useState<Partial<Record<ChecklistId, { emailEnvoye: boolean }>>>({});
   const reduit = useReducedMotion();
   const checklist = CHECKLISTS.find((c) => c.id === actif) ?? CHECKLISTS[0];
-  const memoriser = useCallback((id: ChecklistId) => setDemandees((d) => (d.includes(id) ? d : [...d, id])), []);
+  const memoriser = useCallback((id: ChecklistId, emailEnvoye: boolean) => setDemandees((d) => (d[id]?.emailEnvoye === emailEnvoye ? d : { ...d, [id]: { emailEnvoye } })), []);
+  const demande = demandees[checklist.id];
 
   return (
     <div className="space-y-12">
@@ -58,7 +59,7 @@ export function Checklists() {
                     />
                   ) : null}
                   {c.organisme}
-                  {demandees.includes(c.id) ? <span className="ml-2" aria-label="déjà demandée">✓</span> : null}
+                  {demandees[c.id] ? <span className="ml-2" aria-label="déjà demandée">✓</span> : null}
                 </button>
               );
             })}
@@ -84,18 +85,20 @@ export function Checklists() {
           </AnimatePresence>
 
           <div className="max-w-md">
-            {demandees.includes(checklist.id) ? (
+            {demande ? (
               <p className="flex items-start gap-3 text-corps text-papier" role="status">
                 <CheckCircle size={22} weight="fill" className="mt-0.5 shrink-0 text-menthe" />
-                Checklist {checklist.organisme} demandée. Elle vous sera envoyée par email.
+                {demande.emailEnvoye
+                  ? `Checklist ${checklist.organisme} envoyée. Vérifiez votre boîte mail dans quelques minutes.`
+                  : "Inscription enregistrée. La checklist vous sera envoyée dès que possible."}
               </p>
             ) : (
               <LeadMagnet
                 key={checklist.id}
                 source={`checklist-${checklist.id}`}
                 cta={`Recevoir la checklist ${checklist.organisme === "Inspection du travail" ? "Inspection" : checklist.organisme}`}
-                note={`Un seul email, avec la checklist ${checklist.organisme}. Pas de relance commerciale, désinscription en un clic.`}
-                onSucces={() => memoriser(checklist.id)}
+                note={`Un seul email, avec la checklist ${checklist.organisme}. Pas de relance commerciale, aucun autre envoi.`}
+                onSucces={(emailEnvoye) => memoriser(checklist.id, emailEnvoye)}
                 sombre
               />
             )}

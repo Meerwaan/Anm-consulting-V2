@@ -1,6 +1,7 @@
 import { Bouton } from "@/components/vitrine/Bouton";
 import { LeadMagnet } from "@/components/vitrine/LeadMagnet";
 import { Filet } from "@/components/vitrine/SectionHead";
+import { NOTE_OBSERVATOIRE } from "./EtrePrevenu";
 import type { Territoire } from "@/content/observatoire";
 import { typographie } from "@/lib/observatoire/typographie";
 
@@ -27,7 +28,7 @@ export function EtatVide({ territoire }: { territoire?: Territoire }) {
             <LeadMagnet
               source="observatoire"
               cta="Être prévenu"
-              note="Un email à la parution des fiches, rien d’autre. Désinscription sur simple demande."
+              note={NOTE_OBSERVATOIRE}
             />
           </div>
           <div className="flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-filet pt-6">

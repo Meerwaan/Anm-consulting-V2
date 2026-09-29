@@ -83,9 +83,8 @@ export const PORTAIL_CONSULTANTE = {
 export const PORTAIL_CLIENT = {
   pendantAudit: [
     "Avancement : les 15 étapes et leur statut, la phase en cours",
-    "Pièces demandées, avec dépôt direct et relance automatique tous les 3 jours",
-    "Fil d’échange avec la consultante",
-    "Notification email à chaque demande, relance et message",
+    "Pièces demandées, avec dépôt direct et ce qui manque encore, visible d’un coup d’œil",
+    "Fil d’échange avec la consultante, au même endroit que les pièces",
   ],
   finAudit: [
     "Compte rendu en deux axes (risques réels en cas de contrôle / axes d’amélioration) pour le dirigeant, suivi du détail classé par criticité pour l’avocat et l’expert-comptable (décision 05)",

@@ -5,6 +5,7 @@ import { Conteneur } from "@/components/vitrine/SectionHead";
 import { CtaFinal } from "@/components/vitrine/Sections";
 import { ArticleVue } from "@/components/observatoire/ArticleVue";
 import { EtatVide } from "@/components/observatoire/EtatVide";
+import { EtrePrevenu } from "@/components/observatoire/EtrePrevenu";
 import { FiltreTerritoires, ListeArticles } from "@/components/observatoire/Listes";
 import { OBSERVATOIRE, TERRITOIRES, ctaPour, territoireParId, territoireParSlug, type Territoire } from "@/content/observatoire";
 import { lireArticlePublie, lireArticlesPublies, lireSlugsPublies } from "@/lib/observatoire/donnees";
@@ -165,7 +166,14 @@ async function PageTerritoire({ territoire }: { territoire: Territoire }) {
             </h2>
             <FiltreTerritoires actif={territoire.id} />
           </div>
-          {articles.length ? <ListeArticles articles={articles} /> : <EtatVide territoire={territoire} />}
+          {articles.length ? (
+            <>
+              <ListeArticles articles={articles} />
+              <EtrePrevenu />
+            </>
+          ) : (
+            <EtatVide territoire={territoire} />
+          )}
         </Conteneur>
       </section>
 

@@ -82,6 +82,31 @@ export default function ConfidentialitePage() {
         </p>
       </Section>
 
+      <Section titre="Les emails que nous envoyons">
+        <p>
+          Nos emails partent de {EDITEUR.email}, par l’intermédiaire de Resend. Nous n’envoyons
+          que ce que vous avez demandé&nbsp;:
+        </p>
+        <ul className="space-y-2">
+          <li className="border-l-2 border-[var(--anm-hairline)] pl-4">
+            <strong>Formulaire de contact</strong> — un accusé de réception, et rien d’autre de
+            façon automatique. La suite de l’échange se fait avec nous directement.
+          </li>
+          <li className="border-l-2 border-[var(--anm-hairline)] pl-4">
+            <strong>Checklist</strong> — un seul email, qui contient la checklist demandée. Aucun
+            autre envoi ne suit sans nouvelle demande de votre part.
+          </li>
+          <li className="border-l-2 border-[var(--anm-hairline)] pl-4">
+            <strong>Observatoire ANM</strong> — une confirmation d’inscription, puis un email à
+            chaque nouvelle publication. Chacun contient un lien de désinscription en un clic, sans
+            compte ni mot de passe.
+          </li>
+        </ul>
+        <p>
+          Aucun de ces emails ne contient de pixel de suivi ni de lien de mesure des clics.
+        </p>
+      </Section>
+
       <Section titre="Vos droits">
         <p>
           Vous disposez d’un droit d’accès, de rectification, d’effacement, de
@@ -99,7 +124,7 @@ export default function ConfidentialitePage() {
 
       <Section titre="Sécurité">
         <p>
-          Connexion par lien à usage unique (pas de mot de passe à retenir ni à fuiter), chiffrement
+          Connexion à l’espace client par identifiant et mot de passe personnel, chiffrement
           des échanges, cloisonnement des données par organisation au niveau de la base, et accès
           aux pièces limité aux personnes concernées par la mission. Les notes de travail internes
           ne sont visibles par un client que lorsqu’elles ont été explicitement publiées.

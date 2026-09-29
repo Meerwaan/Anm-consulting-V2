@@ -73,8 +73,8 @@ export const SOUS_TRAITANTS = [
   },
   {
     nom: "Resend",
-    role: "Envoi des emails transactionnels (lien de connexion, demandes de pièces, notifications)",
-    pays: "États-Unis",
+    role: "Envoi des emails du site depuis contact@anm-consulting.fr (accusés de réception, checklists demandées, avis de parution de l’Observatoire)",
+    pays: "États-Unis (envoi depuis l’Union européenne, région Irlande)",
     garantie: "Clauses contractuelles types",
   },
   {
@@ -94,10 +94,10 @@ export const TRAITEMENTS = [
     id: "prospects",
     nom: "Gestion des demandes de contact et de la prospection",
     finalite:
-      "Répondre aux demandes reçues par le formulaire de contact et envoyer la checklist CNAPS demandée.",
-    donnees: "Nom, email, société, effectif, message.",
+      "Répondre aux demandes reçues par le formulaire de contact, envoyer la checklist demandée (CNAPS, URSSAF, Inspection du travail ou DGFiP) et prévenir les inscrits de la parution des publications de l’Observatoire ANM.",
+    donnees: "Nom, email, société, téléphone, effectif, nombre de sites, SIREN, message.",
     baseLegale:
-      "Intérêt légitime (prospection entre professionnels), et consentement pour l’envoi de la checklist.",
+      "Intérêt légitime (prospection entre professionnels) pour les demandes de contact. Consentement pour l’envoi d’une checklist et pour les avis de parution de l’Observatoire, retirable à tout moment par le lien de désinscription présent dans chaque avis.",
     conservation:
       "3 ans à compter du dernier contact resté sans suite (durée recommandée par la CNIL en prospection).",
   },
@@ -150,4 +150,4 @@ export const COOKIES = [
   },
 ] as const;
 
-export const DERNIERE_MISE_A_JOUR = "8 septembre 2026";
+export const DERNIERE_MISE_A_JOUR = "29 septembre 2026";
