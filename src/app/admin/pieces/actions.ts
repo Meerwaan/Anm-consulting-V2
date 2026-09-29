@@ -48,7 +48,7 @@ export const preparerDepot = async (entree: {
     };
   }
   if (!(await pieceDeLaMission(entree.missionId, entree.documentId))) {
-    return { ok: false, erreur: "Cette pièce n’appartient pas à la mission. Recharge la page." };
+    return { ok: false, erreur: "Cette pièce n’appartient pas à la mission. Rechargez la page." };
   }
 
   const chemin = `${entree.missionId}/${entree.documentId}/${Date.now()}-${nomDeStockage(entree.nom)}`;
@@ -56,7 +56,7 @@ export const preparerDepot = async (entree: {
   const { data, error } = await supabase.storage.from("pieces").createSignedUploadUrl(chemin);
   if (error || !data) {
     console.error("[pieces] URL d'envoi", { message: error?.message });
-    return { ok: false, erreur: "Le stockage n’a pas répondu. Réessaie dans un instant." };
+    return { ok: false, erreur: "Le stockage n’a pas répondu. Réessayez dans un instant." };
   }
   return { ok: true, chemin, url: data.signedUrl };
 };
@@ -91,7 +91,7 @@ export const enregistrerFichier = async (entree: {
     // pas laisser dans le bucket un fichier que personne ne verrait jamais.
     await supabase.storage.from("pieces").remove([entree.chemin]);
     console.error("[pieces] enregistrement", { message: error.message });
-    return { ok: false, erreur: "Le fichier n’a pas pu être rattaché à la pièce. Réessaie." };
+    return { ok: false, erreur: "Le fichier n’a pas pu être rattaché à la pièce. Réessayez." };
   }
 
   // Un fichier déposé vaut réception. La date de réception n'est posée qu'une fois.
@@ -120,15 +120,15 @@ export const supprimerFichier = async (entree: {
     .eq("id", entree.fichierId)
     .eq("mission_id", entree.missionId)
     .maybeSingle<{ id: string; document_id: string; storage_path: string; file_name: string }>();
-  if (!fichier) return { ok: false, erreur: "Ce fichier n’existe plus. Recharge la page." };
+  if (!fichier) return { ok: false, erreur: "Ce fichier n’existe plus. Rechargez la page." };
 
   const { error: errStockage } = await supabase.storage.from("pieces").remove([fichier.storage_path]);
   if (errStockage) {
     console.error("[pieces] suppression stockage", { message: errStockage.message });
-    return { ok: false, erreur: "Le fichier n’a pas pu être supprimé du stockage. Réessaie." };
+    return { ok: false, erreur: "Le fichier n’a pas pu être supprimé du stockage. Réessayez." };
   }
   const { error } = await supabase.from("mission_document_files").delete().eq("id", fichier.id);
-  if (error) return { ok: false, erreur: "Le fichier a été retiré du stockage, mais pas de la liste. Recharge la page." };
+  if (error) return { ok: false, erreur: "Le fichier a été retiré du stockage, mais pas de la liste. Rechargez la page." };
 
   const { count } = await supabase
     .from("mission_document_files")
@@ -170,7 +170,7 @@ export const changerStatutPiece = async (entree: {
     if (count) {
       return {
         ok: false,
-        erreur: `Cette pièce a ${count} fichier${count > 1 ? "s" : ""} déposé${count > 1 ? "s" : ""}. Supprime-les d’abord pour la déclarer ${entree.statut === "na" ? "sans objet" : "manquante"}.`,
+        erreur: `Cette pièce a ${count} fichier${count > 1 ? "s" : ""} déposé${count > 1 ? "s" : ""}. Supprimez-les d’abord pour la déclarer ${entree.statut === "na" ? "sans objet" : "manquante"}.`,
       };
     }
   }
@@ -180,7 +180,7 @@ export const changerStatutPiece = async (entree: {
     .update({ received: entree.statut, received_on: entree.statut === "oui" ? aujourdHui() : null })
     .eq("id", entree.documentId)
     .eq("mission_id", entree.missionId);
-  if (error) return { ok: false, erreur: "Le statut n’a pas été enregistré. Réessaie." };
+  if (error) return { ok: false, erreur: "Le statut n’a pas été enregistré. Réessayez." };
 
   rafraichir(entree.missionId);
   return { ok: true };

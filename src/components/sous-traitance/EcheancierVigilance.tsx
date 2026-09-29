@@ -18,7 +18,7 @@ const EcheancierVigilance = ({ e }: { e: Echeancier | null }) => {
   if (!e) {
     return (
       <p className="rounded-[5px] border border-dashed border-filet-2 bg-papier px-4 py-3 text-meta text-encre-2">
-        Renseigne la date de conclusion du contrat dans l’identification : l’outil donnera les dates de renouvellement de
+        Renseignez la date de conclusion du contrat dans l’identification : l’outil donnera les dates de renouvellement de
         l’attestation, tous les 6 mois jusqu’à la fin du contrat.
       </p>
     );

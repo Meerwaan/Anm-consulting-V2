@@ -224,9 +224,9 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
 
       <section aria-labelledby="conclusion-rp" className="flex flex-col gap-6">
         <div>
-          <h3 id="conclusion-rp" className="font-display text-t4 text-encre">Ta conclusion sur le rapprochement</h3>
+          <h3 id="conclusion-rp" className="font-display text-t4 text-encre">Votre conclusion sur le rapprochement</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Ce que tu retiens de l’écart entre heures vendues et heures payées (grille 04). C’est ce qui figure au rapport.
+            Ce que vous retenez de l’écart entre heures vendues et heures payées (grille 04). C’est ce qui figure au rapport.
           </p>
         </div>
         <ConclusionsSaisie

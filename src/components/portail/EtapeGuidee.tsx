@@ -16,13 +16,13 @@ interface Guide {
 const GUIDES: Partial<Record<NatureEtape, Guide>> = {
   echantillon: {
     titre: "Choisir l'échantillon",
-    quoi: "Ce que tu choisis ici décide de ce que valent les contrôles croisés de l'étape 10, et c'est ce qui donne au diagnostic sa valeur probante.",
+    quoi: "Ce que vous choisissez ici décide de ce que valent les contrôles croisés de l'étape 10, et c'est ce qui donne au diagnostic sa valeur probante.",
     points: [
       "Sous-traitants : ceux facturés sur la période auditée, pas seulement ceux sous contrat",
       "Période : celle qui sera croisée entre planning, pointage, paie et facturation",
       "Si une anomalie sérieuse apparaît, élargir l'échantillon jusqu'à comprendre si elle est isolée ou systémique",
     ],
-    suite: "Note ci-dessous ton échantillon ET la justification de ta sélection : la procédure demande de la conserver au dossier de mission.",
+    suite: "Notez ci-dessous votre échantillon ET la justification de votre sélection : la procédure demande de la conserver au dossier de mission.",
   },
   rapport: {
     titre: "Le rapport",
@@ -38,7 +38,7 @@ const GUIDES: Partial<Record<NatureEtape, Guide>> = {
     titre: "La réunion de restitution",
     quoi: `${RESTITUTION_MINUTES.min} à ${RESTITUTION_MINUTES.max} minutes avec le dirigeant, en face à face.`,
     points: [],
-    suite: "Note ici ce qui a été dit et ce qui a été accepté.",
+    suite: "Notez ici ce qui a été dit et ce qui a été accepté.",
   },
 };
 
@@ -92,7 +92,7 @@ const EtapeGuidee = ({ kind, effectif = null }: Props) => {
                   {t.libelle} : {t.cible}
                   {concernee ? (
                     <span className="ml-2 font-mono text-[0.64rem] uppercase tracking-wide text-[var(--anm-green)]">
-                      ta tranche
+                      votre tranche
                     </span>
                   ) : null}
                 </li>

@@ -44,7 +44,7 @@ const convertir = (table: NomTable, ligne: Record<string, string>): { valeurs: R
       }
       case "verif": {
         const r = lireVerif(brut);
-        if (r === "invalide") return { erreur: `« ${brut} » : réponds oui, non ou à vérifier (${c.libelle}).` };
+        if (r === "invalide") return { erreur: `« ${brut} » : répondez oui, non ou à vérifier (${c.libelle}).` };
         v = r;
         break;
       }
@@ -87,7 +87,7 @@ export const enregistrerLigne = async (entree: {
   const valeurs = conv.valeurs;
   const supabase = await createClient();
   const tableDb = def.base ?? def.nom;
-  if (def.complement && !entree.cle) return { ok: false, erreur: "Ajoute d’abord la ligne dans le tableau principal." };
+  if (def.complement && !entree.cle) return { ok: false, erreur: "Ajoutez d’abord la ligne dans le tableau principal." };
 
   if (!def.globale) valeurs.mission_id = entree.missionId;
   if (def.parSousTraitant) {
@@ -98,7 +98,7 @@ export const enregistrerLigne = async (entree: {
       .eq("id", entree.sousTraitantId)
       .eq("mission_id", entree.missionId)
       .maybeSingle();
-    if (!st) return { ok: false, erreur: "Ce sous-traitant n’appartient pas à la mission. Recharge la page." };
+    if (!st) return { ok: false, erreur: "Ce sous-traitant n’appartient pas à la mission. Rechargez la page." };
     valeurs.sous_traitant_id = entree.sousTraitantId;
   }
   if (tableDb === "st_ventes" || tableDb === "st_paie") {
@@ -112,7 +112,7 @@ export const enregistrerLigne = async (entree: {
   if (def.cle !== "id") {
     const nouvelleCle = valeurs[def.cle] as string | null;
     if (!nouvelleCle) return { ok: false, erreur: `${def.colonnes.find((c) => c.cle === def.cle)?.libelle} est obligatoire.` };
-    if (entree.table === "smic_horaire" && valeurs.taux_brut == null) return { ok: false, erreur: "Saisis le taux horaire brut." };
+    if (entree.table === "smic_horaire" && valeurs.taux_brut == null) return { ok: false, erreur: "Saisissez le taux horaire brut." };
     if (entree.cle && entree.cle !== nouvelleCle) {
       let suppr = supabase.from(tableDb).delete().eq(def.cle, entree.cle);
       if (!def.globale) suppr = suppr.eq("mission_id", entree.missionId);
@@ -122,7 +122,7 @@ export const enregistrerLigne = async (entree: {
     const { error } = await supabase.from(tableDb).upsert(valeurs, { onConflict: conflit });
     if (error) {
       console.error("[sous-traitance] enregistrement", entree.table, error.message);
-      return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+      return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
     }
     revalidatePath(racine(entree.missionId), "layout");
     return { ok: true, valeur: { cle: nouvelleCle, valeurs: versLigneInitiale(entree.table, valeurs).valeurs } };
@@ -134,17 +134,17 @@ export const enregistrerLigne = async (entree: {
     const { error } = await maj;
     if (error) {
       console.error("[sous-traitance] mise à jour", entree.table, error.message);
-      return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+      return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
     }
     revalidatePath(racine(entree.missionId), "layout");
     return { ok: true, valeur: { cle: entree.cle, valeurs: versLigneInitiale(entree.table, valeurs).valeurs } };
   }
 
-  if (tableDb === "st_ventes" && !valeurs.mois) return { ok: false, erreur: "Indique le mois de la vente." };
+  if (tableDb === "st_ventes" && !valeurs.mois) return { ok: false, erreur: "Indiquez le mois de la vente." };
   const { data, error } = await supabase.from(tableDb).insert(valeurs).select("id").single<{ id: string }>();
   if (error || !data) {
     console.error("[sous-traitance] création", entree.table, error?.message);
-    return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+    return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
   }
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true, valeur: { cle: data.id, valeurs: versLigneInitiale(entree.table, valeurs).valeurs } };
@@ -158,12 +158,12 @@ export const supprimerLigne = async (entree: {
   await exigerRole("consultant");
   const def = TABLES[entree.table];
   if (!def) return { ok: false, erreur: "Tableau inconnu." };
-  if (def.complement) return { ok: false, erreur: "Supprime la ligne dans le tableau principal." };
+  if (def.complement) return { ok: false, erreur: "Supprimez la ligne dans le tableau principal." };
   const supabase = await createClient();
   let suppr = supabase.from(def.base ?? def.nom).delete().eq(def.cle, entree.cle);
   if (!def.globale) suppr = suppr.eq("mission_id", entree.missionId);
   const { error } = await suppr;
-  if (error) return { ok: false, erreur: "La suppression a échoué. Réessaie." };
+  if (error) return { ok: false, erreur: "La suppression a échoué. Réessayez." };
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true };
 };
@@ -196,7 +196,7 @@ export const enregistrerParametres = async (entree: {
     updated_at: new Date().toISOString(),
     updated_by: session.utilisateurId,
   });
-  if (error) return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+  if (error) return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true };
 };
@@ -211,9 +211,9 @@ export const creerSousTraitant = async (entree: {
 }): Promise<Resultat<string>> => {
   await exigerRole("consultant");
   const nom = entree.raison_sociale.trim();
-  if (!nom) return { ok: false, erreur: "Indique la raison sociale." };
+  if (!nom) return { ok: false, erreur: "Indiquez la raison sociale." };
   if (entree.rang === "2" && !entree.donneur_id) {
-    return { ok: false, erreur: "Un sous-traitant de rang 2 travaille pour un sous-traitant de rang 1 : choisis lequel." };
+    return { ok: false, erreur: "Un sous-traitant de rang 2 travaille pour un sous-traitant de rang 1 : choisissez lequel." };
   }
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -227,7 +227,7 @@ export const creerSousTraitant = async (entree: {
     })
     .select("id")
     .single<{ id: string }>();
-  if (error || !data) return { ok: false, erreur: "La création a échoué. Réessaie." };
+  if (error || !data) return { ok: false, erreur: "La création a échoué. Réessayez." };
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true, valeur: data.id };
 };
@@ -265,7 +265,7 @@ export const enregistrerIdentite = async (entree: {
     .update(maj)
     .eq("id", entree.sousTraitantId)
     .eq("mission_id", entree.missionId);
-  if (error) return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+  if (error) return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true };
 };
@@ -278,7 +278,7 @@ export const supprimerSousTraitant = async (entree: { missionId: string; sousTra
     .delete()
     .eq("id", entree.sousTraitantId)
     .eq("mission_id", entree.missionId);
-  if (error) return { ok: false, erreur: "La suppression a échoué. Réessaie." };
+  if (error) return { ok: false, erreur: "La suppression a échoué. Réessayez." };
   revalidatePath(racine(entree.missionId), "layout");
   return { ok: true };
 };

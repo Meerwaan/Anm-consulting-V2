@@ -13,7 +13,7 @@ const BlocNotes = ({ missionId, stepId, ordre, notes }: Props) => (
   <section>
     <h2 className="text-xl">Notes de travail</h2>
     <p className="mt-1 text-sm text-[var(--anm-muted)]">
-      Pour toi seule. Le client ne les verra pas — le compte rendu final fera foi.
+      Pour vous seule. Le client ne les verra pas — le compte rendu final fera foi.
     </p>
 
     <form action={ajouterNote} className="mt-3 flex flex-col gap-2">
@@ -24,7 +24,7 @@ const BlocNotes = ({ missionId, stepId, ordre, notes }: Props) => (
         name="body"
         rows={3}
         required
-        placeholder="Ce que tu as constaté, qui tu as vu, ce qu'il reste à vérifier…"
+        placeholder="Ce que vous avez constaté, qui vous avez vu, ce qu'il reste à vérifier…"
         className="rounded border border-[var(--anm-hairline)] bg-white px-3 py-2 text-sm"
       />
       <button

@@ -42,7 +42,7 @@ export const enregistrerCabinet = async (_e: EtatFormulaire, fd: FormData): Prom
       updated_at: new Date().toISOString(),
     })
     .eq("id", true);
-  if (error) return { ok: false, message: "Les informations n’ont pas pu être enregistrées. Réessaie." };
+  if (error) return { ok: false, message: "Les informations n’ont pas pu être enregistrées. Réessayez." };
   revalidatePath("/admin/cabinet");
   return { ok: true, message: "Enregistré. Les prochains contrats et factures reprennent ces informations." };
 };

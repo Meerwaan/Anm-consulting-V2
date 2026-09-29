@@ -107,7 +107,7 @@ const Capacitaire = ({
       ) : null}
       <p className="max-w-2xl text-note text-gris">
         Les mois ne se compensent pas entre eux : un dépassement en mars n’explique pas un manque en avril.
-        {!reel ? " Saisis les heures réalisées (planning, pointage) pour obtenir le calcul selon le réel." : ""}
+        {!reel ? " Saisissez les heures réalisées (planning, pointage) pour obtenir le calcul selon le réel." : ""}
         {ecart.moisIncomplets.length ? ` ${ecart.moisIncomplets.length} mois sans heures vendues ou sans paie ne sont pas comptés.` : ""}
       </p>
     </section>

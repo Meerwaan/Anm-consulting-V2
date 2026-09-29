@@ -419,7 +419,7 @@ export default function FormArticle({ initial, enLigne }: { initial: Brouillon; 
         </div>
         <p className="text-note text-gris">
           {typographie(
-            "Apostrophes courbes et espaces insécables (avant les signes doubles, dans les guillemets, entre un nombre et son unité) sont ajoutées automatiquement sur le site : tape normalement.",
+            "Apostrophes courbes et espaces insécables (avant les signes doubles, dans les guillemets, entre un nombre et son unité) sont ajoutées automatiquement sur le site : tapez normalement.",
           )}
         </p>
       </aside>

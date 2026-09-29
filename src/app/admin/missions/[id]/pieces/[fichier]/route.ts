@@ -30,7 +30,7 @@ export const GET = async (
   const { data: signe, error } = await supabase.storage
     .from("pieces")
     .createSignedUrl(data.storage_path, 60, telecharger ? { download: data.file_name } : undefined);
-  if (error || !signe) return new NextResponse("Le stockage n’a pas répondu. Réessaie.", { status: 502 });
+  if (error || !signe) return new NextResponse("Le stockage n’a pas répondu. Réessayez.", { status: 502 });
 
   const reponse = NextResponse.redirect(signe.signedUrl);
   reponse.headers.set("Cache-Control", "no-store");

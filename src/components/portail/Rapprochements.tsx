@@ -88,7 +88,7 @@ const Rapprochements = ({ missionId, ordre, lignes }: Props) => {
 
       <div className="mt-2 flex flex-wrap items-end gap-3">
         <label className="flex min-w-[16rem] flex-1 flex-col gap-1 text-xs">
-          Ce que tu en retiens
+          Ce que vous en retenez
           <input
             name="note" defaultValue={l?.note ?? ""}
             placeholder="Source des chiffres, explication de l'écart, suite à donner…"
@@ -119,8 +119,8 @@ const Rapprochements = ({ missionId, ordre, lignes }: Props) => {
       <h2 className="text-xl">Contrôles croisés</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
         Deux sources qui devraient dire la même chose. L&apos;écart est calculé, pas interprété :
-        c&apos;est toi qui décides s&apos;il devient un constat. Un croisement porte sur{" "}
-        <strong>un site et une période</strong> — si une anomalie sérieuse apparaît, ajoute un
+        c&apos;est vous qui décidez s&apos;il devient un constat. Un croisement porte sur{" "}
+        <strong>un site et une période</strong> — si une anomalie sérieuse apparaît, ajoutez un
         second site pour savoir si elle est isolée ou systémique.
       </p>
 

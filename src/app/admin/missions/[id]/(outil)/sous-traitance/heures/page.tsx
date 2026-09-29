@@ -69,7 +69,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           missionId={id}
           table="st_ventes"
           lignes={d.ventes.map((v) => versLigneInitiale("st_ventes", v as unknown as Record<string, unknown>))}
-          titreVide="Aucune vente saisie. Ajoute une ligne, ou colle le tableau de facturation depuis Excel."
+          titreVide="Aucune vente saisie. Ajoutez une ligne, ou collez le tableau de facturation depuis Excel."
           libelleAjout="Ajouter une vente"
         />
       </section>
@@ -91,7 +91,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
             titreVide=""
           />
         ) : (
-          <p className="text-meta text-encre-2">Ajoute d’abord les ventes : leur facturation se complète ici.</p>
+          <p className="text-meta text-encre-2">Ajoutez d’abord les ventes : leur facturation se complète ici.</p>
         )}
         <ListeAlertes alertes={controles.ventes} vide="Aucune incohérence entre commandes, factures, TVA et règlements." missionId={id} constatsExistants={constats} />
       </section>
@@ -107,7 +107,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           missionId={id}
           table="st_paie"
           lignes={d.paie.map((p) => versLigneInitiale("st_paie", p as unknown as Record<string, unknown>))}
-          titreVide="Aucun mois saisi. Ajoute le premier mois de la période."
+          titreVide="Aucun mois saisi. Ajoutez le premier mois de la période."
           libelleAjout="Ajouter un mois"
         />
         <ListeAlertes alertes={controles.paie} vide="Heures réalisées, heures payées et masse salariale sont cohérentes." missionId={id} constatsExistants={constats} />
@@ -118,7 +118,7 @@ export default async function HeuresPage({ params }: { params: Promise<{ id: str
           <h3 id="smic" className="mt-1 font-display text-t4 text-encre">SMIC horaire brut</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
             Sert à vérifier qu’un sous-traitant a pu payer les heures qu’il facture : rémunérations déclarées ÷ SMIC = heures payables au
-            maximum. Commun à toutes les missions. Saisis chaque valeur avec sa date d’entrée en vigueur et sa source.
+            maximum. Commun à toutes les missions. Saisissez chaque valeur avec sa date d’entrée en vigueur et sa source.
           </p>
         </div>
         <TableauSaisie

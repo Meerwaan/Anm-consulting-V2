@@ -149,7 +149,7 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
         </label>
       </div>
       <p className="mt-1 text-[0.7rem] leading-snug text-[var(--anm-muted)]">
-        Sixième maillon de la chaîne du Manuel de terrain. C&apos;est la frontière de ton
+        Sixième maillon de la chaîne du Manuel de terrain. C&apos;est la frontière de votre
         périmètre : « je ne remplace ni l&apos;avocat ni l&apos;expert-comptable ». Le rapport
         en tire la liste des sujets à faire valider.
       </p>
@@ -289,7 +289,7 @@ const Constats = ({ missionId, ordre, constats }: Props) => {
       {constats.length === 0 ? (
         <p className="mt-3 rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
           Aucun constat pour l&apos;instant. La voie normale part des étapes de contrôle :
-          marque un point en écart, puis clique « Rédiger le constat » — il arrive ici déjà
+          marquez un point en écart, puis cliquez « Rédiger le constat » — il arrive ici déjà
           pré-rempli, avec la référence du point. Pour ce que la grille ne prévoit pas, le
           formulaire en bas de page ouvre un constat hors grille.
         </p>

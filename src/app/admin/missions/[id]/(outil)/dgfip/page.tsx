@@ -113,7 +113,7 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
         <EnTeteSection
           id="taux"
           titre="Taux horaires"
-          texte="Le coût de revient d’une heure d’agent publié par la branche sert de plancher : une heure vendue ou achetée en dessous est à justifier. Saisis la valeur de l’année et sa source ; l’outil n’en propose aucune."
+          texte="Le coût de revient d’une heure d’agent publié par la branche sert de plancher : une heure vendue ou achetée en dessous est à justifier. Saisissez la valeur de l’année et sa source ; l’outil n’en propose aucune."
         />
         <CoutRevient missionId={id} valeur={d.parametres.cout_revient_horaire ?? null} source={d.parametres.cout_revient_source ?? null} />
         <dl className="grid grid-cols-2 gap-x-8 gap-y-5 border-y border-filet py-5 sm:grid-cols-4">
@@ -135,7 +135,7 @@ export default async function DgfipPage({ params }: { params: Promise<{ id: stri
       </section>
 
       <section aria-labelledby="points" className="flex flex-col gap-5">
-        <EnTeteSection id="points" titre="Points de contrôle" texte="Dans la section des indices, réponds « oui » quand l’indice est constaté." />
+        <EnTeteSection id="points" titre="Points de contrôle" texte="Dans la section des indices, répondez « oui » quand l’indice est constaté." />
         <BilanGrille b={bilan} />
         <GrilleSaisie missionId={id} grille="dgfip" cible="mission" sections={GRILLE_DGFIP.sections} reponses={g.reponses} />
       </section>

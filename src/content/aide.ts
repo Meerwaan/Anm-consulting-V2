@@ -73,6 +73,11 @@ export const SECTIONS_AIDE: SectionAide[] = [
             texte:
               "Mot de passe oublié : il n’y a pas de bouton pour le récupérer vous-même. Demandez à Merwan de le réinitialiser, puis changez-le dans [Mon compte](/admin/compte).",
           },
+          {
+            type: "p",
+            texte:
+              "Si vous arrivez sur la page de connexion par un ancien lien reçu par email, elle le dit clairement : « Ce lien a expiré. » ou « Ce lien n’est pas valide, ou il a déjà servi. ». Connectez-vous simplement avec votre adresse et votre mot de passe.",
+          },
         ],
       },
       {
@@ -147,7 +152,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte:
-              "C’est la source de confusion la plus fréquente. Les écrans d’audit enregistrent au fil de l’eau ; les documents (devis, contrat, article, textes du rapport) attendent que vous touchiez leur bouton.",
+              "C’est la source de confusion la plus fréquente. Les écrans d’audit et les textes du rapport enregistrent au fil de l’eau ; les documents (devis, contrat, fiche du client, article) attendent que vous touchiez leur bouton.",
           },
           {
             type: "tableau",
@@ -161,9 +166,10 @@ export const SECTIONS_AIDE: SectionAide[] = [
               ["Pièces : fichier déposé, menu « Sans fichier »", "Tout de suite", "L’état de la pièce change"],
               ["Pièces : date", "Bouton « Enregistrer la date »", "L’état de la pièce change"],
               ["Heures : période et repères, coût de revient (DGFiP)", "Bouton « Enregistrer les repères » ou « Enregistrer »", "Message vert sous le bouton"],
-              ["Textes du rapport", "Bouton « Valider ce texte » ou « Enregistrer mon texte »", "« Ton texte, enregistré »"],
+              ["Textes du rapport", "Pendant la frappe, comme brouillon ; il n’entre au rapport qu’avec « Valider ce texte » ou « Valider mon texte »", "« Enregistré » sous le texte ; « Votre texte, validé » une fois validé"],
               ["Devis, contrat, fiche du client, Cabinet", "Bouton « Enregistrer… » du formulaire", "Message vert sous le bouton"],
               ["Observatoire", "Bouton « Enregistrer le brouillon », « Publier » ou « Enregistrer la page en ligne »", "Message sous les boutons"],
+              ["Espace client : étape affichée, accès, messages", "Dès que vous touchez l’étape ; boutons « Créer l’accès et le lien » et « Envoyer »", "L’étape passe en vert ; le lien ou le message s’affiche"],
             ],
           },
         ],
@@ -209,16 +215,19 @@ export const SECTIONS_AIDE: SectionAide[] = [
           },
           {
             type: "encadre",
-            ton: "attention",
-            titre: "Vous n’êtes pas prévenue par email",
-            texte:
-              "Aucun email ne vous signale une nouvelle demande, et le prospect ne reçoit aucun accusé de réception, même si le site le lui annonce. Ouvrez Commercial régulièrement, et rappelez-le vous-même.",
+            ton: "info",
+            titre: "Les emails de la demande",
+            items: [
+              "Le prospect reçoit un accusé de réception (« Votre demande est bien reçue »), qui annonce un retour sous 48 h ouvrées.",
+              "Une copie de la demande arrive sur contact@anm-consulting.fr, avec tous les champs et un bouton « Ouvrir dans l’espace de travail ». Répondre à cet email écrit directement au prospect.",
+              "Ces emails ne partent réellement qu’une fois le domaine anm-consulting.fr vérifié chez Resend et la clé configurée. Si un email n’est pas parti, le message affiché au visiteur le dit ; la demande, elle, est toujours enregistrée dans Commercial.",
+            ],
           },
           {
             type: "liste",
             items: [
               "« Préparer le devis » : crée la fiche du client et son devis (étape suivante).",
-              "« Rappelé, en cours » : vous l’avez eu au téléphone ; la demande reste dans la liste.",
+              "« Rappelé, en cours » (sur une demande nouvelle) : vous l’avez eu au téléphone ; la demande reste dans la liste.",
               "« Sans suite » : la demande quitte la liste. Elle reste consultable dans « Demandes déjà traitées », avec un bouton « Rouvrir ».",
             ],
           },
@@ -227,7 +236,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             ton: "attention",
             titre: "Les inscriptions ne sont pas des demandes de devis",
             texte:
-              "Les inscriptions aux checklists (« Checklist CNAPS », « Checklist URSSAF »…) et à l’Observatoire (« Alerte Observatoire ») arrivent dans la même liste. Ne touchez pas « Préparer le devis » pour elles : cela créerait un vrai devis numéroté. Leur adresse email est affichée : c’est à vous d’envoyer la checklist, l’outil ne le fait pas encore.",
+              "Les inscriptions aux checklists (« Checklist CNAPS », « Checklist URSSAF »…) et à l’Observatoire (« Alerte Observatoire ») sont rangées à part, dans la section repliée « Inscriptions (checklists, Observatoire) », sans bouton de devis, et ne comptent pas dans le bandeau des nouvelles demandes. La checklist part toute seule par email ; l’inscrit à l’Observatoire reçoit une confirmation. Si l’un d’eux vous appelle pour une mission, créez son devis avec « Un client qui a appelé directement ».",
           },
         ],
       },
@@ -242,7 +251,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
               "Vérifiez « Le client ». Avec le SIREN, « Compléter depuis le SIREN » va chercher la forme juridique, le siège et le dirigeant dans l’annuaire des entreprises. Si vous corrigez quelque chose, touchez « Enregistrer la fiche ».",
               "Relisez « Le devis » : prix, conditions, contrôle en cours, calendrier, livrables. Touchez « Enregistrer le devis ».",
               "« Ouvrir le devis (PDF) », puis envoyez-le vous-même au client, par email : l’outil n’envoie rien.",
-              "De retour sur le devis, touchez « Marquer comme envoyé ».",
+              "De retour sur le devis, touchez « Marquer comme envoyé », même s’il a été remis en main propre : c’est seulement ensuite qu’il peut être accepté.",
             ],
           },
           {
@@ -259,20 +268,21 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "etapes",
             items: [
-              "Quand le client vous renvoie le devis signé « Bon pour accord », ouvrez-le et touchez « Accepté : créer la mission et le contrat ».",
+              "Quand le client vous renvoie le devis signé « Bon pour accord », ouvrez-le et touchez « Accepté : créer la mission et le contrat ». Ce bouton n’apparaît qu’une fois le devis marqué comme envoyé.",
+              "Un cadre dit ce qui va se passer. Touchez « Confirmer : créer la mission et le contrat », ou « Annuler ».",
               "L’outil crée la mission (référence 2026-01, 2026-02…) et prépare son contrat avec tout ce que contient le devis. Vous arrivez directement sur [Contrat et factures](mission:contrat).",
             ],
           },
           {
             type: "encadre",
             ton: "attention",
-            titre: "Un seul toucher, sans confirmation",
+            titre: "Une confirmation, puis plus de retour",
             texte:
-              "Ce bouton ne demande pas de confirmation et ne se défait pas depuis l’outil. Ne le touchez qu’avec le devis signé en main. En cas d’erreur, contactez Merwan.",
+              "L’acceptation ne se défait pas depuis l’outil. Ne la confirmez qu’avec le devis signé en main. Si la validité du devis est dépassée, le cadre le signale : vérifiez que le client l’a signé à temps. En cas d’erreur, contactez Merwan.",
           },
           {
             type: "p",
-            texte: "Si le client décline, touchez « Refusé ». Un devis refusé peut revenir en arrière avec « Remettre en brouillon ».",
+            texte: "Si le client décline, touchez « Refusé », puis « Confirmer : devis refusé ». Son numéro reste pris ; la demande d’origine est classée sans suite. Un devis refusé peut revenir en arrière avec « Remettre en brouillon ».",
           },
           {
             type: "p",
@@ -301,7 +311,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           },
           {
             type: "p",
-            texte: "Pour corriger un contrat signé : « Rouvrir pour le modifier », corrigez, enregistrez, puis marquez-le de nouveau comme signé.",
+            texte: "Pour corriger un contrat signé : « Rouvrir pour le modifier », puis « Confirmer : rouvrir le contrat ». Corrigez, enregistrez, puis marquez-le de nouveau comme signé. La version signée reste archivée ; en attendant, aucune facture ne peut être émise, sauf l’acompte d’un devis accepté.",
           },
         ],
       },
@@ -310,16 +320,50 @@ export const SECTIONS_AIDE: SectionAide[] = [
         titre: "5. Le client et son espace",
         blocs: [
           {
+            type: "p",
+            texte:
+              "Chaque mission a son [Espace client](mission:client) : dans la barre des étapes, sous « Administratif », juste sous « Contrat et factures ». La ligne grise sous « Espace client » résume l’état : les messages non lus du client, ou le nombre d’accès ouverts.",
+          },
+          {
+            type: "etapes",
+            items: [
+              "Dans « Ouvrir un accès », saisissez le « Prénom et nom » et l’« Adresse e-mail » de la personne chez le client, puis touchez « Créer l’accès et le lien ».",
+              "Un lien d’activation s’affiche. Transmettez-le vous-même : « Copier le lien », « Copier le message » (un message prêt à envoyer, visible avec « Voir le message prêt à envoyer »), « Envoyer par e-mail » ou « Envoyer par SMS ».",
+              "Le lien ne sert qu’une fois, et pour une durée limitée : la durée et l’heure limite sont écrites sous le lien. La personne y choisit son mot de passe, puis se connecte ensuite avec son adresse e-mail.",
+              "Dans « Étape affichée au client », touchez l’étape où en est la mission. Le client voit ces sept étapes (Préparation, Transmission des pièces, Étude du dossier, Intervention, Rédaction du rapport, Restitution, Mission terminée), jamais celles de l’outil. Faites-la avancer quand vous voulez qu’il le sache.",
+            ],
+          },
+          {
             type: "encadre",
             ton: "attention",
-            titre: "L’espace client n’est pas encore ouvert",
+            titre: "Aucune invitation ne part par email",
             texte:
-              "Il n’existe pas de bouton pour inviter un client, et aucun email d’invitation ne part. Les comptes sont créés par Merwan ; un client connecté ne verrait aujourd’hui qu’un message d’attente (« Votre espace de suivi ouvrira ici »).",
+              "L’outil crée le compte et vous donne le lien : c’est à vous de l’envoyer. Si le lien a expiré ou a déjà servi, touchez « Nouveau lien » sur la ligne de la personne : le précédent cesse de fonctionner.",
+          },
+          {
+            type: "liste",
+            items: [
+              "Chaque accès affiche son état : « Mot de passe pas encore choisi », « Actif · dernière connexion le … » ou « Accès retiré le … ».",
+              "« Retirer l’accès », puis « Confirmer le retrait », bloque la connexion sans rien effacer : ses dépôts et ses messages restent dans le dossier. « Rétablir l’accès » la rouvre, avec son mot de passe actuel.",
+              "« Échanges » : le fil que le client voit dans son espace. Écrivez dans « Votre message », puis « Envoyer ». Le client n’est pas prévenu par email : il lit le message en se connectant. Ses messages s’affichent ici ; le menu de la mission signale ceux que vous n’avez pas lus.",
+              "Les fichiers que le client dépose arrivent directement dans [Pièces](mission:pieces), et la pièce passe en « Reçue ». Aucun email ne vous prévient d’un dépôt ou d’un message.",
+            ],
+          },
+          {
+            type: "tableau",
+            legende: "Ce que voit le client une fois connecté",
+            colonnes: ["Où", "Ce qu’il y trouve"],
+            lignes: [
+              ["« Suivi »", "L’avancement en sept étapes (l’étape en cours marquée « En cours »), ce qu’il lui reste à déposer, un lien pour vous écrire et, une fois publié, « Votre rapport est disponible » avec le PDF à télécharger"],
+              ["« Pièces »", "Les pièces demandées (« À déposer ») avec « Déposer un fichier », et celles déjà « Reçues »"],
+              ["« Échanges »", "Vos messages et les siens"],
+              ["« Mon compte »", "Son nom, son adresse, et « Changer le mot de passe »"],
+            ],
           },
           {
             type: "p",
             texte:
-              "En attendant, tout ce que reçoit le client, c’est vous qui le lui envoyez : le devis, le contrat, la liste des pièces, le rapport, le plan d’actions (fichier Excel) et les factures.",
+              "Le client ne voit jamais l’outil, vos grilles ni vos notes. Le devis, le contrat, le plan d’actions (fichier Excel) et les factures, c’est toujours vous qui les lui envoyez.",
           },
         ],
       },
@@ -331,8 +375,8 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "etapes",
             items: [
               "Ouvrez la mission : elle s’ouvre sur l’étape 1, [Pièces justificatives](mission:pieces).",
-              "En haut, « Copier la liste des N pièces manquantes » copie la liste, prête à coller dans votre email au client. L’outil note la date de la demande sur chaque pièce.",
-              "Quand le client vous transmet une pièce, déposez-la avec « Déposer le fichier » (ou « Ajouter un fichier » s’il y en a déjà un).",
+              "En haut, « Copier la liste des N pièces manquantes » copie la liste, prête à coller dans votre email au client. L’outil note la date de la demande sur chaque pièce, et ces pièces apparaissent « À déposer » dans l’espace du client.",
+              "Quand le client vous transmet une pièce, déposez-la avec « Déposer le fichier » (ou « Ajouter un fichier » s’il y en a déjà un). S’il la dépose lui-même dans son espace, elle arrive ici et passe en « Reçue ».",
             ],
           },
           {
@@ -340,7 +384,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             ton: "info",
             titre: "Pas de relance automatique",
             texte:
-              "L’outil ne relance pas le client. Pour relancer, copiez de nouveau la liste : elle ne contient que ce qui manque encore. Les états des pièces sont expliqués dans [Étape 1 : Pièces justificatives](/admin/aide#audit-pieces).",
+              "L’outil ne relance pas le client, ni par email ni dans son espace. Pour relancer, copiez de nouveau la liste : elle ne contient que ce qui manque encore. Les états des pièces sont expliqués dans [Étape 1 : Pièces justificatives](/admin/aide#audit-pieces).",
           },
         ],
       },
@@ -353,7 +397,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             items: [
               "Étapes 2 à 6 : les heures, la sous-traitance, puis les contrôles DGFiP, URSSAF et CNAPS. Tout est détaillé dans [Mener un audit](/admin/aide#audit).",
               "Étape 7 : le [Plan d’actions](mission:actions), que l’entreprise garde après l’audit.",
-              "Étape 8 : le [Rapport](mission:rapport). Émettez la version, ouvrez-la depuis « Versions émises » et envoyez le PDF au client.",
+              "Étape 8 : le [Rapport](mission:rapport). Émettez la version, puis, dans « Versions émises », touchez « Rendre visible au client » : il la télécharge depuis son espace. Vous pouvez aussi lui envoyer le PDF vous-même.",
             ],
           },
         ],
@@ -365,7 +409,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "etapes",
             items: [
-              "Dans [Contrat et factures](mission:contrat), partie « Les factures », l’outil propose ce qui peut être émis : d’abord la « Facture d’acompte » (au pourcentage du contrat), puis la « Facture de solde » ; ou la « Facture unique (100 %) » sans acompte.",
+              "Dans [Contrat et factures](mission:contrat), partie « Les factures », l’outil propose ce qui peut être émis : d’abord la « Facture d’acompte » (au pourcentage du contrat), puis la « Facture de solde » ; ou la « Facture unique (100 %) » sans acompte. Il faut un contrat signé ; seule exception, l’acompte d’une mission issue d’un devis accepté, car le devis accepté vaut commande.",
               "Touchez celle qui convient : un cadre récapitule les montants. « Émettre la facture » la numérote (F2026-0001…) et archive son PDF ; « Ne rien faire » annule.",
               "Envoyez le PDF au client (bouton « PDF »).",
               "Quand le virement arrive, touchez « Marquer payée ». Une facture non payée après son échéance s’affiche « en retard », ici et dans Commercial.",
@@ -414,7 +458,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte:
-              "À côté de chaque étape : un cercle vide (à faire), un demi-cercle (en cours) ou une coche (fait), avec une ligne de détail. En bas de chaque page, « Étape suivante » vous mène plus loin.",
+              "À côté de chaque étape : un cercle vide (à faire), un demi-cercle (en cours) ou une coche (fait), avec une ligne de détail. En bas de chaque page, « Étape suivante » vous mène plus loin. L’ancien écran en 15 étapes n’existe plus : une ancienne adresse gardée en favori ouvre l’étape qui fait aujourd’hui ce travail.",
           },
           {
             type: "tableau",
@@ -504,7 +548,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             items: [
               "Dans « Ajouter un sous-traitant » : raison sociale, SIREN, rang (1 : travaille directement pour le client ; 2 : sous-traitant d’un sous-traitant, avec « Travaille pour »). Puis « Créer et ouvrir son dossier ».",
               "Le dossier a quatre onglets : « Vue d’ensemble » (alertes, faisabilité, paiements), « Pièces et chiffres » (identification, attestations, factures, paiements), « Contrôle » (la grille) et « Conclusion ».",
-              "De retour sur la page Sous-traitance, remplissez « Ta conclusion sur le rapprochement » : elle figure au rapport.",
+              "De retour sur la page Sous-traitance, remplissez « Votre conclusion sur le rapprochement » : elle figure au rapport.",
             ],
           },
           {
@@ -581,18 +625,18 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "etapes",
             items: [
               "« Avant la version définitive : N points » liste ce qui manque ; « Y aller » vous emmène au bon endroit.",
-              "« Les textes du rapport » : pour chacun (objet et périmètre, synthèse, conclusion, limites), l’outil propose une rédaction marquée « Proposition de l’outil, à relire ». Relisez, modifiez, puis touchez « Valider ce texte » ou « Enregistrer mon texte ».",
+              "« Les textes du rapport » : pour chacun (objet et périmètre, synthèse, conclusion, limites), l’outil propose une rédaction marquée « Proposition de l’outil, à relire ». Relisez, modifiez : ce que vous tapez s’enregistre tout seul comme brouillon (« Brouillon, pas encore validé », puis « Enregistré »). Touchez « Valider ce texte » (proposition gardée telle quelle) ou « Valider mon texte » pour qu’il entre au rapport : il devient « Votre texte, validé ».",
               "« Voir le rapport » ouvre le PDF tel qu’il serait émis maintenant, sans rien archiver.",
               "« Émettre la version v1 » produit le PDF, le date, le numérote et l’archive. Tant qu’il manque un point, le bouton ajoute « (de travail) » et le PDF porte la mention « Version de travail ».",
-              "Chaque version est gardée dans « Versions émises » : c’est ce PDF que vous envoyez au client. L’outil ne l’envoie pas.",
+              "Chaque version est gardée dans « Versions émises ». « Rendre visible au client » la met en téléchargement dans son espace (« Visible par le client » ; « Masquer » la retire). Aucun email ne le prévient : dites-le-lui, ou envoyez-lui le PDF.",
             ],
           },
           {
             type: "encadre",
-            ton: "attention",
-            titre: "Toujours toucher le bouton du texte",
+            ton: "info",
+            titre: "Brouillon enregistré, texte à valider",
             texte:
-              "Tant qu’un texte n’a jamais été validé, vos modifications ne s’enregistrent pas seules : si vous quittez la page sans toucher « Enregistrer mon texte », elles sont perdues. Une fois le texte validé une première fois, les retouches s’enregistrent en quittant le champ.",
+              "Vos textes ne se perdent plus : ils s’enregistrent pendant la frappe, en quittant le champ ou la page. Mais un brouillon n’entre pas au rapport tant que vous n’avez pas touché « Valider ce texte » ou « Valider mon texte ». Une fois validé, les retouches s’enregistrent directement dans le texte validé. « Revenir à la proposition » reprend la rédaction de l’outil.",
           },
         ],
       },
@@ -634,7 +678,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             colonnes: ["Document", "Modifiable", "Figé", "Pour corriger ensuite"],
             lignes: [
               ["Devis", "Tant qu’il n’est pas accepté", "Dès « Accepté : créer la mission et le contrat »", "Corrigez le contrat de la mission"],
-              ["Contrat", "Jusqu’à « Marquer comme signé »", "Une fois signé ; son PDF est archivé", "« Rouvrir pour le modifier »"],
+              ["Contrat", "Jusqu’à « Marquer comme signé »", "Une fois signé ; son PDF est archivé", "« Rouvrir pour le modifier », puis « Confirmer : rouvrir le contrat »"],
               ["Facture", "Jamais", "Dès l’émission ; seul « Marquer payée » (ou « Payée · annuler ») reste possible", "« Annuler par un avoir », puis émettre une facture corrigée"],
             ],
           },
@@ -642,6 +686,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "liste",
             items: [
               "Un devis ne se supprime pas : s’il ne se fait pas, marquez-le « Refusé ».",
+              "Un devis ne peut être accepté qu’après « Marquer comme envoyé ».",
               "Une facture émise ne se supprime jamais. L’avoir porte son propre numéro et ne se supprime pas non plus.",
               "Un acompte déjà déduit d’une facture de solde ne s’annule qu’après le solde.",
               "Une facture garde pour toujours les informations d’ANM et du client du jour de son émission.",
@@ -656,7 +701,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte:
-              "Tant qu’une de ces informations manque, les boutons de facture restent grisés et un cadre « Avant d’émettre une facture, il manque : » dit laquelle :",
+              "Deux conditions. D’abord le contrat : sans contrat signé, pas de facture de solde ni de facture unique. Seul l’acompte d’une mission issue d’un devis accepté peut partir avant la signature (le devis accepté vaut commande). Ensuite, tant qu’une de ces informations manque, les boutons de facture restent grisés et un cadre « Avant d’émettre une facture, il manque : » dit laquelle :",
           },
           {
             type: "liste",
@@ -665,7 +710,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
               "l’adresse d’ANM Consulting (page Cabinet) ;",
               "l’adresse du client (sa fiche, dans « Les parties » du contrat) ;",
               "le SIREN du client ;",
-              "le prix de la mission, dans le contrat enregistré.",
+              "le prix de la mission (contrat).",
             ],
           },
         ],
@@ -873,15 +918,15 @@ export const SECTIONS_AIDE: SectionAide[] = [
             items: [
               "« Enregistrer le brouillon » garde votre travail. Un brouillon n’est visible que dans l’espace de travail.",
               "« Aperçu de la page », en haut une fois le brouillon enregistré, montre la page telle que le lecteur la verra.",
-              "Quand « Pour publier, il manque : » a disparu et que « Tout est en place » s’affiche, touchez « Publier ». La page est en ligne ; « Voir en ligne » l’ouvre.",
+              "Quand « Pour publier, il manque : » a disparu et que « Tout est en place » s’affiche, touchez « Publier ». La page est en ligne ; « Voir en ligne » l’ouvre. À la première publication, un email part aux inscrits « Être prévenu », et le message affiché dit le résultat : « Email envoyé à N inscrit(s). », « Aucun inscrit à prévenir pour l’instant. » ou « L’email aux inscrits n’a pas pu partir. ».",
             ],
           },
           {
             type: "liste",
             items: [
               "Une page en ligne se corrige avec « Enregistrer la page en ligne ». Pour une correction de fond, cochez « Mise à jour de fond » : les lecteurs verront « Mis à jour le ». Pas pour une coquille.",
-              "« Retirer du site » remet la page en brouillon ; sa date de première publication est conservée.",
-              "« Supprimer le brouillon », en bas d’un brouillon, efface tout son contenu tout de suite : pas de confirmation, pas de retour possible.",
+              "« Retirer du site » remet la page en brouillon ; sa date de première publication est conservée. La remettre en ligne ne renvoie pas d’email aux inscrits.",
+              "« Supprimer le brouillon », en bas d’un brouillon, puis « Confirmer : supprimer le brouillon », efface tout son contenu : pas de retour possible.",
             ],
           },
         ],
@@ -953,14 +998,16 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte:
-              "Tant qu’une page de l’Observatoire n’a aucune publication, elle propose au visiteur de laisser son email pour être prévenu. Les inscriptions arrivent dans [Commercial](/admin/commercial#demandes), marquées « Alerte Observatoire ».",
+              "Les pages de l’Observatoire proposent au visiteur de laisser son email pour être prévenu. Les inscriptions arrivent dans [Commercial](/admin/commercial), section repliée « Inscriptions (checklists, Observatoire) », marquées « Alerte Observatoire ».",
           },
           {
-            type: "encadre",
-            ton: "attention",
-            titre: "Aucun email ne part",
-            texte:
-              "Ce n’est pas encore branché : personne n’est prévenu à la publication d’une fiche. Et le formulaire d’inscription disparaît de la page d’accueil de l’Observatoire dès la première publication ; il ne reste que sur les territoires encore vides.",
+            type: "liste",
+            items: [
+              "L’inscrit reçoit aussitôt un email de confirmation (« Votre inscription est confirmée »).",
+              "À la première publication d’une fiche ou d’un dossier, chaque inscrit reçoit un email (« Nouvelle fiche : … » ou « Nouveau dossier : … ») ; le message affiché après « Publier » dit à combien il est parti.",
+              "Chaque email porte un lien « Se désinscrire en un clic ». Un désinscrit ne reçoit plus rien.",
+              "Les emails ne partent réellement qu’une fois le domaine anm-consulting.fr vérifié chez Resend et la clé configurée : si un email n’est pas parti, le message affiché le dit.",
+            ],
           },
         ],
       },
@@ -971,7 +1018,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
   {
     id: "automatique",
     titre: "Ce qui est automatique, et ce qui ne l’est pas",
-    resume: "Sur tout l’outil, en un tableau. En un mot : l’outil calcule, remplit, numérote et archive ; il n’envoie aucun email.",
+    resume: "Sur tout l’outil, en un tableau. En un mot : l’outil calcule, remplit, numérote et archive ; il envoie les emails du site, mais aucun email à vos clients de mission.",
     fiches: [
       {
         id: "recapitulatif",
@@ -993,14 +1040,20 @@ export const SECTIONS_AIDE: SectionAide[] = [
               ["Numéroter devis, factures et avoirs", "Oui, sans trou", "—"],
               ["Archiver les PDF (contrat signé, factures, versions du rapport)", "Oui", "—"],
               ["Proposer les textes du rapport", "Oui, une proposition tirée de vos réponses", "Relire, corriger, valider"],
-              ["Envoyer un email, quel qu’il soit", "Non : aucun email ne part de l’outil", "Envoyer devis, contrat, liste des pièces, rapport et factures"],
+              ["Accuser réception au prospect", "Oui, par email, avec une copie de la demande sur contact@anm-consulting.fr", "Rappeler le prospect"],
+              ["Envoyer la checklist demandée sur le site", "Oui, par email", "—"],
+              ["Confirmer une inscription « Être prévenu »", "Oui, par email", "—"],
+              ["Prévenir les inscrits de l’Observatoire", "Oui, à la première publication d’un article ; le résultat s’affiche", "—"],
+              ["Désinscrire un lecteur", "Oui, en un clic depuis chaque email", "—"],
+              ["Faire partir ces emails", "Seulement une fois le domaine anm-consulting.fr vérifié chez Resend et la clé configurée ; sinon le message affiché le dit", "—"],
+              ["Envoyer devis, contrat, rapport et factures au client", "Non", "Les envoyer depuis votre messagerie (ou rendre le rapport visible dans son espace)"],
+              ["Inviter un client dans son espace", "Non : l’outil crée le compte et un lien d’activation", "Envoyer le lien (copie, e-mail ou SMS) ; en créer un nouveau s’il a expiré"],
+              ["Faire avancer l’étape vue par le client", "Non", "Toucher l’étape dans Espace client"],
+              ["Ranger les dépôts du client", "Oui : le fichier arrive dans Pièces et la pièce passe en reçue", "—"],
+              ["Vous prévenir d’un dépôt ou d’un message du client", "Non : seulement le signal dans le menu de la mission", "Ouvrir Espace client"],
               ["Relancer les pièces manquantes", "Non", "Copier la liste des manquantes et relancer par email"],
               ["Relancer une facture en retard", "Non : elle s’affiche « en retard »", "Relancer le client"],
-              ["Vous prévenir d’une nouvelle demande du site", "Non : seulement le bandeau de la page Missions", "Consulter Commercial"],
-              ["Accuser réception au prospect", "Non, même si le site l’annonce", "Le rappeler"],
-              ["Envoyer la checklist demandée sur le site", "Non, pas encore branché", "L’envoyer depuis votre messagerie"],
-              ["Prévenir les inscrits « Être prévenu » de l’Observatoire", "Non, pas encore branché", "—"],
-              ["Ouvrir son espace au client", "Non : l’espace client n’est pas encore ouvert", "—"],
+              ["Vous prévenir d’une nouvelle demande du site", "Oui, par la copie sur contact@anm-consulting.fr, et le bandeau de la page Missions", "Consulter Commercial"],
               ["Mettre en page et publier un article de l’Observatoire", "Oui : typographie, image de partage, flux RSS, plan du site, données pour Google", "Choisir, lire, rédiger, vérifier, décider de publier"],
             ],
           },
@@ -1039,12 +1092,12 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-lien",
-        titre: "Mon lien de connexion reçu par email a expiré",
+        titre: "« Ce lien a expiré » ou « Ce lien n’est pas valide, ou il a déjà servi »",
         blocs: [
           {
             type: "p",
             texte:
-              "La connexion ne passe plus par un lien envoyé par email : elle se fait avec votre adresse et votre mot de passe, sur [Connexion](/connexion). Un ancien email de connexion ne sert plus à rien.",
+              "Vous avez ouvert un ancien lien de connexion reçu par email. La connexion ne passe plus par un lien : connectez-vous avec votre adresse et votre mot de passe, sur la même page.",
           },
         ],
       },
@@ -1109,7 +1162,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-archive",
-        titre: "« Le PDF n’a pas pu être archivé. Réessaie. »",
+        titre: "« Le PDF n’a pas pu être archivé. Réessayez. »",
         blocs: [
           {
             type: "p",
@@ -1119,12 +1172,12 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-texte-perdu",
-        titre: "Mes modifications d’un texte du rapport ont disparu",
+        titre: "Mon texte du rapport n’apparaît pas dans le PDF",
         blocs: [
           {
             type: "p",
             texte:
-              "Un texte jamais validé ne s’enregistre qu’avec le bouton (« Valider ce texte » ou « Enregistrer mon texte »). Réécrivez-le, et touchez le bouton avant de quitter la page.",
+              "Il est enregistré comme brouillon (« Brouillon, pas encore validé ») mais pas encore validé : touchez « Valider ce texte » ou « Valider mon texte ». Si « Non enregistré : vérifiez la connexion » s’affiche, votre texte reste à l’écran : touchez « Réessayer » quand le réseau revient.",
           },
         ],
       },
@@ -1136,6 +1189,17 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "p",
             texte:
               "Le cadre dit quoi compléter : le SIREN ou l’adresse d’ANM dans [Cabinet](/admin/cabinet) ; l’adresse ou le SIREN du client dans sa fiche (« Compléter depuis le SIREN ») ; ou le prix dans le contrat.",
+          },
+        ],
+      },
+      {
+        id: "faq-facture-signature",
+        titre: "Je ne peux pas émettre la facture : « Le contrat n’est pas signé… »",
+        blocs: [
+          {
+            type: "p",
+            texte:
+              "Une facture de solde ou une facture unique demande un contrat signé : indiquez la date dans « Signé le » et touchez « Marquer comme signé ». Seul l’acompte d’une mission issue d’un devis accepté peut partir avant. Si vous venez de rouvrir le contrat, marquez-le de nouveau comme signé.",
           },
         ],
       },
@@ -1152,11 +1216,11 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-contrat-signe",
-        titre: "« Le contrat est signé : rouvre-le avant de le modifier »",
+        titre: "« Le contrat est signé : rouvrez-le avant de le modifier »",
         blocs: [
           {
             type: "p",
-            texte: "Touchez « Rouvrir pour le modifier », corrigez, enregistrez, puis marquez-le de nouveau comme signé.",
+            texte: "Touchez « Rouvrir pour le modifier », puis « Confirmer : rouvrir le contrat ». Corrigez, enregistrez, puis marquez-le de nouveau comme signé.",
           },
         ],
       },
@@ -1167,6 +1231,16 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte: "Le prix et les conditions vivent maintenant dans le contrat de la mission : touchez « Ouvrir le contrat et les factures ».",
+          },
+        ],
+      },
+      {
+        id: "faq-accepte-absent",
+        titre: "Le bouton « Accepté » n’apparaît pas sur le devis",
+        blocs: [
+          {
+            type: "p",
+            texte: "Le devis est encore en brouillon. Touchez d’abord « Marquer comme envoyé » (même s’il a été remis en main propre) : « Accepté : créer la mission et le contrat » apparaît ensuite.",
           },
         ],
       },
@@ -1193,22 +1267,44 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-invitation",
-        titre: "Le client n’a pas reçu son invitation, ou ne peut pas se connecter",
+        titre: "Le client n’a pas reçu d’email d’invitation",
         blocs: [
           {
             type: "p",
             texte:
-              "L’outil n’envoie pas d’invitation : l’espace client n’est pas encore ouvert. Ce que le client doit recevoir, envoyez-le-lui par email.",
+              "C’est normal : l’outil n’envoie pas d’invitation. Dans [Espace client](mission:client), transmettez-lui le lien vous-même (« Copier le message », « Envoyer par e-mail » ou « Envoyer par SMS »).",
+          },
+        ],
+      },
+      {
+        id: "faq-lien-activation",
+        titre: "Le lien d’activation du client ne marche plus",
+        blocs: [
+          {
+            type: "p",
+            texte:
+              "Il ne sert qu’une fois et pour une durée limitée ; le client voit « Ce lien a expiré ou a déjà servi ». Dans [Espace client](mission:client), touchez « Nouveau lien » sur sa ligne et envoyez-le-lui : le précédent cesse de fonctionner. S’il a déjà choisi son mot de passe, il peut simplement se connecter.",
+          },
+        ],
+      },
+      {
+        id: "faq-client-rapport",
+        titre: "Le client ne voit pas le rapport",
+        blocs: [
+          {
+            type: "p",
+            texte:
+              "Une version émise n’est pas visible d’office. Dans le [Rapport](mission:rapport), sous « Versions émises », touchez « Rendre visible au client » : elle apparaît dans son onglet « Suivi ».",
           },
         ],
       },
       {
         id: "faq-rien-recu",
-        titre: "Le client n’a rien reçu (devis, liste des pièces, rapport)",
+        titre: "Le client n’a rien reçu (devis, contrat, factures, liste des pièces)",
         blocs: [
           {
             type: "p",
-            texte: "L’outil n’envoie aucun email. Ouvrez le PDF (ou copiez la liste) et envoyez-le depuis votre messagerie.",
+            texte: "L’outil n’envoie aucun email à vos clients de mission. Ouvrez le PDF (ou copiez la liste) et envoyez-le depuis votre messagerie. Le rapport, lui, peut aussi être rendu visible dans son espace.",
           },
         ],
       },
@@ -1229,7 +1325,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
       },
       {
         id: "faq-piece-fichiers",
-        titre: "« Cette pièce a N fichiers déposés. Supprime-les d’abord… »",
+        titre: "« Cette pièce a N fichiers déposés. Supprimez-les d’abord… »",
         blocs: [
           {
             type: "p",

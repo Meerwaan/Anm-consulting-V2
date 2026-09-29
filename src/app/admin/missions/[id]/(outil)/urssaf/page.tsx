@@ -85,7 +85,7 @@ export default async function UrssafPage({ params }: { params: Promise<{ id: str
           missionId={id}
           table="salaries_entreprise"
           lignes={salaries.map((a) => versLigneInitiale("salaries_entreprise", a as unknown as Record<string, unknown>))}
-          titreVide="Aucun salarié saisi. Ajoute-les un par un, ou colle la liste depuis Excel ou le registre."
+          titreVide="Aucun salarié saisi. Ajoutez-les un par un, ou collez la liste depuis Excel ou le registre."
           libelleAjout="Ajouter un salarié"
         />
         {salaries.length ? (

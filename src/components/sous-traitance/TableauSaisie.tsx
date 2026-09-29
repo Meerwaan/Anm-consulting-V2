@@ -374,7 +374,7 @@ const TableauSaisie = ({ missionId, table, sousTraitantId, lignes: initiales, fa
       {collage !== null ? (
         <div className="flex flex-col gap-2 rounded-[5px] border border-filet bg-papier p-4">
           <label htmlFor={`coller-${table}-${sousTraitantId ?? ""}`} className="text-meta text-encre">
-            Colle ici des lignes copiées d’Excel, colonnes dans cet ordre :{" "}
+            Collez ici des lignes copiées d’Excel, colonnes dans cet ordre :{" "}
             <strong className="font-medium">
               {def.colonnes
                 .filter((c) => c.type !== "facture")

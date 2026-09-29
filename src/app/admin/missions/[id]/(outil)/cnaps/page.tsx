@@ -63,7 +63,7 @@ export default async function CnapsPage({ params }: { params: Promise<{ id: stri
           missionId={id}
           table="agents_entreprise"
           lignes={agents.map((a) => versLigneInitiale("agents_entreprise", a as unknown as Record<string, unknown>))}
-          titreVide="Aucun agent saisi. Ajoute-les un par un, ou colle la liste depuis Excel."
+          titreVide="Aucun agent saisi. Ajoutez-les un par un, ou collez la liste depuis Excel."
           libelleAjout="Ajouter un agent"
         />
         {agents.length ? (

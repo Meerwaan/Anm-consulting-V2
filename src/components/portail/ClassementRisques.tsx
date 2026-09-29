@@ -38,7 +38,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       <section>
         <h2 className="text-xl">Ce qui entre dans le rapport</h2>
         <p className="mt-3 rounded border border-dashed border-[var(--anm-hairline)] p-5 text-sm text-[var(--anm-muted)]">
-          Rien à classer : aucun constat n&apos;a encore été écrit. Reviens après l&apos;étape 11.
+          Rien à classer : aucun constat n&apos;a encore été écrit. Revenez après l&apos;étape 11.
         </p>
       </section>
     );
@@ -49,7 +49,7 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       <h2 className="text-xl">Classement et mise en avant</h2>
       <p className="mt-1 text-sm text-[var(--anm-muted)]">
         <strong>Les {constats.length} constats figureront au rapport</strong> — c&apos;est un
-        dossier complet, rien ne s&apos;en exclut. Numérote ceux que le dirigeant doit lire en
+        dossier complet, rien ne s&apos;en exclut. Numérotez ceux que le dirigeant doit lire en
         premier : ils ouvrent la synthèse, le reste suit classé par criticité. Autant que la
         mission en demande — un client bien tenu peut n&apos;en avoir aucun, un autre dix.
       </p>
@@ -113,8 +113,8 @@ const ClassementRisques = ({ missionId, constats }: Props) => {
       </p>
       {top.length === 0 ? (
         <p className="mt-2 text-sm text-[var(--anm-muted)]">
-          Aucun constat mis en avant. Numérote ci-dessous ceux qui ouvriront le rapport — ou
-          laisse vide si rien ne se détache : le rapport reste complet, il commencera par le
+          Aucun constat mis en avant. Numérotez ci-dessous ceux qui ouvriront le rapport — ou
+          laissez vide si rien ne se détache : le rapport reste complet, il commencera par le
           classement par criticité.
         </p>
       ) : (

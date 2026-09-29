@@ -357,7 +357,7 @@ export default async function DossierSousTraitantPage({
         <div>
           <h3 id="controle" className="font-display text-t4 text-encre">Contrôle du sous-traitant</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Les points de tes grilles 02 et 05. Ouvre une partie, réponds au toucher ; ajoute une observation quand c’est utile.
+            Les points de vos grilles 02 et 05. Ouvrez une partie, répondez au toucher ; ajoutez une observation quand c’est utile.
             Les parties « points d’alerte » se lisent à l’envers : « oui » veut dire que l’anomalie est constatée.
           </p>
         </div>
@@ -372,7 +372,7 @@ export default async function DossierSousTraitantPage({
         <div>
           <h3 id="conclusion" className="font-display text-t4 text-encre">Conclusion sur {st.raison_sociale}</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            Ce que tu retiens de ce dossier, avec les choix de tes grilles. C’est ce qui figure au rapport.
+            Ce que vous retenez de ce dossier, avec les choix de vos grilles. C’est ce qui figure au rapport.
           </p>
         </div>
         <ConclusionsSaisie

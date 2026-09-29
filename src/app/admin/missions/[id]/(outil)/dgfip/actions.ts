@@ -15,7 +15,7 @@ export const enregistrerCoutRevient = async (entree: { missionId: string; valeur
   if (Number.isNaN(n)) return { ok: false, erreur: "Le coût de revient n’est pas un nombre. Exemple : 22,50." };
   if (n !== null && n <= 0) return { ok: false, erreur: "Le coût de revient doit être positif." };
   const source = entree.source.trim();
-  if (n !== null && !source) return { ok: false, erreur: "Indique la source du chiffre (organisme, publication, année)." };
+  if (n !== null && !source) return { ok: false, erreur: "Indiquez la source du chiffre (organisme, publication, année)." };
   const supabase = await createClient();
   const { error } = await supabase.from("st_parametres").upsert(
     { mission_id: entree.missionId, cout_revient_horaire: n, cout_revient_source: n === null ? null : source, updated_at: new Date().toISOString(), updated_by: session.utilisateurId },
@@ -23,7 +23,7 @@ export const enregistrerCoutRevient = async (entree: { missionId: string; valeur
   );
   if (error) {
     console.error("[dgfip] coût de revient", error.message);
-    return { ok: false, erreur: "L’enregistrement a échoué. Réessaie." };
+    return { ok: false, erreur: "L’enregistrement a échoué. Réessayez." };
   }
   revalidatePath(`/admin/missions/${entree.missionId}`, "layout");
   return { ok: true };
