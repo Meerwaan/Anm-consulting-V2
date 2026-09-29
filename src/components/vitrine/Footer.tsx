@@ -15,8 +15,10 @@ const colonnes = [
   {
     titre: "Ressources",
     liens: [
+      { href: "/observatoire", label: "L’Observatoire ANM" },
+      { href: "/observatoire/note-methodologique", label: "Note méthodologique de l’Observatoire" },
       { href: "/#checklist", label: "Checklists : CNAPS, URSSAF, Inspection, DGFiP" },
-      { href: "/audit#methode", label: "La méthode en 15 étapes" },
+      { href: "/audit#methode", label: "Le déroulé d’un audit" },
       { href: "/a-propos#ligne-de-crete", label: "Ce que nous ne faisons pas" },
       { href: "/connexion", label: "Espace client" },
     ],
@@ -57,7 +59,7 @@ export function Footer() {
           </div>
           {colonnes.map((c) => (
             <div key={c.titre} className="space-y-4">
-              <p className="etiquette text-brume">{c.titre}</p>
+              <p className="etiquette !text-brume">{c.titre}</p>
               <ul className="space-y-2.5">
                 {c.liens.map((l) => (
                   <li key={l.href}>

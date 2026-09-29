@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import type { ReactNode } from "react";
 import { CRITICITE, PILIERS, POSITIONNEMENT } from "@/content/piliers";
 import { ABONNEMENTS, OFFRES } from "@/content/offres";
-import { REGLE_OR } from "@/content/methode";
+import { METHODE_4_TEMPS, PHASES_MISSION } from "@/content/methode";
 import { LIGNE_DE_CRETE } from "@/content/vision";
-import { CONTROLES_VECUS, LIVRABLES } from "@/content/vitrine";
+import { CONTROLES_VECUS, LIVRABLES, MANIFESTE, PHRASE_CHOC, TEMPS_MISSION } from "@/content/vitrine";
 import { Bouton } from "./Bouton";
 import { Cascade, Element, Reveal } from "./Reveal";
 import { Conteneur, Filet } from "./SectionHead";
@@ -57,20 +57,30 @@ export function Piliers({ detaille = false }: { detaille?: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* La règle d'or                                                       */
+/* Le déroulé d'une mission, en quatre temps (fond encre)              */
 /* ------------------------------------------------------------------ */
 
-export function RegleOr({ sombre = true }: { sombre?: boolean }) {
+/**
+ * Le « quoi » et le « quand » d'une mission, pas le « comment » : les quinze étapes de travail
+ * et les rapprochements restent dans l'outil (retour de Sofia du 29/09/2026).
+ */
+export function DerouleMission() {
   return (
-    <Cascade className="flex flex-wrap items-center gap-x-3 gap-y-3" pas={0.12}>
-      {REGLE_OR.map((mot, i) => (
-        <Element key={mot} className="flex items-center gap-3" y={10}>
-          <span className={`rounded-full border px-4 py-2 font-mono text-note uppercase tracking-[0.16em] ${sombre ? "border-nuit bg-encre text-papier" : "border-encre bg-papier text-encre"}`}>
-            {mot}
-          </span>
-          {i < REGLE_OR.length - 1 ? <ArrowRight size={14} className={sombre ? "text-brume" : "text-gris"} aria-hidden /> : null}
-        </Element>
-      ))}
+    <Cascade className="grid gap-px overflow-hidden rounded-[5px] border border-nuit bg-nuit md:grid-cols-4" pas={0.1}>
+      {METHODE_4_TEMPS.map((t, i) => {
+        const phases = t.phases.map((p) => PHASES_MISSION[p - 1]);
+        return (
+          <Element key={t.nom} className="space-y-4 bg-encre p-6 md:p-7">
+            <p className="font-display text-chiffre leading-none text-brume">{["I", "II", "III", "IV"][i]}</p>
+            <h3 className="font-display text-t3 text-papier">{t.nom}</h3>
+            <p className="font-mono text-etiquette uppercase tracking-[0.14em] text-brume">
+              {phases[0].moment}
+              {phases.length > 1 ? ` → ${phases[phases.length - 1].moment}` : ""}
+            </p>
+            <p className="text-corps text-brume-2">{TEMPS_MISSION[t.nom]}</p>
+          </Element>
+        );
+      })}
     </Cascade>
   );
 }
@@ -342,11 +352,14 @@ export function CtaFinal({
   texte = "Trente minutes, sans engagement, pour identifier vos trois principaux risques et décider de la suite. Aucune promesse de garantie contre un redressement : des faits, une méthode, un plan.",
   cta = "Demander un premier échange",
   href = "/contact",
+  signature = false,
 }: {
-  titre?: string;
+  titre?: ReactNode;
   texte?: string;
   cta?: string;
   href?: string;
+  /** Remplace le titre par la signature de notre fondatrice (fin de son manifeste), signée d'elle. */
+  signature?: boolean;
 }) {
   return (
     <section className="bg-encre text-papier">
@@ -354,8 +367,19 @@ export function CtaFinal({
         <Reveal>
           <div className="grid gap-10 md:grid-cols-[1.3fr_1fr] md:items-end">
             <div className="space-y-5">
-              <p className="etiquette text-brume">Premier échange</p>
-              <h2 className="font-display text-t1-lg">{titre}</h2>
+              <p className="etiquette !text-brume">Premier échange</p>
+              {signature ? (
+                <figure className="space-y-4">
+                  <blockquote>
+                    <h2 className="font-display text-t1 md:text-t1-lg">
+                      {MANIFESTE.signature[0]} <em className="text-menthe">{MANIFESTE.signature[1]}</em>
+                    </h2>
+                  </blockquote>
+                  <figcaption className="etiquette !text-brume">{PHRASE_CHOC.auteur}</figcaption>
+                </figure>
+              ) : (
+                <h2 className="font-display text-t1-lg">{titre}</h2>
+              )}
               <p className="max-w-xl text-chapo text-brume-2">{texte}</p>
             </div>
             <div className="flex flex-col gap-4 md:items-end">

@@ -54,8 +54,8 @@ export default function FormationPage() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="max-w-2xl text-chapo text-encre-2">
-                Pour le dirigeant, le responsable d’exploitation, la personne qui fait la paie : {NB_MODULES} modules courts, organisés en {PARCOURS.length} parcours, tirés des mêmes outils que
-                l’audit. Le premier module est gratuit.
+                Pour le dirigeant, le responsable d’exploitation, la personne qui fait la paie : {NB_MODULES} modules courts, organisés en {PARCOURS.length} parcours, nourris de vingt et un ans de
+                terrain. Le premier module est gratuit.
               </p>
             </Reveal>
             <Reveal delay={0.15}>

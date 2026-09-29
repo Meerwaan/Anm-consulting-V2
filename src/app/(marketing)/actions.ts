@@ -10,7 +10,7 @@ const CHECKLISTS: Record<string, string> = {
   "checklist-inspection": "Inspection du travail",
   "checklist-fiscal": "DGFiP",
 };
-const SOURCES = new Set(["contact", "formation", "abonnement", ...Object.keys(CHECKLISTS)]);
+const SOURCES = new Set(["contact", "formation", "abonnement", "observatoire", ...Object.keys(CHECKLISTS)]);
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 const texte = (formData: FormData, cle: string, max = 400) =>
@@ -41,7 +41,9 @@ export const envoyerLead = async (_etat: EtatLead, formData: FormData): Promise<
         ? "C’est noté. Vous recevez un accusé de réception, puis un appel sous 48 h ouvrées."
         : source in CHECKLISTS
           ? `C’est noté. La checklist ${CHECKLISTS[source]} vous sera envoyée par email.`
-          : "C’est noté. Vous serez prévenu à l’ouverture.",
+          : source === "observatoire"
+            ? "C’est noté. Vous serez prévenu à la parution des prochaines fiches de l’Observatoire."
+            : "C’est noté. Vous serez prévenu à l’ouverture.",
   };
 
   if (texte(formData, "site_web", 10)) return succes;

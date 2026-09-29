@@ -1,26 +1,50 @@
 import type { Metadata } from "next";
 import { Bouton } from "@/components/vitrine/Bouton";
 import { Estimateur } from "@/components/vitrine/Estimateur";
-import { Etapes } from "@/components/vitrine/Etapes";
 import { FAQ } from "@/components/vitrine/FAQ";
 import { FicheConstat } from "@/components/vitrine/FicheConstat";
 import { Cascade, Element, Reveal } from "@/components/vitrine/Reveal";
-import { Conteneur, SectionHead } from "@/components/vitrine/SectionHead";
-import { CtaFinal, EchelleCriticite, Livrables, Piliers, RegleOr, Tarifs } from "@/components/vitrine/Sections";
+import { Conteneur, Filet, SectionHead } from "@/components/vitrine/SectionHead";
+import { Citation, CtaFinal, DerouleMission, EchelleCriticite, Livrables, Piliers, Tarifs } from "@/components/vitrine/Sections";
 import { AXES_RAPPORT } from "@/content/vision";
-import { FAQ as FAQ_ITEMS } from "@/content/vitrine";
+import { FAQ as FAQ_ITEMS, PHRASE_CHOC } from "@/content/vitrine";
 
 export const metadata: Metadata = {
   title: "Audit & diagnostic 360° sécurité privée",
   description:
-    "Cinq piliers, 208 points de contrôle, 15 étapes du cadrage à la restitution. Audits CNAPS, social / URSSAF, Inspection du travail, préparation contrôle fiscal, audit 360°. Grille tarifaire publique.",
+    "Cinq piliers, 208 points de contrôle, un plan d’actions daté. Audits CNAPS, social / URSSAF, Inspection du travail, sous-traitance, préparation au contrôle fiscal, audit 360°. Grille tarifaire publique.",
   alternates: { canonical: "/audit" },
 };
 
+/**
+ * Le risque au centre de l'audit, d'après la vision de Sofia (docs/grilles-sofia/00-vision-sofia.md) :
+ * ce que l'administration reproche et ce qu'elle regarde. Le « comment nous le vérifions » n'est pas écrit.
+ */
+const RISQUE_SOUS_TRAITANCE = [
+  {
+    qui: "URSSAF",
+    reproche: "Travail dissimulé, prêt illicite de main-d’œuvre.",
+    regarde: "Les heures que votre sous-traitant vous facture, et les salariés qu’il déclare pour les réaliser.",
+  },
+  {
+    qui: "DGFiP",
+    reproche: "Factures de complaisance ou fictives.",
+    regarde: "Des prestations facturées que personne n’a pu matériellement réaliser. La TVA déduite est alors remise en cause.",
+  },
+  {
+    qui: "Le dirigeant",
+    reproche: "Défaut de vigilance, heures vendues sans heures réalisées.",
+    regarde: "Le risque ne s’arrête pas à la société : il peut atteindre le dirigeant, personnellement, jusqu’au pénal.",
+  },
+] as const;
+
 const ECHANTILLON = [
   { titre: "Calibré sur votre effectif", texte: "Assez de dossiers pour que le résultat soit représentatif, pas plus. La taille suit l’entreprise, pas un forfait." },
-  { titre: "Les profils qu’un contrôleur cible", texte: "Nouvel embauché, temps partiel, travailleur de nuit, gros volume d’heures supplémentaires, salarié d’un sous-traitant : ceux qui portent le risque passent en premier." },
-  { titre: "Sur copies, jamais sur originaux", texte: "Vos pièces restent chez vous. On travaille sur des copies datées, indexées, restituées ou détruites à la fin de la mission." },
+  {
+    titre: "Là où le risque se concentre",
+    texte: "Un contrôleur ne choisit pas ses dossiers au hasard. Nous non plus : nous regardons d’abord ceux qu’il regarderait. Lesquels, et pourquoi, c’est notre métier.",
+  },
+  { titre: "Sur copies, jamais sur originaux", texte: "Vos pièces restent chez vous. Nous travaillons sur des copies datées, indexées, restituées ou détruites à la fin de la mission." },
 ] as const;
 
 const RESTITUTION = [
@@ -46,9 +70,9 @@ export default function AuditPage() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="max-w-xl text-chapo text-encre-2">
-                L’audit 360° croise ce que cinq contrôleurs regarderaient séparément : planning, présence réelle, paie,
-                facturation, situation réglementaire. Vous repartez avec des constats qui tiennent devant un contrôleur, et
-                un plan d’actions avec un responsable et une échéance par ligne.
+                L’audit 360° regarde votre entreprise comme cinq contrôleurs la regarderaient, mais tous en même temps : c’est là où leurs lectures se croisent que les
+                écarts apparaissent. Vous repartez avec des constats qui tiennent devant un contrôleur, et un plan d’actions avec un responsable et une échéance par
+                ligne.
               </p>
             </Reveal>
             <Reveal delay={0.15}>
@@ -75,7 +99,7 @@ export default function AuditPage() {
             index="01"
             eyebrow="Le périmètre"
             titre={<>Cinq piliers, <em className="text-vert">208 points de contrôle.</em></>}
-            sous="Chaque point de contrôle renvoie à un texte officiel vérifié et daté, et se croise avec les autres : planning, présence réelle, paie, facturation, situation réglementaire. Rien n’est improvisé sur place."
+            sous="Chaque point de contrôle renvoie à un texte officiel, vérifié et daté. La grille ne se publie pas : ce qu’elle révèle chez vous, si, dans votre rapport."
             aligne="deux"
           />
           <div className="mt-14">
@@ -84,23 +108,59 @@ export default function AuditPage() {
         </Conteneur>
       </section>
 
-      {/* MÉTHODE 15 ÉTAPES */}
-      <section id="methode" className="scroll-mt-20 bg-encre text-papier">
+      {/* LE RISQUE AU CENTRE : LA SOUS-TRAITANCE */}
+      <section id="sous-traitance" className="scroll-mt-20">
         <Conteneur className="py-24 md:py-32">
           <SectionHead
             index="02"
-            eyebrow="La méthode"
-            titre={<>Quinze étapes, <em className="text-menthe">du premier entretien à la restitution.</em></>}
-            sous="Le portail suit ces quinze étapes une à une. À chacune, ses points de contrôle, ses pièces et son indicateur « rien ne manque »."
+            eyebrow="Le risque au centre"
+            titre={<>Vérifier ne suffit pas. <em className="text-vert">Encore faut-il que ce soit possible.</em></>}
+            sous="Dans la sécurité privée, les redressements URSSAF et fiscaux naissent très souvent de la sous-traitance. Le donneur d’ordre a les mêmes obligations que son sous-traitant, plus une : vérifier."
+            aligne="deux"
+          />
+          <div className="mt-14">
+            <Filet epais />
+            <ol>
+              {RISQUE_SOUS_TRAITANCE.map((r, i) => (
+                <Reveal key={r.qui} delay={i * 0.05}>
+                  <li className="grid gap-3 border-b border-filet py-6 md:grid-cols-[11rem_1fr_1.3fr] md:items-baseline md:gap-8 md:py-7">
+                    <span className="etiquette !text-encre md:pt-1">{r.qui}</span>
+                    <p className="font-display text-t4 text-encre">{r.reproche}</p>
+                    <p className="text-corps text-encre-2">{r.regarde}</p>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+          <Reveal>
+            <div className="mt-14 grid gap-10 md:grid-cols-[1.4fr_1fr] md:items-end md:gap-16">
+              <p className="font-display text-t3 text-encre">
+                Une attestation de vigilance à jour ne suffit pas. <em className="text-vert">Ce qu’elle déclare doit être cohérent avec les heures qui vous sont facturées.</em>
+              </p>
+              <div className="space-y-4">
+                <p className="text-chapo text-encre">Savez-vous combien de salariés votre sous-traitant déclare réellement ?</p>
+                <Bouton href="/contact?situation=sous_traitance" variante="lien">
+                  Faire vérifier ma sous-traitance
+                </Bouton>
+              </div>
+            </div>
+          </Reveal>
+        </Conteneur>
+      </section>
+
+      {/* LE DÉROULÉ (ancre #methode conservée : le pied de page y renvoie) */}
+      <section id="methode" className="scroll-mt-20 bg-encre text-papier">
+        <Conteneur className="py-24 md:py-32">
+          <SectionHead
+            index="03"
+            eyebrow="Le déroulé"
+            titre={<>Quatre temps, <em className="text-menthe">du premier entretien à la restitution.</em></>}
+            sous="Vous savez ce qui sera regardé avant que nous commencions, et où en est la mission à chaque instant, dans votre espace. Ce que nous vérifions, et comment, se découvre en mission."
             sombre
             aligne="deux"
           />
-          <div className="mt-16 md:mt-20">
-            <Etapes />
-          </div>
-          <div className="mt-20 space-y-5 border-t border-nuit pt-10">
-            <p className="etiquette text-brume">La règle d’or, à chaque constat</p>
-            <RegleOr />
+          <div className="mt-14">
+            <DerouleMission />
           </div>
         </Conteneur>
       </section>
@@ -110,7 +170,7 @@ export default function AuditPage() {
         <Conteneur className="py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
             <SectionHead
-              index="03"
+              index="04"
               eyebrow="L’échantillon"
               titre={<>On ne regarde pas tout. <em className="text-vert">On regarde ce qui porte le risque.</em></>}
               sous="Un contrôleur ne lit pas cent dossiers : il en choisit quelques-uns, et il sait lesquels. L’audit fait la même chose, avant lui."
@@ -134,7 +194,7 @@ export default function AuditPage() {
       <section className="bg-papier">
         <Conteneur className="py-24 md:py-32">
           <SectionHead
-            index="04"
+            index="05"
             eyebrow="Classement des risques"
             titre={<>Quatre niveaux, <em className="text-vert">quatre délais.</em></>}
             sous="Un écart critique ne se traite pas comme une amélioration de forme. Le plan d’actions suit cette échelle : P1 immédiat, P2 sous 30 jours, P3 sous 90 jours, P4 en continu."
@@ -150,7 +210,7 @@ export default function AuditPage() {
       <section>
         <Conteneur className="py-24 md:py-32">
           <SectionHead
-            index="05"
+            index="06"
             eyebrow="Ce que vous recevez"
             titre={<>Un rapport qui se lit en dix minutes, <em className="text-vert">et qui tient devant un contrôleur.</em></>}
             aligne="deux"
@@ -180,10 +240,10 @@ export default function AuditPage() {
         <Conteneur className="py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
             <SectionHead
-              index="06"
+              index="07"
               eyebrow="La restitution"
               titre={<>Une heure, <em className="text-vert">et vous savez quoi faire lundi.</em></>}
-              sous="Pas de présentation de 80 slides. On traite ce qui compte, on décide qui fait quoi pour quand, et on repart avec une liste courte."
+              sous="Pas de présentation de 80 slides. Nous traitons ce qui compte, nous décidons avec vous qui fait quoi pour quand, et vous repartez avec une liste courte."
             />
             <Cascade className="rounded-[5px] border border-encre bg-papier" pas={0.08}>
               {RESTITUTION.map((r, i) => (
@@ -204,7 +264,7 @@ export default function AuditPage() {
       <section id="tarifs" className="scroll-mt-20 bg-papier">
         <Conteneur className="py-24 md:py-32">
           <SectionHead
-            index="07"
+            index="08"
             eyebrow="Grille tarifaire"
             titre={<>Des prix publics, <em className="text-vert">et une proposition ferme sous 48 h.</em></>}
             aligne="deux"
@@ -213,14 +273,17 @@ export default function AuditPage() {
           <div className="mt-14">
             <Tarifs avecLien={false} />
           </div>
+          <Reveal>
+            <Citation texte={`${PHRASE_CHOC.debut} ${PHRASE_CHOC.accent}`} auteur={PHRASE_CHOC.auteur} className="mt-16" />
+          </Reveal>
           <div id="estimateur" className="mt-20 scroll-mt-28 grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-start">
             <Reveal>
               <div className="space-y-4 md:sticky md:top-28">
                 <p className="etiquette">Estimateur</p>
                 <h3 className="font-display text-t2 text-encre">Estimez votre mission.</h3>
                 <p className="text-corps text-encre-2">
-                  Majoration selon l’effectif (jusqu’à 1 800 € au-delà de 200 salariés), 180 € par site au-delà de deux,
-                  20 % en cas d’urgence. Le fiscal n’est pas chiffrable ici : contactez-nous.
+                  Majoration selon l’effectif (jusqu’à 1 800 € au-delà de 200 salariés), 180 € par site au-delà de deux, 20 % en cas d’urgence. Le fiscal n’est pas
+                  chiffrable ici : contactez-nous.
                 </p>
               </div>
             </Reveal>
@@ -235,7 +298,7 @@ export default function AuditPage() {
       <section>
         <Conteneur className="py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-            <SectionHead index="08" eyebrow="Vos questions" titre={<>Ce qu’on nous demande <em className="text-vert">avant de signer.</em></>} />
+            <SectionHead index="09" eyebrow="Vos questions" titre={<>Ce qu’on nous demande <em className="text-vert">avant de signer.</em></>} />
             <Reveal delay={0.1}>
               <FAQ items={FAQ_ITEMS} />
             </Reveal>

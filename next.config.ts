@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@react-pdf/renderer"],
   outputFileTracingIncludes: {
     "/admin/**": ["./src/lib/rapport/polices/**", "./node_modules/pdfkit/js/standard-fonts/**", "./node_modules/pdfkit/js/data/**"],
+    // Images de partage de l'Observatoire (next/og) : mêmes polices, lues sur disque.
+    "/observatoire/**": ["./src/lib/rapport/polices/**"],
   },
 };
 

@@ -22,7 +22,8 @@ export function SectionHead({
   aligne?: "un" | "deux";
   taille?: "md" | "lg";
 }) {
-  const couleurEyebrow = sombre ? "text-brume" : "text-gris";
+  // « ! » : la classe .etiquette (globals.css, hors couche) l'emporterait sur une utilitaire simple.
+  const couleurEyebrow = sombre ? "!text-brume" : "text-gris";
   const couleurSous = sombre ? "text-brume-2" : "text-encre-2";
   const tailleTitre = taille === "lg" ? "text-t1-lg" : "text-t2-lg";
 

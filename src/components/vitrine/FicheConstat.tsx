@@ -27,6 +27,7 @@ export function Criticite({ niveau, petit = false }: { niveau: string; petit?: b
 /**
  * La fiche de constat, objet signature de la DA. Dans le hero, elle « s'écrit » ligne par
  * ligne puis passe à l'exemple suivant. Ailleurs (`statique`), elle s'affiche d'un bloc.
+ * L'action corrective est caviardée : elle appartient au rapport, pas à la vitrine.
  */
 export function FicheConstat({
   fiches = FICHES_EXEMPLE,
@@ -98,9 +99,15 @@ export function FicheConstat({
                 }}
               >
                 <dt className="etiquette mb-1.5">{l.cle}</dt>
-                <dd className={`font-display text-chapo leading-[1.4] text-encre ${l.cle === "Action" ? "italic" : ""}`}>
-                  <Ligne texte={l.valeur} anime={anime} delai={0.2 + i * 0.55} />
-                </dd>
+                {"masquee" in l ? (
+                  <dd>
+                    <Caviarde mention={l.masquee} />
+                  </dd>
+                ) : (
+                  <dd className="font-display text-chapo leading-[1.4] text-encre">
+                    <Ligne texte={l.valeur} anime={anime} delai={0.2 + i * 0.55} />
+                  </dd>
+                )}
               </motion.div>
             ))}
           </motion.dl>
@@ -126,6 +133,22 @@ export function FicheConstat({
         </div>
       ) : null}
     </div>
+  );
+}
+
+/**
+ * Une ligne caviardée : la vitrine montre qu'elle existe, pas ce qu'elle dit. Aucun texte réel
+ * derrière les barres, seulement la mention (« Détaillée dans le rapport »).
+ */
+function Caviarde({ mention }: { mention: string }) {
+  return (
+    <span className="block space-y-2 pt-1">
+      <span className="flex flex-col gap-1.5" aria-hidden>
+        <span className="block h-2.5 w-full rounded-[2px] bg-encre/[0.09]" />
+        <span className="block h-2.5 w-3/5 rounded-[2px] bg-encre/[0.09]" />
+      </span>
+      <span className="etiquette block">{mention}</span>
+    </span>
   );
 }
 

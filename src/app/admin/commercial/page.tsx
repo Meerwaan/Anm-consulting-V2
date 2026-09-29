@@ -20,6 +20,7 @@ const SOURCES: Record<string, string> = {
   "checklist-urssaf": "Checklist URSSAF",
   "checklist-inspection": "Checklist Inspection",
   "checklist-fiscal": "Checklist DGFiP",
+  observatoire: "Alerte Observatoire",
 };
 
 const Exemple = () => <span className="rounded-full bg-fond px-2.5 py-0.5 text-note font-medium text-majeur ring-1 ring-majeur/30">Exemple</span>;
