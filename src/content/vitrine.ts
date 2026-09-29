@@ -113,8 +113,8 @@ export const PONT_OBSERVATOIRE = {
 /**
  * Les contrôles vécus comme dirigeante — chiffres transmis le 15/09/2026.
  * Ce sont SES résultats, jamais une promesse pour le client : la réserve est affichée avec.
- * ⚠ DGFiP : 6 contrôles annoncés, 4 sans redressement + 1 annulé au tribunal administratif = 5 ;
- * le sixième est à préciser par Sofia avant mise en ligne.
+ * DGFiP : 6 contrôles = 5 sans redressement + 1 redressement annulé au tribunal administratif
+ * (corrigé le 29/09/2026 sur indication de Merwan).
  */
 export const CONTROLES_VECUS = {
   titre: "Les contrôles, notre fondatrice les a vécus du côté du dirigeant.",
@@ -122,7 +122,7 @@ export const CONTROLES_VECUS = {
     "Vingt et un ans à la tête d’une entreprise de sécurité privée, c’est aussi une quarantaine de contrôles reçus, subis, préparés. Voilà ce qu’ils ont donné.",
   items: [
     { organisme: "CNAPS", nombre: "≈ 30", label: "contrôles", resultat: "Aucune sanction." },
-    { organisme: "DGFiP", nombre: "6", label: "contrôles fiscaux", resultat: "4 sans redressement. 1 redressement annulé au tribunal administratif, décharge à 100 %." },
+    { organisme: "DGFiP", nombre: "6", label: "contrôles fiscaux", resultat: "5 sans redressement. 1 redressement annulé au tribunal administratif, décharge à 100 %." },
     { organisme: "URSSAF", nombre: "5", label: "contrôles, dont 3 en flagrance", resultat: "0 redressement." },
     { organisme: "Inspection du travail", nombre: "3", label: "contrôles", resultat: "0 redressement." },
   ],

@@ -67,7 +67,9 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
               <Cascade className="grid gap-px overflow-hidden rounded-[5px] border border-filet bg-filet sm:grid-cols-2" pas={0.08}>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Email</p>
-                  <p className="text-corps text-encre">{EDITEUR.email}</p>
+                  <a href={`mailto:${EDITEUR.email}`} className="text-corps text-encre underline decoration-filet underline-offset-4 transition-colors hover:text-vert hover:decoration-vert">
+                    {EDITEUR.email}
+                  </a>
                 </Element>
                 <Element className="space-y-1.5 bg-papier p-5">
                   <p className="etiquette">Téléphone</p>

@@ -27,7 +27,7 @@ export const EDITEUR = {
   tvaIntracommunautaire: A_COMPLETER,
   /** Personne physique responsable du contenu publié (art. 6-III-1 LCEN). */
   directeurPublication: A_COMPLETER,
-  email: A_COMPLETER,
+  email: "contact@anm-consulting.fr",
   telephone: A_COMPLETER,
 } as const;
 
