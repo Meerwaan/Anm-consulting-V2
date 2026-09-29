@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import { Bouton } from "@/components/vitrine/Bouton";
+import { Manifeste } from "@/components/vitrine/Manifeste";
 import { Cascade, Element, Reveal } from "@/components/vitrine/Reveal";
 import { Conteneur, Filet, SectionHead } from "@/components/vitrine/SectionHead";
-import { Citation, ControlesVecus, CtaFinal, PourQui, RegleOr } from "@/components/vitrine/Sections";
+import { Citation, ControlesVecus, CtaFinal, PourQui } from "@/components/vitrine/Sections";
 import { POSITIONNEMENT } from "@/content/piliers";
 import { OBJECTIFS } from "@/content/vision";
-import { CONSULTANTE, CONTROLES_VECUS } from "@/content/vitrine";
+import { CHAINE_CONSTAT, CONSULTANTE, CONTROLES_VECUS } from "@/content/vitrine";
 
 export const metadata: Metadata = {
   title: `À propos — ${CONSULTANTE.prenomNom}`,
   description:
-    "Vingt et un ans à la tête d’une entreprise de sécurité privée, une quarantaine de contrôles vécus, une méthode, une ligne de crête : ce que nous faisons, ce que nous ne faisons pas, et pourquoi.",
+    "« Quand tout va bien, vous n’avez pas besoin de moi. » Vingt et un ans à la tête d’une entreprise de sécurité privée, une quarantaine de contrôles vécus, une ligne de crête : ce que nous faisons, ce que nous ne faisons pas, et pourquoi.",
   alternates: { canonical: "/a-propos" },
 };
 
@@ -26,10 +27,10 @@ const ENGAGEMENTS = [
 export default function AProposPage() {
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <Conteneur large className="relative grid gap-12 pb-20 pt-12 md:grid-cols-[0.8fr_1.2fr] md:items-center md:gap-20 md:pb-28 md:pt-20">
-          <Reveal y={40}>
+      {/* HERO : le manifeste de notre fondatrice, en ouverture (son texte, en « je », signé d'elle) */}
+      <section className="relative">
+        <Conteneur large className="relative grid gap-12 pb-20 pt-12 md:grid-cols-[0.8fr_1.2fr] md:gap-20 md:pb-28 md:pt-20">
+          <Reveal y={40} className="md:sticky md:top-28 md:self-start">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[5px] border border-filet bg-papier shadow-flottant">
               <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-6">
                 <div>
@@ -44,21 +45,7 @@ export default function AProposPage() {
             <Reveal y={16}>
               <p className="etiquette">{CONSULTANTE.titre}</p>
             </Reveal>
-            <Reveal delay={0.05}>
-              <h1 className="font-display text-t1 text-encre md:text-t1-lg">
-                {CONSULTANTE.prenomNom}. <em className="text-vert">{CONSULTANTE.enTete}</em>
-              </h1>
-            </Reveal>
-            <Reveal delay={0.1}>
-              <div className="max-w-xl space-y-4 text-chapo text-encre-2">
-                {CONSULTANTE.bio.map((paragraphe) => (
-                  <p key={paragraphe}>{paragraphe}</p>
-                ))}
-              </div>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <Citation texte={CONSULTANTE.citation} />
-            </Reveal>
+            <Manifeste />
           </div>
         </Conteneur>
       </section>
@@ -81,12 +68,21 @@ export default function AProposPage() {
               <SectionHead index="02" eyebrow="Parcours" titre={<>Ce que j’ai dirigé, <em className="text-vert">avant de l’auditer.</em></>} />
               <Reveal delay={0.05}>
                 <div className="space-y-4 text-corps text-encre-2">
+                  <p className="font-display text-t3 text-encre">{CONSULTANTE.enTete}</p>
+                  {CONSULTANTE.bio.map((paragraphe) => (
+                    <p key={paragraphe} className="text-chapo">
+                      {paragraphe}
+                    </p>
+                  ))}
                   {CONSULTANTE.bioSuite.map((paragraphe) => (
                     <p key={paragraphe}>{paragraphe}</p>
                   ))}
                   <p className="font-medium text-encre">{CONSULTANTE.objectif}</p>
                   <p>{CONSULTANTE.intervention}</p>
                 </div>
+              </Reveal>
+              <Reveal delay={0.1}>
+                <Citation texte={CONSULTANTE.citation} auteur={CONSULTANTE.prenomNom} />
               </Reveal>
             </div>
             <div>
@@ -147,10 +143,12 @@ export default function AProposPage() {
               </Element>
             ))}
           </Cascade>
-          <div className="mt-14 space-y-5 border-t border-nuit pt-10">
-            <p className="etiquette text-brume">La chaîne que suit chaque constat</p>
-            <RegleOr />
-          </div>
+          <Reveal>
+            <div className="mt-14 max-w-3xl space-y-5 border-t border-nuit pt-10">
+              <p className="etiquette !text-brume">Ce que chaque constat vous donne</p>
+              <p className="font-display text-t3 text-papier">{CHAINE_CONSTAT}</p>
+            </div>
+          </Reveal>
         </Conteneur>
       </section>
 

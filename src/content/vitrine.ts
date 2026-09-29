@@ -52,6 +52,65 @@ export const CONSULTANTE = {
 } as const;
 
 /**
+ * La phrase de Sofia (26/09/2026), à afficher « en gras et en gros » (docs/observatoire/01-phrase-choc.md).
+ * Coupée en deux pour la mise en page : la seconde partie porte l'accent typographique.
+ */
+export const PHRASE_CHOC = {
+  debut: "La question n’est pas de savoir combien coûte la mise en conformité, mais combien il vous en coûtera",
+  accent: "de ne pas l’avoir faite à temps.",
+  auteur: "Sofia Aoun, fondatrice",
+} as const;
+
+/**
+ * Son manifeste (28/09/2026), version retenue, MOT POUR MOT (docs/observatoire/02-manifeste-sofia.md).
+ * Écrit à la première personne : c'est son récit, il reste en « je » et il est signé d'elle.
+ * Seule la typographie est ajustée (espaces insécables). Ne pas réécrire.
+ */
+export const MANIFESTE = {
+  ouverture: "Quand tout va bien, vous n’avez pas besoin de moi.",
+  ouvertureSuite: "C’est quand ça se complique que mon expérience prend tout son sens.",
+  duree: "21 ans à la tête d’une société de sécurité privée.",
+  /** Le rythme : une ligne chacune, les retours à la ligne font partie du texte. */
+  rythme: ["Les contrôles.", "La pression.", "Les décisions à prendre vite.", "Et ces moments où le dirigeant se retrouve seul face au problème."],
+  metier: "Je ne suis pas là pour vous apprendre votre métier.",
+  place: "J’ai été à votre place.",
+  role: "Quand ça se complique, mon rôle est simple : comprendre vite, identifier ce qui vous expose et trouver avec vous les solutions pour reprendre la main.",
+  /** « TVA • Sous-traitance • URSSAF • CNAPS », rendu comme un élément graphique. */
+  domaines: ["TVA", "Sous-traitance", "URSSAF", "CNAPS"],
+  marque: "ANM Consulting",
+  signature: ["J’ai été de votre côté du bureau.", "Aujourd’hui, je suis à vos côtés."],
+  auteur: "Sofia Aoun",
+} as const;
+
+/**
+ * Ce que chaque constat apporte au dirigeant, dit comme un bénéfice. Remplace sur la vitrine la chaîne
+ * FAIT → PREUVE → RISQUE → RÉFÉRENCE → ACTION → DÉLAI (REGLE_OR, qui reste la structure du portail).
+ */
+export const CHAINE_CONSTAT =
+  "Chaque constat que nous vous remettons dit ce qui a été vu, sur quelle pièce, ce que cela vous expose, sur quel texte, et ce qu’il faut faire, pour quand.";
+
+/**
+ * Les quatre temps d'une mission, dits en « quoi » et en « pourquoi », jamais en « comment »
+ * (retour de Sofia du 29/09/2026). Clés = noms de METHODE_4_TEMPS (methode.ts).
+ */
+export const TEMPS_MISSION: Record<string, string> = {
+  Cadrage: "Un entretien avec vous, un périmètre fixé ensemble. Vous savez ce qui sera regardé avant que nous commencions.",
+  Collecte: "Les pièces qu’un contrôleur vous demanderait. Sur copies, jamais sur vos originaux.",
+  Tests: "Ce qu’un contrôleur rapproche, nous le rapprochons avant lui. Comment ? C’est l’objet de l’audit.",
+  Restitution: "Des constats qualifiés, des risques classés, un plan d’actions daté, une réunion d’une heure.",
+};
+
+/** Le pont vers l'Observatoire (le blog), d'après le squelette éditorial de Sofia. */
+export const PONT_OBSERVATOIRE = {
+  phrase: "L’Observatoire vous montre ce qui est arrivé aux autres.",
+  accent: "L’audit regarde ce qui se passe chez vous.",
+  /** Sa phrase d'accroche de l'Observatoire (03-presentation-observatoire.md). */
+  texte: "Savoir ce qui arrive aux autres pour éviter que cela ne vous arrive.",
+  lien: "Lire l’Observatoire",
+  href: "/observatoire",
+} as const;
+
+/**
  * Les contrôles vécus comme dirigeante — chiffres transmis le 15/09/2026.
  * Ce sont SES résultats, jamais une promesse pour le client : la réserve est affichée avec.
  * ⚠ DGFiP : 6 contrôles annoncés, 4 sans redressement + 1 annulé au tribunal administratif = 5 ;
@@ -77,9 +136,9 @@ export const HERO = {
   titre: "Repérez les écarts",
   titreItalique: "avant qu’un contrôleur ne les trouve.",
   texte:
-    "CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : une photographie factuelle de vos risques, un plan d’actions daté, et un espace pour suivre la mission. Par une dirigeante qui a passé vingt et un ans de votre côté de la table.",
+    "CNAPS, URSSAF, DGFiP, Inspection du travail : nous identifions vos vulnérabilités avant qu’un contrôle ne les révèle, à commencer par votre sous-traitance. Un constat factuel, un plan d’actions daté, et le regard d’une dirigeante qui a passé vingt et un ans de votre côté de la table.",
   ctaPrincipal: { label: "Demander un diagnostic flash", href: "/contact?offre=flash" },
-  ctaSecondaire: { label: "Voir la méthode en 15 étapes", href: "/audit#methode" },
+  ctaSecondaire: { label: "Ce qu’un contrôleur verrait chez vous", href: "#controleur" },
   chiffres: [
     { valeur: 21, suffixe: " ans", label: "à la tête d’une entreprise de sécurité privée" },
     { valeur: 400, suffixe: "", label: "collaborateurs lors des pics d’activité" },
@@ -128,21 +187,38 @@ export const CE_QUE_VOIT_LE_CONTROLEUR = {
     {
       organisme: "Inspection du travail",
       fait: "Des heures facturées au client qui ne correspondent ni au pointage ni aux bulletins.",
-      consequence: "Présomption de travail dissimulé. C’est le test le plus fréquent, et le moins préparé.",
+      consequence: "Présomption de travail dissimulé. C’est l’écart le plus fréquent, et le moins préparé.",
       criticite: "Critique",
     },
     {
       organisme: "Sous-traitance",
-      fait: "Un sous-traitant sans autorisation d’exercer, sans attestation de vigilance à jour.",
-      consequence: "Solidarité financière : ses dettes sociales et fiscales deviennent les vôtres.",
+      fait: "Un sous-traitant à jour de ses attestations, qui facture plus d’heures que ses salariés déclarés ne peuvent en faire.",
+      consequence: "Solidarité financière sur ses dettes sociales et fiscales et, selon les cas, un risque pénal pour le dirigeant.",
       criticite: "Critique",
     },
   ],
-  conclusion: "Un audit sert à voir ces quatre lignes avant lui. Et à les corriger dans l’ordre.",
+  conclusion: "Vos documents existent sans doute. La vraie question est de savoir s’ils résistent au rapprochement entre eux.",
 } as const;
 
-/** Trois fiches de constat qui tournent dans le hero. Exemples anonymes, chiffres fictifs. */
-export const FICHES_EXEMPLE = [
+/**
+ * Trois fiches de constat qui tournent dans le hero. Exemples anonymes, chiffres fictifs.
+ *
+ * Retour de Sofia (29/09/2026) : « montrer où se trouve le risque sans donner gratuitement toute la
+ * méthode permettant de le neutraliser ». La fiche montre donc le fait, la preuve, le risque et le
+ * texte (ce que l'administration regarde, et qui est public) ; l'action corrective n'est pas écrite
+ * sur la vitrine, elle est `masquee` : la fiche affiche un bandeau caviardé « détaillée dans le rapport ».
+ * Aucune action réelle n'est présente dans le code, pour qu'elle ne sorte pas non plus dans le HTML.
+ */
+export type LigneFiche = { cle: string; valeur: string } | { cle: string; masquee: string };
+
+export const FICHES_EXEMPLE: readonly {
+  numero: string;
+  total: string;
+  domaine: string;
+  criticite: string;
+  priorite: string;
+  lignes: readonly LigneFiche[];
+}[] = [
   {
     numero: "047",
     total: "120",
@@ -150,11 +226,11 @@ export const FICHES_EXEMPLE = [
     criticite: "Critique",
     priorite: "P1 — Immédiat",
     lignes: [
-      { cle: "Fait constaté", valeur: "Trois agents en poste sur le site de [Ville] avec une carte professionnelle expirée depuis 41 jours." },
-      { cle: "Preuve", valeur: "Export Dracar du 02/09/2026 ; planning semaine 35 ; cartes n° 4472, 5120, 6103." },
-      { cle: "Risque", valeur: "Sanction administrative CNAPS, retrait d'autorisation possible, responsabilité du dirigeant." },
-      { cle: "Action", valeur: "Retrait immédiat des postes, demande de renouvellement, contrôle mensuel des échéances." },
-      { cle: "Référence", valeur: "CSI art. L.612-20 ; référentiel CNAPS surveillance humaine (vérifié le 07/09/2026)." },
+      { cle: "Fait constaté", valeur: "Trois agents en poste sur un même site client avec une carte professionnelle expirée depuis 41 jours." },
+      { cle: "Preuve", valeur: "Export Dracar du 02/09/2026 et planning de la semaine 35." },
+      { cle: "Risque", valeur: "Sanction administrative CNAPS, retrait d’autorisation possible, responsabilité du dirigeant." },
+      { cle: "Action", masquee: "Détaillée dans le rapport" },
+      { cle: "Référence", valeur: "Code de la sécurité intérieure, art. L. 612-20 (vérifié le 07/09/2026)." },
     ],
   },
   {
@@ -164,11 +240,11 @@ export const FICHES_EXEMPLE = [
     criticite: "Majeur",
     priorite: "P2 — 30 jours",
     lignes: [
-      { cle: "Fait constaté", valeur: "Sur l'échantillon de 12 bulletins, 4 paniers repas versés sans justificatif de vacation de nuit." },
-      { cle: "Preuve", valeur: "Bulletins de juin à août 2026 ; plannings correspondants ; grille IDCC 1351." },
-      { cle: "Risque", valeur: "Réintégration dans l'assiette, redressement sur trois ans avec majorations." },
-      { cle: "Action", valeur: "Rapprocher panier et planning avant chaque paie, sous la responsabilité du service paie." },
-      { cle: "Référence", valeur: "Convention collective IDCC 1351 ; BOSS frais professionnels (vérifié le 07/09/2026)." },
+      { cle: "Fait constaté", valeur: "Sur un échantillon de 12 bulletins, 4 paniers repas versés sans vacation de nuit correspondante." },
+      { cle: "Preuve", valeur: "Bulletins de juin à août 2026 et plannings de la même période." },
+      { cle: "Risque", valeur: "Réintégration dans l’assiette, redressement sur trois ans avec majorations." },
+      { cle: "Action", masquee: "Détaillée dans le rapport" },
+      { cle: "Référence", valeur: "Convention collective IDCC 1351 ; BOSS, frais professionnels (vérifié le 07/09/2026)." },
     ],
   },
   {
@@ -178,14 +254,14 @@ export const FICHES_EXEMPLE = [
     criticite: "Critique",
     priorite: "P1 — Immédiat",
     lignes: [
-      { cle: "Fait constaté", valeur: "Un sous-traitant intervient sur deux sites sans attestation de vigilance depuis mars 2026." },
-      { cle: "Preuve", valeur: "Contrat cadre du 12/01/2026 ; dernière attestation datée du 28/02/2026 ; factures avril à août." },
-      { cle: "Risque", valeur: "Solidarité financière sur ses dettes sociales et fiscales ; travail illégal présumé." },
-      { cle: "Action", valeur: "Suspendre les affectations, obtenir l'attestation, mettre en place un contrôle semestriel." },
-      { cle: "Référence", valeur: "Code du travail art. L.8222-1 et D.8222-5 (vérifié le 07/09/2026)." },
+      { cle: "Fait constaté", valeur: "Un sous-traitant facture 2 400 heures par mois ; son attestation de vigilance déclare six salariés." },
+      { cle: "Preuve", valeur: "Attestation de vigilance du 15/07/2026 ; factures de juin à août 2026." },
+      { cle: "Risque", valeur: "Faisabilité non démontrée : solidarité financière sur ses dettes, recours au travail dissimulé présumé." },
+      { cle: "Action", masquee: "Détaillée dans le rapport" },
+      { cle: "Référence", valeur: "Code du travail, art. L. 8222-1 et D. 8222-5 (vérifié le 07/09/2026)." },
     ],
   },
-] as const;
+];
 
 /** Ce que le client repart avec, à la fin d'un audit. */
 export const LIVRABLES = [
@@ -254,14 +330,18 @@ export type ChecklistId = "cnaps" | "urssaf" | "inspection" | "fiscal";
 /**
  * Les quatre checklists gratuites (lead magnet) — une par contrôleur.
  * Dix points chacune, tirés des modules du pack (03 CNAPS, 04 URSSAF / Inspection, 05 Fiscal).
- * Seuls les quatre premiers points sont lisibles sur la page ; la liste complète part par email.
+ * La page n'en montre que trois (`apercu`) : les dix sont dans `checklists.ts`, qui n'est lu que
+ * côté serveur et part par email. Retour de Sofia du 29/09/2026 : ne pas publier toute la grille.
  */
 export const CHECKLISTS: {
   id: ChecklistId;
   organisme: string;
   titre: string;
   texte: string;
-  points: string[];
+  /** Les trois premiers points de la checklist complète (checklists.ts), seuls visibles sur la page. */
+  apercu: readonly [string, string, string];
+  /** Nombre de points de la checklist complète envoyée par email. */
+  nbPoints: number;
   /** Ressources annoncées pour ce contrôleur — issues des modules de formation prévus, à écrire. */
   aVenir: { titre: string; type: "Guide" | "Checklist" | "Outil" }[];
 }[] = [
@@ -270,19 +350,13 @@ export const CHECKLISTS: {
     organisme: "CNAPS",
     titre: "Êtes-vous prêt pour un contrôle CNAPS ?",
     texte:
-      "Dix points, dix minutes. La checklist que nous passons en premier chez un client : autorisation, agrément, cartes, Dracar, contrats, sous-traitance, terrain.",
-    points: [
+      "Dix points, dix minutes. Ce que le CNAPS vérifie en premier : autorisation, agrément, cartes, Dracar, contrats, sous-traitance, terrain.",
+    apercu: [
       "Autorisation d’exercer à jour pour chaque établissement",
-      "Agrément dirigeant valide et affiché",
       "Cartes professionnelles : aucune expirée, activité adaptée au poste",
-      "Déclarations mensuelles Dracar Ultimate à jour",
-      "Contrats clients avec les mentions obligatoires",
       "Sous-traitants autorisés, attestations de vigilance de moins de six mois",
-      "Numéro d’autorisation sur devis, factures et documents commerciaux",
-      "Tenue et carte visibles sur site, consignes écrites",
-      "Registre du personnel et DPAE cohérents avec le planning",
-      "Échéancier des renouvellements tenu, avec alerte à 90 jours",
     ],
+    nbPoints: 10,
     aVenir: [
       { titre: "Préparer une visite de site : ce que le CNAPS regarde sur place", type: "Guide" },
       { titre: "Les documents à contrôler avant de faire intervenir un sous-traitant", type: "Checklist" },
@@ -295,22 +369,16 @@ export const CHECKLISTS: {
     titre: "Êtes-vous prêt pour un contrôle URSSAF ?",
     texte:
       "Ce que l’inspecteur du recouvrement rapproche en premier : embauches, bulletins, primes et paniers, heures, DSN, sous-traitance. Dix points pour savoir où vous en êtes.",
-    points: [
+    apercu: [
       "DPAE transmise avant chaque prise de poste, sans exception",
-      "Registre unique du personnel à jour, contrats écrits et signés",
-      "Classification et salaire de base conformes à la grille IDCC 1351",
       "Primes, paniers et indemnités justifiés par le planning réel (nuit, vacation, dimanche)",
-      "Frais professionnels remboursés sur justificatifs, pas en forfait déguisé",
-      "Heures supplémentaires et complémentaires payées, majorées et déclarées",
-      "DSN mensuelle cohérente avec les bulletins et les effectifs",
-      "Temps partiels : avenants signés et limite d’heures complémentaires respectée",
       "Attestations de vigilance des sous-traitants renouvelées tous les six mois",
-      "Planning, pointage, paie et facturation rapprochés au moins une fois par trimestre",
     ],
+    nbPoints: 10,
     aVenir: [
       { titre: "Lire et contrôler un bulletin de paie sécurité privée (IDCC 1351)", type: "Guide" },
       { titre: "Primes, paniers, frais : ce qui entre dans l’assiette", type: "Checklist" },
-      { titre: "Rapprochement planning, pointage, paie, facturation sur un mois", type: "Outil" },
+      { titre: "Heures vendues, heures réalisées : l’écart à surveiller", type: "Outil" },
     ],
   },
   {
@@ -319,18 +387,12 @@ export const CHECKLISTS: {
     titre: "Êtes-vous prêt pour une visite de l’Inspection du travail ?",
     texte:
       "Durées, repos, prévention, documents obligatoires : ce que l’inspecteur demande dès son arrivée, et ce qu’il vérifie sur un site en vingt minutes.",
-    points: [
+    apercu: [
       "DUERP rédigé, mis à jour dans l’année, adapté aux risques réels des sites",
-      "Plans de prévention établis pour les interventions sur sites clients",
       "Durées maximales de travail et repos quotidien et hebdomadaire respectés sur les plannings",
-      "Affichages et documents obligatoires disponibles : horaires, convention collective, coordonnées de l’inspection et de la médecine du travail",
-      "Suivi médical à jour, renforcé pour les travailleurs de nuit",
       "Travail isolé : procédure écrite et moyen d’alerte fonctionnel",
-      "Équipements de protection fournis, tracés, remplacés",
-      "CSE en place dès que l’effectif l’impose, élections tracées",
-      "Accidents du travail déclarés dans les délais et analysés",
-      "Agressions et incidents consignés, avec une procédure connue des agents",
     ],
+    nbPoints: 10,
     aVenir: [
       { titre: "DUERP en sécurité privée : travail isolé, agressions, nuit", type: "Guide" },
       { titre: "Affichages et documents obligatoires à présenter à l’inspecteur", type: "Checklist" },
@@ -342,18 +404,12 @@ export const CHECKLISTS: {
     titre: "Êtes-vous prêt pour un contrôle fiscal ?",
     texte:
       "Avant de remettre quoi que ce soit au vérificateur : la comptabilité, la facturation et la TVA doivent se rapprocher entre elles, et avec vos plannings. À passer avec votre expert-comptable.",
-    points: [
+    apercu: [
       "Fichier des écritures comptables (FEC) exportable et conforme, testé avant toute demande",
-      "Balance, grand livre et liasse fiscale rapprochés sans écart inexpliqué",
-      "Chiffre d’affaires facturé rapproché des heures planifiées et pointées",
       "Factures complètes : mentions obligatoires et numéro d’autorisation CNAPS",
       "TVA collectée et déductible cohérentes avec les déclarations déposées",
-      "Charges et frais du dirigeant justifiés, usage mixte documenté",
-      "Factures de sous-traitants rapprochées des plannings et des agents présents",
-      "Comptes courants d’associés et flux avec le dirigeant documentés",
-      "Pièces classées, indexées et datées, prêtes à être remises sur demande",
-      "Interlocuteur unique désigné et procédure de contrôle comprise avant le premier rendez-vous",
     ],
+    nbPoints: 10,
     aVenir: [
       { titre: "Contrôle fiscal : préparer la remise des pièces sans créer d’incohérences", type: "Guide" },
       { titre: "FEC, balance, grand livre : les tests à faire avant de remettre", type: "Checklist" },
@@ -365,7 +421,7 @@ export const CHECKLISTS: {
 export const APRES_CONTACT = [
   { etape: "01", titre: "Un appel de trente minutes", texte: "Sans engagement. On identifie vos trois principaux risques et on décide de la suite, ou pas." },
   { etape: "02", titre: "Une proposition écrite sous 48 h", texte: "Périmètre, format, prix ferme, liste des pièces. Pas de surprise à la facture." },
-  { etape: "03", titre: "La mission, suivie dans votre espace", texte: "Vous déposez les pièces, vous suivez les 15 étapes, vous recevez le rapport et le plan d’actions." },
+  { etape: "03", titre: "La mission, suivie dans votre espace", texte: "Vous déposez les pièces, vous suivez chaque étape, vous recevez le rapport et le plan d’actions." },
 ] as const;
 
 /** Contextes proposés dans le formulaire de contact. */

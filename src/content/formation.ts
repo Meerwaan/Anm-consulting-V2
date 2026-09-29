@@ -66,7 +66,7 @@ export const PARCOURS: ParcoursFormation[] = [
   {
     id: "temps",
     nom: "Temps de travail",
-    accroche: "Le rapprochement planning → pointage → paie → facturation. Le test à plus forte valeur ajoutée de toute la méthode.",
+    accroche: "Heures vendues, heures réalisées, heures payées : l’écart qu’un contrôleur cherche en premier.",
     modules: [
       { code: "TPS-01", titre: "Planning, pointage, paie, facturation : le rapprochement qui sauve", niveau: "Essentiel", dureeMin: 30, nbPoints: null, offre: "payant", formats: ["Vidéo", "Outil interactif"] },
       { code: "TPS-02", titre: "Durées, repos, nuit, heures sup/complémentaires, vacations", niveau: "Approfondi", dureeMin: 25, nbPoints: 15, offre: "abonnement", formats: ["Vidéo", "Checklist téléchargeable", "Quiz"] },

@@ -8,24 +8,18 @@ import { Criticite, FicheConstat } from "@/components/vitrine/FicheConstat";
 import { Checklists } from "@/components/vitrine/Checklists";
 import { Marquee } from "@/components/vitrine/Marquee";
 import { PortailApercu } from "@/components/vitrine/PortailApercu";
+import { ManifesteCourt, PhraseChoc, PontObservatoire } from "@/components/vitrine/Manifeste";
 import { Cascade, Element, Reveal } from "@/components/vitrine/Reveal";
 import { Conteneur, Filet, SectionHead } from "@/components/vitrine/SectionHead";
-import { Abonnements, Citation, ControlesVecus, CtaFinal, Piliers, PourQui, RegleOr, Tarifs } from "@/components/vitrine/Sections";
-import { METHODE_4_TEMPS, PHASES_MISSION } from "@/content/methode";
-import { CE_QUE_VOIT_LE_CONTROLEUR, CONSULTANTE, CONTROLES_VECUS, FAQ as FAQ_ITEMS, HERO } from "@/content/vitrine";
+import { Abonnements, ControlesVecus, CtaFinal, DerouleMission, Piliers, PourQui, Tarifs } from "@/components/vitrine/Sections";
+import { CE_QUE_VOIT_LE_CONTROLEUR, CHAINE_CONSTAT, CONSULTANTE, CONTROLES_VECUS, FAQ as FAQ_ITEMS, HERO } from "@/content/vitrine";
 import { PORTAIL_CLIENT } from "@/content/vision";
 
 export const metadata: Metadata = {
   title: "ANM Consulting — Audit et préparation aux contrôles en sécurité privée",
-  description: "CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : repérez les écarts avant qu’un contrôleur ne les trouve. 208 points de contrôle, 15 étapes, un plan d’actions daté.",
+  description:
+    "CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : identifiez vos vulnérabilités avant qu’un contrôle ne les révèle. Un audit mené par une ancienne dirigeante du secteur, un plan d’actions daté.",
   alternates: { canonical: "/" },
-};
-
-const TEXTES_TEMPS: Record<string, string> = {
-  Cadrage: "Entretien dirigeant, périmètre, liste des pièces. Vous savez ce qui sera regardé avant qu’on commence.",
-  Collecte: "Analyse documentaire, échantillon de salariés, de sites et de sous-traitants. Travail sur copies, jamais sur originaux.",
-  Tests: "CNAPS, social, URSSAF, temps de travail, inspection, fiscal. Rapprochement planning → pointage → paie → facturation.",
-  Restitution: "Constats qualifiés, risques classés, plan d’actions P1 → P4, rapport, réunion d’une heure.",
 };
 
 export default function HomePage() {
@@ -81,7 +75,7 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------ CE QUE VOIT LE CONTRÔLEUR */}
-      <section className="bg-papier">
+      <section id="controleur" className="scroll-mt-20 bg-papier">
         <Conteneur className="py-24 md:py-32">
           <SectionHead index="01" eyebrow="Le problème" titre={CE_QUE_VOIT_LE_CONTROLEUR.titre} sous={CE_QUE_VOIT_LE_CONTROLEUR.intro} aligne="deux" />
           <Cascade className="mt-14 grid gap-px overflow-hidden rounded-[5px] border border-filet bg-filet sm:grid-cols-2 lg:grid-cols-4" pas={0.1}>
@@ -100,7 +94,12 @@ export default function HomePage() {
             ))}
           </Cascade>
           <Reveal delay={0.1}>
-            <p className="mt-10 max-w-2xl font-display text-t3 text-encre">{CE_QUE_VOIT_LE_CONTROLEUR.conclusion}</p>
+            <p className="mt-10 max-w-3xl font-display text-t3 text-encre">{CE_QUE_VOIT_LE_CONTROLEUR.conclusion}</p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="mt-16">
+              <PontObservatoire />
+            </div>
           </Reveal>
         </Conteneur>
       </section>
@@ -133,10 +132,10 @@ export default function HomePage() {
             eyebrow="Cinq piliers"
             titre={
               <>
-                Tout ce qu’un contrôleur peut regarder, <em className="text-vert">et dans quel ordre.</em>
+                Cinq lectures de la même entreprise. <em className="text-vert">Ce qu’un contrôleur rapproche, nous le rapprochons avant lui.</em>
               </>
             }
-            sous="Cinq organismes, cinq lectures différentes de la même entreprise. L’audit les croise : planning, présence réelle, paie, facturation, situation réglementaire."
+            sous="CNAPS, URSSAF, DGFiP, Inspection du travail, sous-traitance : chacun lit votre entreprise avec ses propres pièces, et les écarts naissent entre deux lectures. Comment nous les croisons, c’est l’objet de l’audit."
             aligne="deux"
           />
           <div className="mt-14">
@@ -170,40 +169,31 @@ export default function HomePage() {
         <Conteneur className="py-24 md:py-32">
           <SectionHead
             index="05"
-            eyebrow="La méthode"
+            eyebrow="Le déroulé"
             titre={
               <>
                 Pas de théorie inutile : <em className="text-menthe">des preuves et des décisions.</em>
               </>
             }
-            sous="Quinze étapes, du premier entretien à la réunion de restitution. Vous savez à tout moment où en est la mission, et ce qui manque."
+            sous="Quatre temps, du premier entretien à la réunion de restitution. Vous savez à tout moment où en est la mission, et ce qui manque."
             sombre
             aligne="deux"
           />
-          <Cascade className="mt-14 grid gap-px overflow-hidden rounded-[5px] border border-nuit bg-nuit md:grid-cols-4" pas={0.1}>
-            {METHODE_4_TEMPS.map((t, i) => {
-              const phases = t.phases.map((p) => PHASES_MISSION[p - 1]);
-              return (
-                <Element key={t.nom} className="space-y-4 bg-encre p-6 md:p-7">
-                  <p className="font-display text-chiffre leading-none text-brume">{["I", "II", "III", "IV"][i]}</p>
-                  <h3 className="font-display text-t3">{t.nom}</h3>
-                  <p className="font-mono text-etiquette uppercase tracking-[0.14em] text-brume">
-                    {phases[0].moment}
-                    {phases.length > 1 ? ` → ${phases[phases.length - 1].moment}` : ""}
-                  </p>
-                  <p className="text-corps text-brume-2">{TEXTES_TEMPS[t.nom]}</p>
-                </Element>
-              );
-            })}
-          </Cascade>
-          <div className="mt-14 grid gap-10 md:grid-cols-[1fr_auto] md:items-center">
-            <div className="space-y-5">
-              <p className="etiquette text-brume">Chaque constat suit la même chaîne</p>
-              <RegleOr />
-              <Citation texte="Jamais une hypothèse présentée comme une non-conformité certaine. Chaque écart cite une référence officielle, vérifiée et datée." sombre />
-            </div>
+          <div className="mt-14">
+            <DerouleMission />
+          </div>
+          <div className="mt-14 grid gap-10 md:grid-cols-[1fr_auto] md:items-end">
+            <Reveal>
+              <div className="max-w-2xl space-y-5">
+                <p className="etiquette !text-brume">Ce que vous recevez</p>
+                <p className="font-display text-t3 text-papier">{CHAINE_CONSTAT}</p>
+                <p className="text-corps text-brume-2">
+                  Jamais une hypothèse présentée comme une non-conformité certaine. Chaque écart cite une référence officielle, vérifiée et datée.
+                </p>
+              </div>
+            </Reveal>
             <Bouton href="/audit#methode" variante="clair" taille="lg">
-              Les 15 étapes en détail
+              Comment se déroule un audit
             </Bouton>
           </div>
         </Conteneur>
@@ -249,6 +239,11 @@ export default function HomePage() {
           </Reveal>
         </Conteneur>
       </section>
+
+      {/* ------------------------------------------------ PHRASE CHOC
+          Juste avant la grille : le visiteur s'apprête à lire des prix, la phrase de notre fondatrice
+          déplace la question du coût de l'audit vers le coût du contrôle non préparé. */}
+      <PhraseChoc />
 
       {/* ------------------------------------------------ OFFRES + ESTIMATEUR */}
       <section className="bg-papier">
@@ -319,26 +314,22 @@ export default function HomePage() {
                 </div>
               </div>
             </Reveal>
-            <div className="space-y-7">
-              <SectionHead
-                index="09"
-                eyebrow="La fondatrice"
-                titre={
-                  <>
-                    {CONSULTANTE.prenomNom}, <em className="text-vert">vingt et un ans de l’autre côté de la table.</em>
-                  </>
-                }
-              />
+            <div className="space-y-8">
+              <Reveal>
+                <h2 className="etiquette font-mono font-normal">
+                  <span className="mr-3">09</span>La fondatrice
+                </h2>
+              </Reveal>
               <Reveal delay={0.05}>
-                <p className="text-chapo text-encre-2">{CONSULTANTE.accroche}</p>
+                <ManifesteCourt />
               </Reveal>
               <Reveal delay={0.1}>
-                <Citation texte={CONSULTANTE.citation} auteur={CONSULTANTE.prenomNom} />
-              </Reveal>
-              <Reveal delay={0.15}>
-                <Bouton href="/a-propos" variante="lien">
-                  Son parcours et notre ligne de crête
-                </Bouton>
+                <div className="space-y-4 border-t border-filet pt-6">
+                  <p className="text-corps text-encre-2">{CONSULTANTE.accroche}</p>
+                  <Bouton href="/a-propos" variante="lien">
+                    Son parcours et notre ligne de crête
+                  </Bouton>
+                </div>
               </Reveal>
             </div>
           </div>
@@ -373,7 +364,7 @@ export default function HomePage() {
       </section>
 
       {/* ------------------------------------------------ CTA */}
-      <CtaFinal />
+      <CtaFinal signature />
       <div className="sr-only">
         <Link href="/audit">Audit 360°</Link>
       </div>

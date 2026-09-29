@@ -47,7 +47,7 @@ export function PortailApercu() {
             ))}
           </div>
           <div className="flex items-center justify-between gap-4 text-meta">
-            <span className="font-medium text-encre">Étape 10 / 15 — Rapprochement planning → pointage → paie → facturation</span>
+            <span className="font-medium text-encre">Étape 10 / 15 — Contrôles croisés</span>
             <span className="font-mono text-etiquette text-gris">J+1</span>
           </div>
         </div>
@@ -143,7 +143,7 @@ export function PortailApercu() {
             {[
               { p: "P1", t: "Retirer des postes les 3 agents dont la carte est expirée", s: "Non conforme", fait: true },
               { p: "P1", t: "Obtenir l’attestation de vigilance du sous-traitant", s: "Partiel", fait: false },
-              { p: "P2", t: "Rapprocher paniers et plannings avant chaque paie", s: "Partiel", fait: false },
+              { p: "P2", t: "Régulariser les paniers repas versés sans vacation de nuit", s: "Partiel", fait: false },
             ].map((a, i) => (
               <motion.li
                 key={a.t}
