@@ -101,7 +101,7 @@ export default async function SousTraitancePage({ params }: { params: Promise<{ 
 
         {ecart.lignes.length === 0 ? (
           <p className="text-meta text-encre-2">
-            Le tableau mois par mois apparaîtra dès que les heures vendues et payées seront saisies à l’étape 1.
+            Le tableau mois par mois apparaîtra dès que les heures vendues et payées seront saisies à l’étape 2.
           </p>
         ) : (
           <div className="relative overflow-x-auto">

@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 lg:px-8">
           <Link href="/admin" className="flex min-h-12 items-baseline gap-3 py-3">
             <span className="font-display text-t4 text-encre">ANM Consulting</span>
-            <span className="hidden text-meta text-gris sm:inline">Espace de travail</span>
+            <span className="hidden text-meta text-gris xl:inline">Espace de travail</span>
           </Link>
           <nav className="flex items-center gap-1 text-meta">
             {[
@@ -19,15 +19,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               ["/admin/observatoire", "Observatoire"],
               ["/admin/cabinet", "Cabinet"],
             ].map(([href, libelle]) => (
-              <Link key={href} href={href} className="hidden min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline md:flex">
+              <Link key={href} href={href} className="hidden min-h-12 items-center px-2 text-encre-2 underline-offset-4 hover:text-vert hover:underline md:flex lg:px-3">
                 {libelle}
               </Link>
             ))}
-            <Link href="/admin/compte" className="flex min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline">
+            <Link href="/admin/aide" className="flex min-h-12 items-center px-2 text-encre-2 underline-offset-4 hover:text-vert hover:underline lg:px-3">
+              Aide
+            </Link>
+            <Link href="/admin/compte" className="flex min-h-12 items-center px-2 text-encre-2 underline-offset-4 hover:text-vert hover:underline lg:px-3">
               {session.profil?.full_name ?? "Mon compte"}
             </Link>
             <form action="/auth/deconnexion" method="post">
-              <button type="submit" className="flex min-h-12 items-center px-3 text-encre-2 underline-offset-4 hover:text-vert hover:underline">
+              <button type="submit" className="flex min-h-12 items-center px-2 text-encre-2 underline-offset-4 hover:text-vert hover:underline lg:px-3">
                 Déconnexion
               </button>
             </form>

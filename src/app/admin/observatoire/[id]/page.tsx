@@ -33,7 +33,11 @@ export default async function ArticleAdminPage({ params, searchParams }: { param
             {publie_le ? ` · publiée pour la première fois le ${dateLongue(publie_le)}` : " · jamais publiée"}
             {mis_a_jour_le ? ` · mise à jour signalée le ${dateLongue(mis_a_jour_le)}` : ""}
           </p>
-          {cree ? <p className="text-meta text-vert" role="status">Brouillon créé. Il n’est visible que dans l’espace de travail.</p> : null}
+          {cree ? (
+            <p className="text-meta text-vert" role="status">
+              {cree === "publie" ? "Publié. La page est en ligne." : "Brouillon créé. Il n’est visible que dans l’espace de travail."}
+            </p>
+          ) : null}
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link href={`/admin/observatoire/${article.id}/apercu`} className={boutonSecondaire}>

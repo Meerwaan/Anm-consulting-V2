@@ -29,6 +29,12 @@ export default async function ObservatoireAdminPage() {
               "Le blog du site. L’outil range ton analyse dans la structure de ta note méthodologique et la publie proprement pour Google ; le choix de la décision, sa lecture et le point ANM restent les tiens. Rien ne part en ligne sans les cinq questions avant diffusion.",
             )}
           </p>
+          <p className="text-meta text-encre-2">
+            Première fois, ou bloquée ?{" "}
+            <Link href="/admin/aide#observatoire" className="text-vert underline underline-offset-4 hover:text-encre">
+              Le mode d’emploi de l’Observatoire
+            </Link>
+          </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link href="/admin/observatoire/nouveau?type=fiche" className={boutonPrincipal}>

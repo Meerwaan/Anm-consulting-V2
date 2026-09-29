@@ -60,6 +60,12 @@ export default async function CommercialPage() {
           Tout se suit ici, dans l’ordre : la demande reçue du site devient un devis, le devis accepté devient la mission et son contrat,
           le contrat donne les factures. Chaque étape reprend la précédente : rien n’est à retaper.
         </p>
+        <p className="text-meta text-encre-2">
+          Numérotation, avoirs, ce qui ne se modifie plus :{" "}
+          <Link href="/admin/aide#commercial" className="text-vert underline underline-offset-4 hover:text-encre">
+            le mode d’emploi
+          </Link>
+        </p>
       </div>
 
       <section aria-label="Exemple" className="flex flex-col gap-3 rounded-[5px] border border-majeur/40 bg-papier p-5 md:flex-row md:items-center md:justify-between md:gap-8">

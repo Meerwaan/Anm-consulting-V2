@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import Link from "next/link";
 import { enregistrerArticle } from "@/app/admin/observatoire/actions";
 import { Message } from "@/components/facturation/FicheClient";
 import { boutonPrincipal, boutonSecondaire, champ, zone } from "@/components/facturation/styles";
@@ -144,6 +145,12 @@ export default function FormArticle({ initial, enLigne }: { initial: Brouillon; 
       <input type="hidden" name="type" value={a.type} />
 
       <div className="flex min-w-0 flex-col gap-12">
+        <p className="-mb-6 text-meta text-encre-2">
+          Un doute sur un bloc, le bouton Publier grisé ?{" "}
+          <Link href="/admin/aide#observatoire" className="text-vert underline underline-offset-4 hover:text-encre">
+            Le mode d’emploi
+          </Link>
+        </p>
         <Groupe titre="Le sujet">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -236,7 +243,7 @@ export default function FormArticle({ initial, enLigne }: { initial: Brouillon; 
                   nom={b.cle}
                   valeur={val(b.cle)}
                   onChange={surTexte(b.cle)}
-                  libelle={`${String(i + 1).padStart(2, "0")} · ${b.titre} — ${b.libelle.toLowerCase()}`}
+                  libelle={`${String(i + 1).padStart(2, "0")} · ${b.titre}${b.libelle !== b.titre ? ` — ${b.libelle.charAt(0).toLowerCase()}${b.libelle.slice(1)}` : ""}`}
                   aide={b.aide}
                   lignes={b.cle === "question" ? 3 : 7}
                   obligatoire={b.obligatoire}

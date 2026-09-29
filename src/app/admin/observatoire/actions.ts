@@ -109,7 +109,7 @@ export const enregistrerArticle = async (_e: EtatFormulaire, fd: FormData): Prom
   else revalidatePath("/admin/observatoire");
   revalidatePath(`/admin/observatoire/${data.id}`);
 
-  if (!id) redirect(`/admin/observatoire/${data.id}?cree=1`);
+  if (!id) redirect(`/admin/observatoire/${data.id}?cree=${statut === "publie" ? "publie" : "brouillon"}`);
 
   if (intention === "publier" && !enLigneAvant) return { ok: true, message: `Publié. La page est en ligne à l’adresse /observatoire/${slug}.` };
   if (intention === "depublier") return { ok: true, message: "Retiré du site. L’article redevient un brouillon ; sa date de première publication est conservée." };
