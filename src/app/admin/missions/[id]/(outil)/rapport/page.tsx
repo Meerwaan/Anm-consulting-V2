@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRight, DownloadSimple, FilePdf } from "@phosphor-icons/react/dist/ssr";
 import TexteRapport from "@/components/rapport/TexteRapport";
 import EmettreRapport from "@/components/rapport/EmettreRapport";
+import PublierRapport from "@/components/rapport/PublierRapport";
 import Link from "next/link";
 import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
@@ -25,9 +26,14 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
   const supabase = await createClient();
   const { data: versions } = await supabase
     .from("reports")
-    .select("id, version, generated_at, summary")
+    .select("id, version, generated_at, summary, published_to_client")
     .eq("mission_id", id)
     .order("generated_at", { ascending: false });
+  // Brouillons des textes pas encore validés (migration 0044). Si la colonne manque, l'écran
+  // fonctionne comme avant : seuls les textes validés s'affichent.
+  const { data: lignesBrouillons } = await supabase.from("rapport_textes").select("cle, brouillon").eq("mission_id", id);
+  const brouillons: Record<string, string> = {};
+  for (const x of (lignesBrouillons ?? []) as { cle: string; brouillon: string | null }[]) if (x.brouillon) brouillons[x.cle] = x.brouillon;
   const propositions = propositionsTextes(r);
   const prochaine = `v${(versions?.length ?? 0) + 1}`;
   const actionsOuvertes = r.nonConformites.filter((n) => n.statut !== "regularise").length;
@@ -38,7 +44,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
         <EtapePage chemin="rapport" />
         <h2 className="font-display text-t3 text-encre">Rapport</h2>
         <p className="max-w-2xl text-corps text-encre-2">
-          Le rapport se construit tout seul à partir de ce que tu as saisi et conclu. Ici, tu relis les textes et tu émets la version qui part chez le client.
+          Le rapport se construit tout seul à partir de ce que vous avez saisi et conclu. Ici, vous relisez les textes et vous émettez la version qui part chez le client.
         </p>
       </div>
 
@@ -60,7 +66,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
               ))}
             </ul>
             <p className="text-meta text-encre-2">
-              Tu peux émettre le rapport dès maintenant : tant qu’il manque un point, il porte la mention « version de travail ».
+              Vous pouvez émettre le rapport dès maintenant : tant qu’il manque un point, il porte la mention « version de travail ».
             </p>
           </>
         ) : (
@@ -82,14 +88,15 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
         {versions && versions.length ? (
           <div className="flex flex-col gap-2">
             <p className="text-meta font-medium text-encre">Versions émises</p>
+            <p className="text-note text-gris">Une version rendue visible apparaît dans l’espace client de la mission, en téléchargement.</p>
             <ul className="flex flex-col divide-y divide-filet border-y border-filet">
               {versions.map((v) => (
-                <li key={v.id}>
+                <li key={v.id} className="flex flex-wrap items-center justify-between gap-x-4">
                   <a
                     href={`/admin/missions/${id}/rapport/version/${v.id}`}
                     target="_blank"
                     rel="noopener"
-                    className="flex min-h-12 items-center justify-between gap-4 py-2 text-meta text-encre hover:text-vert"
+                    className="flex min-h-12 min-w-0 flex-1 items-center justify-between gap-4 py-2 text-meta text-encre hover:text-vert"
                   >
                     <span>
                       <strong className="font-medium">{v.version}</strong> · {new Date(v.generated_at).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })}
@@ -97,6 +104,7 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
                     </span>
                     <DownloadSimple size={18} aria-hidden />
                   </a>
+                  <PublierRapport missionId={id} rapportId={v.id} visible={Boolean(v.published_to_client)} />
                 </li>
               ))}
             </ul>
@@ -108,11 +116,11 @@ export default async function RapportPage({ params }: { params: Promise<{ id: st
         <div>
           <h3 id="textes" className="font-display text-t4 text-encre">Les textes du rapport</h3>
           <p className="mt-1 max-w-2xl text-meta text-encre-2">
-            L’outil propose une rédaction à partir de tes réponses et des chiffres. Relis-la, change ce qui ne te ressemble pas, puis valide.
+            L’outil propose une rédaction à partir de vos réponses et des chiffres. Relisez-la, changez ce qui ne vous ressemble pas, puis validez.
           </p>
         </div>
         {CLES_TEXTES.map((k) => (
-          <TexteRapport key={k} missionId={id} cle={k} titre={TITRES_TEXTES[k]} proposition={propositions[k]} enregistre={g.textes[k] ?? null} />
+          <TexteRapport key={k} missionId={id} cle={k} titre={TITRES_TEXTES[k]} proposition={propositions[k]} enregistre={g.textes[k] ?? null} brouillon={brouillons[k] ?? null} />
         ))}
       </section>
 

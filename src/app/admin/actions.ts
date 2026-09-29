@@ -14,6 +14,7 @@ import {
   cequiManque,
 } from "@/content/constat";
 import { completerDepuisAnnuaire } from "./missions/[id]/(outil)/contrat/actions";
+import { etapeEquivalente } from "@/lib/modules/anciennes-etapes";
 
 const chemin = (missionId: string) => `/admin/missions/${missionId}`;
 
@@ -27,9 +28,12 @@ type Retour = (missionId: string, ordre: string, params: Record<string, string>)
 // Le type est porté par la constante, pas seulement par la flèche : c'est ce qui
 // permet à TypeScript de savoir qu'un appel à `retour` interrompt la suite, et donc
 // de comprendre qu'après « si le point est introuvable, retour », le point existe.
+// L'ancien écran en 15 étapes n'est plus affiché (21/09/2026) : ces actions ne sont plus appelées
+// que par ses anciens composants. Si l'une l'était encore, le retour se ferait sur l'étape de la
+// barre en 8 étapes qui en tient lieu (qui n'affiche pas `ok` / `erreur`).
 const retour: Retour = (missionId, ordre, params) => {
   const q = new URLSearchParams(params).toString();
-  redirect(`${chemin(missionId)}/etapes/${ordre}${q ? `?${q}` : ""}`);
+  redirect(`${chemin(missionId)}/${etapeEquivalente(ordre)}${q ? `?${q}` : ""}`);
 };
 
 export interface EtatCreation {
@@ -55,8 +59,8 @@ export const creerMission = async (_etat: EtatCreation, formData: FormData): Pro
   const debut = String(formData.get("periode_debut") ?? "").trim();
   const fin = String(formData.get("periode_fin") ?? "").trim();
 
-  if (!nomClient) return { erreur: "Indique le nom du client." };
-  if (!reference) return { erreur: "Indique une référence de mission." };
+  if (!nomClient) return { erreur: "Indiquez le nom du client." };
+  if (!reference) return { erreur: "Indiquez une référence de mission." };
   if (siren && !/^\d{9}(\d{5})?$/.test(siren)) return { erreur: "Le SIREN compte 9 chiffres (14 pour un SIRET)." };
   if (debut && fin && fin < debut) return { erreur: "La fin de la période est avant son début." };
 
@@ -65,7 +69,7 @@ export const creerMission = async (_etat: EtatCreation, formData: FormData): Pro
     .insert({ name: nomClient, siren, headcount: effectif })
     .select("id")
     .single();
-  if (erreurOrg || !org) return { erreur: "Le client n’a pas pu être créé. Réessaie." };
+  if (erreurOrg || !org) return { erreur: "Le client n’a pas pu être créé. Réessayez." };
 
   const { data: mission, error: erreurMission } = await supabase
     .from("missions")
@@ -81,7 +85,7 @@ export const creerMission = async (_etat: EtatCreation, formData: FormData): Pro
     .single();
   if (erreurMission || !mission) {
     await supabase.from("organizations").delete().eq("id", org.id);
-    return { erreur: /duplicate|unique/i.test(erreurMission?.message ?? "") ? "Cette référence existe déjà." : "La mission n’a pas pu être créée. Réessaie." };
+    return { erreur: /duplicate|unique/i.test(erreurMission?.message ?? "") ? "Cette référence existe déjà." : "La mission n’a pas pu être créée. Réessayez." };
   }
 
   if (debut || fin) {
@@ -107,7 +111,6 @@ export const definirResultatPoint = async (formData: FormData): Promise<void> =>
   const missionId = String(formData.get("missionId"));
   const pointId = Number(formData.get("pointId"));
   const statut = String(formData.get("statut")) as ResultatPoint;
-  const ordre = String(formData.get("ordre") ?? "1");
   const risqueInitial = String(formData.get("risqueInitial") ?? "");
   const { data: utilisateur } = await supabase.auth.getUser();
 
@@ -124,7 +127,7 @@ export const definirResultatPoint = async (formData: FormData): Promise<void> =>
     { onConflict: "mission_id,control_point_id" },
   );
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /**
@@ -138,7 +141,6 @@ export const marquerEtapeConforme = async (formData: FormData): Promise<void> =>
   const supabase = await createClient();
 
   const missionId = String(formData.get("missionId"));
-  const ordre = String(formData.get("ordre") ?? "1");
   const pointsIds = String(formData.get("pointsIds") ?? "")
     .split(",")
     .map((v) => Number(v))
@@ -172,7 +174,7 @@ export const marquerEtapeConforme = async (formData: FormData): Promise<void> =>
     { onConflict: "mission_id,control_point_id" },
   );
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /** Avancement d'une étape : à faire / en cours / faite / sans objet. */
@@ -183,7 +185,6 @@ export const definirStatutEtape = async (formData: FormData): Promise<void> => {
   const missionId = String(formData.get("missionId"));
   const stepId = Number(formData.get("stepId"));
   const statut = String(formData.get("statut")) as StatutEtape;
-  const ordre = String(formData.get("ordre") ?? "1");
 
   await supabase
     .from("mission_step_progress")
@@ -191,7 +192,7 @@ export const definirStatutEtape = async (formData: FormData): Promise<void> => {
     .eq("mission_id", missionId)
     .eq("step_id", stepId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /** Note de travail rattachée à l'étape. Jamais visible du client (décision 04). */
@@ -201,7 +202,6 @@ export const ajouterNote = async (formData: FormData): Promise<void> => {
 
   const missionId = String(formData.get("missionId"));
   const stepId = Number(formData.get("stepId"));
-  const ordre = String(formData.get("ordre") ?? "1");
   const body = String(formData.get("body") ?? "").trim();
   if (!body) return;
 
@@ -214,7 +214,7 @@ export const ajouterNote = async (formData: FormData): Promise<void> => {
     visible_to_client: false,
   });
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
 };
 
 /**
@@ -222,7 +222,7 @@ export const ajouterNote = async (formData: FormData): Promise<void> => {
  * C'est le poste de perte de temps numéro un d'une mission : réclamer les
  * pièces une par une multiplie les allers-retours. Une demande par pièce est
  * créée (le client doit pouvoir en déposer une sans attendre les autres), mais
- * en un seul geste, et les relances partent ensuite toutes seules.
+ * en un seul geste. Aucune relance automatique n'existe : c'est la consultante qui relance.
  */
 export const demanderPiecesManquantes = async (formData: FormData): Promise<void> => {
   await exigerRole("consultant");
@@ -352,10 +352,10 @@ export const enregistrerRapprochement = async (formData: FormData): Promise<void
         .from("mission_reconciliations")
         .insert({ mission_id: missionId, kind, ...valeurs });
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, ordre, error
     ? { erreur: error.message.includes("portee_uniq")
-        ? "Ce croisement existe déjà pour ce site et cette période — modifie la ligne existante."
+        ? "Ce croisement existe déjà pour ce site et cette période — modifiez la ligne existante."
         : error.message }
     : { ok: ligneId ? "Croisement mis à jour." : "Croisement ajouté." });
 };
@@ -371,7 +371,7 @@ export const supprimerRapprochement = async (formData: FormData): Promise<void> 
     .delete()
     .eq("id", String(formData.get("ligneId")))
     .eq("mission_id", missionId);
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, ordre, error ? { erreur: error.message } : { ok: "Croisement supprimé." });
 };
 
@@ -476,9 +476,8 @@ export const creerConstatDepuisPoint = async (formData: FormData): Promise<void>
     .eq("mission_id", missionId)
     .eq("control_point_id", pointId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
-  revalidatePath(`${chemin(missionId)}/etapes/11`);
-  retour(missionId, "11", { ok: `Constat ouvert depuis ${point.code}. Complète-le ici.` });
+  revalidatePath(chemin(missionId), "layout");
+  retour(missionId, "11", { ok: `Constat ouvert depuis ${point.code}. Complétez-le ici.` });
 };
 
 /**
@@ -567,7 +566,7 @@ export const enregistrerConstat = async (formData: FormData): Promise<void> => {
     .eq("id", constatId)
     .eq("mission_id", missionId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
   if (error) retour(missionId, ordre, { erreur: error.message });
   if (publier && !complet) {
     retour(missionId, ordre, {
@@ -634,7 +633,7 @@ export const genererPlanActions = async (formData: FormData): Promise<void> => {
     }),
   );
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, ordre, error
     ? { erreur: error.message }
     : { ok: `${aCreer.length} action${aCreer.length > 1 ? "s" : ""} générée${aCreer.length > 1 ? "s" : ""}.` });
@@ -658,7 +657,7 @@ export const enregistrerCadrage = async (formData: FormData): Promise<void> => {
     })
     .eq("id", missionId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/1`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "1", error ? { erreur: error.message } : { ok: "Cadrage enregistré." });
 };
 
@@ -688,7 +687,7 @@ export const enregistrerPerimetre = async (formData: FormData): Promise<void> =>
       .eq("id", missionId),
   ]);
 
-  revalidatePath(`${chemin(missionId)}/etapes/2`);
+  revalidatePath(chemin(missionId), "layout");
   const souci = erreurOrg ?? erreurMission;
   retour(missionId, "2", souci ? { erreur: souci.message } : { ok: "Périmètre enregistré." });
 };
@@ -722,8 +721,7 @@ export const definirPlaceDansRapport = async (formData: FormData): Promise<void>
     p_rang: rang,
   });
 
-  revalidatePath(`${chemin(missionId)}/etapes/12`);
-  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "12", error ? { erreur: error.message } : { ok: String(data) });
 };
 
@@ -748,7 +746,7 @@ export const enregistrerAction = async (formData: FormData): Promise<void> => {
     .eq("id", actionId)
     .eq("mission_id", missionId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "13", error ? { erreur: error.message } : { ok: "Action mise à jour." });
 };
 
@@ -771,7 +769,7 @@ export const ajouterAction = async (formData: FormData): Promise<void> => {
     status: "a_faire",
   });
 
-  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "13", error ? { erreur: error.message } : { ok: "Action ajoutée." });
 };
 
@@ -812,7 +810,7 @@ export const ajouterConstatLibre = async (formData: FormData): Promise<void> => 
     visible_to_client: false,
   });
 
-  revalidatePath(`${chemin(missionId)}/etapes/${ordre}`);
+  revalidatePath(chemin(missionId), "layout");
   retour(
     missionId,
     ordre,
@@ -846,9 +844,7 @@ export const supprimerConstat = async (formData: FormData): Promise<void> => {
     p_constat: constatId,
   });
 
-  for (const etape of [ordre, "11", "12", "13", "14"]) {
-    revalidatePath(`${chemin(missionId)}/etapes/${etape}`);
-  }
+  revalidatePath(chemin(missionId), "layout");
   if (error) retour(missionId, ordre, { erreur: error.message });
 
   const bilan = (Array.isArray(data) ? data[0] : data) as
@@ -900,7 +896,7 @@ export const realignerAction = async (formData: FormData): Promise<void> => {
     .eq("id", actionId)
     .eq("mission_id", missionId);
 
-  revalidatePath(`${chemin(missionId)}/etapes/13`);
+  revalidatePath(chemin(missionId), "layout");
   retour(
     missionId,
     "13",
@@ -942,7 +938,7 @@ export const enregistrerReponseEntretien = async (formData: FormData): Promise<v
     { onConflict: "mission_id,question_code" },
   );
 
-  revalidatePath(`${chemin(missionId)}/etapes/1`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "1", error ? { erreur: error.message } : { ok: "Réponse enregistrée." });
 };
 
@@ -984,8 +980,7 @@ export const enregistrerHeuresAgent = async (formData: FormData): Promise<void> 
     ? await supabase.from("mission_heures_agent").update(valeurs).eq("id", ligneId).eq("mission_id", missionId)
     : await supabase.from("mission_heures_agent").insert({ mission_id: missionId, ...valeurs });
 
-  revalidatePath(`${chemin(missionId)}/etapes/10`);
-  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "10", error
     ? { erreur: error.message.includes("heures_agent_uniq")
         ? "Cet agent a déjà une ligne pour ce site et cette période."
@@ -1003,7 +998,6 @@ export const supprimerHeuresAgent = async (formData: FormData): Promise<void> =>
     .delete()
     .eq("id", String(formData.get("ligneId")))
     .eq("mission_id", missionId);
-  revalidatePath(`${chemin(missionId)}/etapes/10`);
-  revalidatePath(`${chemin(missionId)}/etapes/14`);
+  revalidatePath(chemin(missionId), "layout");
   retour(missionId, "10", error ? { erreur: error.message } : { ok: "Ligne supprimée." });
 };

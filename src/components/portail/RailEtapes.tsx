@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AvancementEtape } from "@/lib/types";
 import type { HorsEtape } from "@/lib/portail/mission";
+import { etapeEquivalente } from "@/lib/modules/anciennes-etapes";
 
 const COULEUR_STATUT: Record<string, string> = {
   todo: "var(--anm-hairline)",
@@ -32,7 +33,7 @@ const RailEtapes = ({ missionId, etapes, ordreActif, horsEtape }: Props) => {
         return (
           <Link
             key={e.step_id}
-            href={`/admin/missions/${missionId}/etapes/${e.sort_order}`}
+            href={`/admin/missions/${missionId}/${etapeEquivalente(String(e.sort_order))}`}
             aria-current={actif ? "page" : undefined}
             className={`flex items-start gap-2.5 rounded px-2.5 py-2 text-sm ${
               actif ? "bg-[var(--anm-mint)] font-medium" : "hover:bg-[var(--anm-paper)]"
@@ -60,7 +61,7 @@ const RailEtapes = ({ missionId, etapes, ordreActif, horsEtape }: Props) => {
 
       {pointsHors > 0 ? (
         <Link
-          href={`/admin/missions/${missionId}/etapes/hors-etape`}
+          href={`/admin/missions/${missionId}/${etapeEquivalente("hors-etape")}`}
           aria-current={ordreActif === -1 ? "page" : undefined}
           className={`mt-2 flex items-start gap-2.5 rounded border border-dashed border-[var(--anm-majeur)] px-2.5 py-2 text-sm ${
             ordreActif === -1 ? "bg-[var(--anm-mint)] font-medium" : ""

@@ -3,6 +3,7 @@ import type { LignePoint } from "@/lib/portail/mission";
 import type { Constat } from "@/lib/types";
 import { creerConstatDepuisPoint, definirResultatPoint, marquerEtapeConforme } from "@/app/admin/actions";
 import { constatComplet } from "@/content/constat";
+import { etapeEquivalente } from "@/lib/modules/anciennes-etapes";
 
 const LIBELLE: Record<string, string> = {
   conforme: "Conforme",
@@ -150,7 +151,7 @@ const TableauPoints = ({ missionId, ordre, points, constats }: Props) => {
                       ) : null}
                       {p.resultat?.finding_id ? (
                         <Link
-                          href={`/admin/missions/${missionId}/etapes/11`}
+                          href={`/admin/missions/${missionId}/${etapeEquivalente("11")}`}
                           className="font-mono text-[0.64rem] uppercase tracking-wide underline decoration-[var(--anm-hairline)] underline-offset-2"
                           style={{
                             color:

@@ -36,9 +36,9 @@ export const enregistrerReponse = async (entree: {
     ...g.sections.flatMap((s) => s.items.map((i) => i.code)),
     ...g.conclusions.filter((c) => c.type === "multi").flatMap((c) => (c.choix ?? []).map((_, i) => `${c.code}.${i}`)),
   ]);
-  if (!items.has(entree.item)) return { ok: false, erreur: "Question inconnue. Recharge la page." };
+  if (!items.has(entree.item)) return { ok: false, erreur: "Question inconnue. Rechargez la page." };
   if (entree.reponse && !REPONSES.has(entree.reponse)) return { ok: false, erreur: "Réponse invalide." };
-  if (!(await cibleValide(entree.missionId, entree.grille, entree.cible))) return { ok: false, erreur: "Dossier introuvable. Recharge la page." };
+  if (!(await cibleValide(entree.missionId, entree.grille, entree.cible))) return { ok: false, erreur: "Dossier introuvable. Rechargez la page." };
 
   const valeurs: Record<string, unknown> = {
     mission_id: entree.missionId,
@@ -55,7 +55,7 @@ export const enregistrerReponse = async (entree: {
   const { error } = await supabase.from("grille_reponses").upsert(valeurs, { onConflict: "mission_id,grille,cible,item" });
   if (error) {
     console.error("[grilles] réponse", error.message);
-    return { ok: false, erreur: "Non enregistré. Réessaie." };
+    return { ok: false, erreur: "Non enregistré. Réessayez." };
   }
   rafraichir(entree.missionId);
   return { ok: true };
@@ -74,7 +74,7 @@ export const enregistrerConclusion = async (entree: {
   const c = GRILLES[entree.grille]?.conclusions.find((x) => x.code === entree.code);
   if (!c) return { ok: false, erreur: "Conclusion inconnue." };
   if (entree.choix && !(c.choix ?? []).includes(entree.choix)) return { ok: false, erreur: "Choix invalide." };
-  if (!(await cibleValide(entree.missionId, entree.grille, entree.cible))) return { ok: false, erreur: "Dossier introuvable. Recharge la page." };
+  if (!(await cibleValide(entree.missionId, entree.grille, entree.cible))) return { ok: false, erreur: "Dossier introuvable. Rechargez la page." };
 
   const valeurs: Record<string, unknown> = {
     mission_id: entree.missionId,
@@ -89,7 +89,7 @@ export const enregistrerConclusion = async (entree: {
   const { error } = await supabase.from("grille_conclusions").upsert(valeurs, { onConflict: "mission_id,grille,cible" });
   if (error) {
     console.error("[grilles] conclusion", error.message);
-    return { ok: false, erreur: "Non enregistré. Réessaie." };
+    return { ok: false, erreur: "Non enregistré. Réessayez." };
   }
   rafraichir(entree.missionId);
   return { ok: true };
@@ -136,7 +136,7 @@ export const enregistrerNonConformite = async (entree: {
   }
   if (entree.id) {
     const { error } = await supabase.from("non_conformites").update(valeurs).eq("id", entree.id).eq("mission_id", entree.missionId);
-    if (error) return { ok: false, erreur: "Non enregistré. Réessaie." };
+    if (error) return { ok: false, erreur: "Non enregistré. Réessayez." };
     rafraichir(entree.missionId);
     return { ok: true, valeur: entree.id };
   }
@@ -146,7 +146,7 @@ export const enregistrerNonConformite = async (entree: {
     .insert({ ...valeurs, mission_id: entree.missionId })
     .select("id")
     .single<{ id: string }>();
-  if (error || !data) return { ok: false, erreur: "La création a échoué. Réessaie." };
+  if (error || !data) return { ok: false, erreur: "La création a échoué. Réessayez." };
   rafraichir(entree.missionId);
   return { ok: true, valeur: data.id };
 };
@@ -155,7 +155,7 @@ export const supprimerNonConformite = async (entree: { missionId: string; id: st
   await exigerRole("consultant");
   const supabase = await createClient();
   const { error } = await supabase.from("non_conformites").delete().eq("id", entree.id).eq("mission_id", entree.missionId);
-  if (error) return { ok: false, erreur: "La suppression a échoué. Réessaie." };
+  if (error) return { ok: false, erreur: "La suppression a échoué. Réessayez." };
   rafraichir(entree.missionId);
   return { ok: true };
 };
@@ -178,7 +178,37 @@ export const enregistrerTexte = async (entree: { missionId: string; cle: string;
     },
     { onConflict: "mission_id,cle" },
   );
-  if (error) return { ok: false, erreur: "Non enregistré. Réessaie." };
+  if (error) return { ok: false, erreur: "Non enregistré. Réessayez." };
+  // Le texte validé remplace le brouillon. Sans effet (et sans erreur remontée) tant que la
+  // migration 0044 n'est pas appliquée : la validation, elle, a réussi.
+  await supabase.from("rapport_textes").update({ brouillon: null }).eq("mission_id", entree.missionId).eq("cle", entree.cle);
+  rafraichir(entree.missionId);
+  return { ok: true };
+};
+
+/**
+ * Le brouillon d'un texte pas encore validé, enregistré pendant la frappe : rien ne se perd si
+ * l'écran est quitté sans toucher le bouton. N'écrit que `brouillon` : `texte` (le texte validé,
+ * seul repris dans le rapport) n'est jamais modifié ici.
+ */
+export const enregistrerBrouillonTexte = async (entree: { missionId: string; cle: string; texte: string }): Promise<Resultat> => {
+  const session = await exigerRole("consultant");
+  if (!CLES_TEXTE.test(entree.cle)) return { ok: false, erreur: "Texte inconnu." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("rapport_textes").upsert(
+    {
+      mission_id: entree.missionId,
+      cle: entree.cle,
+      brouillon: entree.texte.trim() ? entree.texte : null,
+      updated_at: new Date().toISOString(),
+      updated_by: session.utilisateurId,
+    },
+    { onConflict: "mission_id,cle" },
+  );
+  if (error) {
+    console.error("[rapport] brouillon", error.message);
+    return { ok: false, erreur: "Brouillon non enregistré." };
+  }
   rafraichir(entree.missionId);
   return { ok: true };
 };

@@ -25,7 +25,7 @@ export const emettreRapport = async (missionId: string): Promise<{ ok: true; ver
   const { error: errStockage } = await supabase.storage.from("pieces").upload(chemin, new Uint8Array(pdf), { contentType: "application/pdf", upsert: false });
   if (errStockage) {
     console.error("[rapport] archivage", errStockage.message);
-    return { ok: false, erreur: "Le PDF n’a pas pu être archivé. Réessaie." };
+    return { ok: false, erreur: "Le PDF n’a pas pu être archivé. Réessayez." };
   }
   const { error } = await supabase.from("reports").insert({
     mission_id: missionId,
@@ -36,7 +36,7 @@ export const emettreRapport = async (missionId: string): Promise<{ ok: true; ver
   });
   if (error) {
     await supabase.storage.from("pieces").remove([chemin]);
-    return { ok: false, erreur: "La version n’a pas pu être enregistrée. Réessaie." };
+    return { ok: false, erreur: "La version n’a pas pu être enregistrée. Réessayez." };
   }
   revalidatePath(`/admin/missions/${missionId}`, "layout");
   return { ok: true, version };

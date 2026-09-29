@@ -77,8 +77,11 @@ const FormulaireConnexion = () => {
       </button>
 
       <p className="text-meta text-gris">
-        Mot de passe oublié : demande à Merwan de le réinitialiser. Tu pourras ensuite le changer
-        depuis « Mon compte ».
+        Mot de passe oublié : écrivez à{" "}
+        <a href="mailto:contact@anm-consulting.fr" className="whitespace-nowrap underline underline-offset-4">
+          contact@anm-consulting.fr
+        </a>
+        , nous vous envoyons un nouveau lien.
       </p>
     </form>
   );
