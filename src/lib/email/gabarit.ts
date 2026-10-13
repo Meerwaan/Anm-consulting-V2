@@ -1,6 +1,6 @@
 /**
- * Gabarit commun des emails d’ANM Consulting : HTML sobre (tableaux, styles en ligne, aucune image
- * distante) et version texte brut, construits à partir des mêmes blocs pour qu’ils disent la même chose.
+ * Gabarit commun des emails d’ANM Consulting : HTML sobre (tableaux, styles en ligne, une seule image,
+ * le logo) et version texte brut, construits à partir des mêmes blocs pour qu’ils disent la même chose.
  *
  * Direction artistique du site (src/app/globals.css) : fond #f6f7f5, papier #fbfbf9, encre #0e1f1c,
  * vert #0f3d35, filet #d3dad6, gris #5f6b67. Instrument Serif n’est pas disponible dans les messageries :
@@ -19,6 +19,17 @@ const C = {
   filet: "#d3dad6",
   gris: "#5f6b67",
 } as const;
+
+/**
+ * Le logo horizontal « couleur » du kit, en PNG sur son fond papier (scripts/logo-email.mjs) : les
+ * messageries n’affichent pas le SVG, et celles qui assombrissent le message ne touchent pas aux images.
+ * L’image porte sa zone de protection (16 px) : le logo lui-même fait 160 px de large.
+ *
+ * Adresse fixe, sur le site en ligne : un email déjà parti la relira à chaque ouverture. Ne jamais
+ * renommer ni supprimer public/email/logo-anm-consulting.png.
+ */
+const SITE = "https://anm-consulting.fr";
+const LOGO = { url: `${SITE}/email/logo-anm-consulting.png`, largeur: 192, hauteur: 98 } as const;
 
 const SERIF = "Georgia, 'Times New Roman', serif";
 const SANS = "Arial, Helvetica, sans-serif";
@@ -117,7 +128,7 @@ export const composer = (c: Contenu): { html: string; text: string } => {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.fond};">
 <tr><td align="center" style="padding:32px 16px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:${C.papier};border:1px solid ${C.filet};border-radius:5px;">
-<tr><td style="padding:22px 28px 16px;font-family:${MONO};font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${C.encre};">ANM Consulting</td></tr>
+<tr><td style="padding:10px 12px 6px;"><a href="${SITE}" style="text-decoration:none;"><img src="${LOGO.url}" width="${LOGO.largeur}" height="${LOGO.hauteur}" alt="ANM Consulting" style="display:block;width:${LOGO.largeur}px;height:${LOGO.hauteur}px;border:0;outline:none;font-family:${MONO};font-size:11px;letter-spacing:2px;text-transform:uppercase;color:${C.encre};"></a></td></tr>
 <tr><td style="height:2px;line-height:2px;font-size:0;background:${C.encre};">&nbsp;</td></tr>
 <tr><td style="padding:28px 28px 8px;">
 <p style="margin:0 0 10px;font-family:${MONO};font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:${C.gris};">${echapper(c.surtitre)}</p>

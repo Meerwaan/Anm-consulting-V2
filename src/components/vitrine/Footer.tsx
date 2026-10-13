@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/marque/Logo";
 import { EDITEUR } from "@/content/legal";
 import { Conteneur } from "./SectionHead";
 
@@ -43,9 +44,8 @@ export function Footer() {
       <Conteneur large className="py-16 md:py-20">
         <div className="grid gap-12 md:grid-cols-[1.3fr_repeat(3,1fr)] md:gap-8">
           <div className="space-y-5">
-            <Link href="/" className="flex items-baseline gap-2">
-              <span className="font-display text-t3 leading-none">ANM</span>
-              <span className="font-mono text-etiquette uppercase tracking-[0.28em] text-brume">Consulting</span>
+            <Link href="/" className="block w-fit" aria-label="ANM Consulting, accueil">
+              <Logo variante="horizontal-negatif" largeur={160} />
             </Link>
             <p className="max-w-xs text-corps text-brume-2">
               Audit et préparation aux contrôles pour les entreprises de sécurité privée. Vingt et un ans de

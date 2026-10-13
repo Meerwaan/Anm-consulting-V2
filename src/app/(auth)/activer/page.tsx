@@ -18,7 +18,7 @@ export default async function ActiverPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <p className="etiquette">ANM Consulting · Espace client</p>
+      <p className="etiquette">Espace client</p>
       <h1 className="mt-4 font-display text-t2 text-encre">Choisissez votre mot de passe</h1>
       {jeton ? (
         <>

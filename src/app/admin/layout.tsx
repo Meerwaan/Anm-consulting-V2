@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/marque/Logo";
 import { exigerRole } from "@/lib/supabase/session";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -8,8 +9,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-dvh bg-fond">
       <header className="border-b border-filet bg-papier">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 lg:px-8">
-          <Link href="/admin" className="flex min-h-12 items-baseline gap-3 py-3">
-            <span className="font-display text-t4 text-encre">ANM Consulting</span>
+          <Link href="/admin" className="flex items-center gap-3 py-2.5">
+            <Logo variante="symbole-couleur" largeur={38} prioritaire />
             <span className="hidden text-meta text-gris xl:inline">Espace de travail</span>
           </Link>
           <nav className="flex items-center gap-1 text-meta">

@@ -1,5 +1,6 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { ARTICLES_CONTRAT, ARTICLE_PRESTATION, CHAINE_METHODE, type Bloc } from "@/content/contrat";
+import { LogoPdf } from "@/lib/marque/LogoPdf";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { tvaIntracom } from "./annuaire";
 import type { Cabinet, ClientFiche, Contrat, MissionFacturation } from "./donnees";
@@ -68,6 +69,9 @@ export const DocumentContrat = ({ cabinet, client, mission, contrat }: Props) =>
         <EnTete gauche={cabinet.raison_sociale} droite={titreDoc} />
         <Pied gauche={`${cabinet.raison_sociale} · ${client.name}`} />
         <View style={s.corps}>
+          <View style={{ marginBottom: 20 }}>
+            <LogoPdf />
+          </View>
           <Text style={s.etiquette}>Mission {mission.reference}</Text>
           <Text style={[s.h1, { marginTop: 6, marginBottom: 18 }]}>Contrat de prestation de services</Text>
 

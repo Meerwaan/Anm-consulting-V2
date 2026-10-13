@@ -18,7 +18,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: DONNEES }} />
       <Nav />
-      <main className="pt-[77px] md:pt-[85px]">{children}</main>
+      <main className="pt-[87px] md:pt-[91px]">{children}</main>
       <Footer />
     </>
   );

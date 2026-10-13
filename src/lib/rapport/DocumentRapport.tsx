@@ -2,6 +2,7 @@ import path from "node:path";
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { fmtDate, fmtEuros, fmtHeures, fmtMois, fmtNombre, fmtPct } from "@/lib/sous-traitance/format";
 import { GRILLE_SOUS_TRAITANT } from "@/content/grilles";
+import { LogoPdf } from "@/lib/marque/LogoPdf";
 import { TITRES_TEXTES, type ChapitreModule, type ModeleRapport, type PointDefavorable } from "./modele";
 
 /**
@@ -199,9 +200,9 @@ export const DocumentRapport = ({ r, version, dateEmission }: { r: ModeleRapport
       <Page size="A4" style={[s.page, { paddingTop: 80 }]}>
         {brouillon ? <Text style={s.filigrane} fixed>Version de travail</Text> : null}
         <View style={s.corps}>
-        <Text style={{ fontFamily: "Instrument Serif", fontSize: 18, color: C.encre }}>ANM Consulting</Text>
-        <Text style={[s.etiquette, { marginTop: 4 }]}>Audit et préparation aux contrôles · sécurité privée</Text>
-        <View style={{ marginTop: 170 }}>
+        <LogoPdf largeur={132} />
+        <Text style={[s.etiquette, { marginTop: 14 }]}>Audit et préparation aux contrôles · sécurité privée</Text>
+        <View style={{ marginTop: 128 }}>
           <Text style={s.etiquette}>Rapport de contrôle</Text>
           <Text style={[s.h1, { marginTop: 12 }]}>Sous-traitance, URSSAF, DGFiP et CNAPS</Text>
           <Text style={[s.h1, { color: C.vert, fontStyle: "italic", marginTop: 4 }]}>{r.mission.client}</Text>

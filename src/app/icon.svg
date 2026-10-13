@@ -1,8 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="14" fill="#0f3d35"/>
-  <rect x="14" y="16" width="36" height="1.6" fill="#fbfbf9"/>
-  <rect x="14" y="26" width="24" height="1.2" fill="#dcefe5"/>
-  <rect x="14" y="33" width="30" height="1.2" fill="#dcefe5"/>
-  <rect x="14" y="40" width="20" height="1.2" fill="#dcefe5"/>
-  <circle cx="45" cy="46" r="5" fill="#f5ecdd"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+<title>ANM Consulting</title>
+<rect width="120" height="120" rx="24" fill="#0F3D35"/>
+<g transform="matrix(0.889 0 0 0.889 6.667 3.634)">
+<path fill="#FBFBF9" d="M6 42 L45 19.483 L45 42 Z M114 42 L75 19.483 L75 42 Z M18 53 L34 53 L34 96 L18 96 Z M86 53 L102 53 L102 96 L86 96 Z M6 105 L114 105 L114 116 L6 116 Z"/><path fill="#D4A35A" d="M52 96 L52 15.442 L60 10.823 L68 15.442 L68 96 Z"/>
+</g>
 </svg>

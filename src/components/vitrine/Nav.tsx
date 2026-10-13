@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/marque/Logo";
 import { Bouton } from "./Bouton";
 
 const LIENS = [
@@ -28,7 +29,7 @@ const EXPO = [0.16, 1, 0.3, 1] as const;
  *
  * L'en-tête est `fixed` et non `sticky` : Safari iOS laisse un `sticky` traîner
  * derrière le défilement quand sa barre d'adresse se replie, et le contenu passe
- * au-dessus. Sa hauteur (77 px mobile, 85 px desktop) est réservée par le `main`
+ * au-dessus. Sa hauteur (87 px mobile, 91 px desktop) est réservée par le `main`
  * du layout. Elle se range quand on descend et revient dès qu'on remonte : avec la
  * barre d'adresse Safari en haut, une barre de site toujours visible se retrouve
  * sous la pastille d'adresse, avec la page floutée au-dessus — c'est Safari qui
@@ -68,10 +69,11 @@ export function Nav() {
           defile ? "border-b border-filet bg-fond" : "border-b border-transparent bg-transparent"
         } ${cache && !ouvert ? "-translate-y-full" : "translate-y-0"}`}
       >
-        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-4 md:px-10 md:py-5">
-          <Logo />
+        <div className="mx-auto flex max-w-[1320px] items-center justify-between px-5 py-3.5 md:px-10 md:py-4">
+          <LogoAccueil />
 
-          <nav className="hidden items-center gap-5 md:flex xl:gap-8" aria-label="Navigation principale">
+          {/* À 768 px la ligne est pleine : 16 px entre les liens laissent au logo sa zone de protection (14 px). */}
+          <nav className="hidden items-center gap-4 md:flex lg:gap-5 xl:gap-8" aria-label="Navigation principale">
             {LIENS.map((l) => {
               const actif = chemin === l.href || chemin.startsWith(`${l.href}/`);
               return (
@@ -114,8 +116,8 @@ export function Nav() {
             transition={{ duration: 0.35, ease: EXPO }}
             className="fixed inset-0 z-40 flex flex-col overflow-y-auto overscroll-contain bg-fond md:hidden"
           >
-            <div className="flex items-center justify-between px-5 py-4">
-              <Logo onClick={() => setOuvert(false)} />
+            <div className="flex items-center justify-between px-5 py-3.5">
+              <LogoAccueil onClick={() => setOuvert(false)} />
               <BoutonMenu ouvert onClick={() => setOuvert(false)} />
             </div>
 
@@ -163,11 +165,14 @@ export function Nav() {
   );
 }
 
-function Logo({ onClick }: { onClick?: () => void }) {
+/**
+ * Le logo horizontal à sa largeur minimale (140 px, soit 58 px de haut). Les marges verticales de
+ * l'en-tête (14 px mobile, 16 px desktop) lui laissent sa zone de protection.
+ */
+function LogoAccueil({ onClick }: { onClick?: () => void }) {
   return (
-    <Link href="/" onClick={onClick} className="flex items-baseline gap-2" aria-label="ANM Consulting, accueil">
-      <span className="font-display text-t3 leading-none text-encre">ANM</span>
-      <span className="font-mono text-etiquette uppercase tracking-[0.28em] text-gris">Consulting</span>
+    <Link href="/" onClick={onClick} aria-label="ANM Consulting, accueil">
+      <Logo largeur={140} prioritaire />
     </Link>
   );
 }

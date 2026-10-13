@@ -25,8 +25,7 @@ export default async function ConnexionPage({ searchParams }: { searchParams: Pr
 
   return (
     <>
-      <p className="etiquette">ANM Consulting</p>
-      <h1 className="mt-4 font-display text-t2 text-encre">Connexion</h1>
+      <h1 className="font-display text-t2 text-encre">Connexion</h1>
       <p className="mt-3 text-corps text-encre-2">L’espace de travail des missions d’audit.</p>
       {lien ? (
         <div role="status" className="mt-8 rounded-[5px] border border-majeur/40 bg-majeur-l/60 px-4 py-3 text-meta text-encre">

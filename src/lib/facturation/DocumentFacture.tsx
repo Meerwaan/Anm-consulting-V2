@@ -1,4 +1,5 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
+import { LogoPdf } from "@/lib/marque/LogoPdf";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { LIBELLE_NATURE, type Facture, type PartieFacture } from "./donnees";
 import { C, Filigrane, Pied, s, typo } from "./pdf-commun";
@@ -46,8 +47,8 @@ export const DocumentFacture = ({ facture: f, origine, iban, bic, delaiJours }: 
         <View style={s.corps}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 22 }}>
             <View>
-              <Text style={{ fontFamily: "Instrument Serif", fontSize: 20, lineHeight: 1.2 }}>{typo(f.vendeur.nom)}</Text>
-              <Text style={[s.etiquette, { marginTop: 4 }]}>Audit & préparation aux contrôles</Text>
+              <LogoPdf />
+              <Text style={[s.etiquette, { marginTop: 12 }]}>Audit & préparation aux contrôles</Text>
             </View>
             <View style={{ alignItems: "flex-end" }}>
               <Text style={[s.h1, { fontSize: 24, lineHeight: 1.2 }]}>{typo(LIBELLE_NATURE[f.nature])}</Text>
