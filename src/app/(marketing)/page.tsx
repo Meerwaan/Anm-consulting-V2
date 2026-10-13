@@ -11,7 +11,7 @@ import { PortailApercu } from "@/components/vitrine/PortailApercu";
 import { ManifesteCourt, PhraseChoc, PontObservatoire } from "@/components/vitrine/Manifeste";
 import { Cascade, Element, Reveal } from "@/components/vitrine/Reveal";
 import { Conteneur, Filet, SectionHead } from "@/components/vitrine/SectionHead";
-import { Abonnements, ControlesVecus, CtaFinal, DerouleMission, Piliers, PourQui, Tarifs } from "@/components/vitrine/Sections";
+import { ControlesVecus, CtaFinal, DerouleMission, Piliers, PourQui, Tarifs } from "@/components/vitrine/Sections";
 import { CE_QUE_VOIT_LE_CONTROLEUR, CHAINE_CONSTAT, CONSULTANTE, CONTROLES_VECUS, FAQ as FAQ_ITEMS, HERO } from "@/content/vitrine";
 import { PORTAIL_CLIENT } from "@/content/vision";
 
@@ -224,14 +224,8 @@ export default function HomePage() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-corps text-gris">
-                Rien du contenu de l’audit ne sort avant d’être qualifié : le compte rendu arrive quand il est vérifié, en deux axes, avec un plan d’actions que vous cochez vous-même. Après la
-                mission, le portail devient votre tableau de bord de conformité.
+                Rien du contenu de l’audit ne sort avant d’être qualifié : le compte rendu arrive quand il est vérifié, en deux axes, avec un plan d’actions que vous cochez vous-même.
               </p>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <Bouton href="/abonnement" variante="lien">
-                Découvrir le suivi conformité
-              </Bouton>
             </Reveal>
           </div>
           <Reveal y={40}>
@@ -279,26 +273,6 @@ export default function HomePage() {
         </Conteneur>
       </section>
 
-      {/* ------------------------------------------------ ABONNEMENTS */}
-      <section className="bg-menthe-2">
-        <Conteneur className="py-24 md:py-32">
-          <SectionHead
-            index="08"
-            eyebrow="Suivi conformité"
-            titre={
-              <>
-                Et après l’audit, <em className="text-vert">on ne vous laisse pas seul.</em>
-              </>
-            }
-            sous="Un abonnement mensuel pour que les échéances ne repassent plus entre les mailles : revues périodiques, alertes cartes et attestations, plan d’actions suivi."
-            aligne="deux"
-          />
-          <div className="mt-14">
-            <Abonnements />
-          </div>
-        </Conteneur>
-      </section>
-
       {/* ------------------------------------------------ À PROPOS (teaser) */}
       <section className="bg-papier">
         <Conteneur className="py-24 md:py-32">
@@ -317,7 +291,7 @@ export default function HomePage() {
             <div className="space-y-8">
               <Reveal>
                 <h2 className="etiquette font-mono font-normal">
-                  <span className="mr-3">09</span>La fondatrice
+                  <span className="mr-3">08</span>La fondatrice
                 </h2>
               </Reveal>
               <Reveal delay={0.05}>
@@ -341,7 +315,7 @@ export default function HomePage() {
         <Conteneur className="py-24 md:py-32">
           <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
             <SectionHead
-              index="10"
+              index="09"
               eyebrow="Vos questions"
               titre={
                 <>

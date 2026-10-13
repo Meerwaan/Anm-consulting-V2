@@ -8,8 +8,6 @@ const colonnes = [
     liens: [
       { href: "/audit", label: "Audit & diagnostic 360°" },
       { href: "/audit#tarifs", label: "Grille tarifaire" },
-      { href: "/abonnement", label: "Suivi conformité" },
-      { href: "/formation", label: "Centre de formation" },
     ],
   },
   {
@@ -50,7 +48,7 @@ export function Footer() {
               <span className="font-mono text-etiquette uppercase tracking-[0.28em] text-brume">Consulting</span>
             </Link>
             <p className="max-w-xs text-corps text-brume-2">
-              Audit, préparation aux contrôles et formation pour les entreprises de sécurité privée. Vingt et un ans de
+              Audit et préparation aux contrôles pour les entreprises de sécurité privée. Vingt et un ans de
               direction dans le secteur.
             </p>
             <p className="text-meta text-brume">

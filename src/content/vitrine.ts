@@ -43,7 +43,7 @@ export const CONSULTANTE = {
   parcours: [
     { periode: "Avant 2003", poste: "Directrice d’exploitation, sécurité privée", detail: "Cinq années sur le terrain : plannings, agents, sites, clients. Là où les écarts naissent, et où un contrôleur va les chercher." },
     { periode: "2003 – 2024", poste: "Fondatrice et dirigeante d’une entreprise de sécurité privée", detail: "Vingt et un ans de direction. Jusqu’à 400 collaborateurs lors des pics d’activité. Clients privés, institutionnels et marchés publics." },
-    { periode: "2026", poste: "Création d’ANM Consulting", detail: "Audit, préparation aux contrôles et formation pour les dirigeants de sécurité privée." },
+    { periode: "2026", poste: "Création d’ANM Consulting", detail: "Audit et préparation aux contrôles pour les dirigeants de sécurité privée." },
   ],
   citation: "Le problème que l’on voit n’est pas toujours celui qu’il faut traiter en premier. Il faut prendre de la hauteur et anticiper les conséquences avant de décider.",
   /** Son appel à l'action, en fin de présentation. */
@@ -316,7 +316,7 @@ export const FAQ = [
   {
     question: "Je suis une petite structure de huit agents. C’est pour moi ?",
     reponse:
-      "Oui. Les petites structures sont les plus exposées : une carte expirée ou un panier hors assiette pèse le même poids qu’ailleurs, avec moins de marge pour encaisser. Le diagnostic flash à partir de 590 € HT et le suivi Essentiel à 390 € HT par mois sont faits pour ça.",
+      "Oui. Les petites structures sont les plus exposées : une carte expirée ou un panier hors assiette pèse le même poids qu’ailleurs, avec moins de marge pour encaisser. Le diagnostic flash à partir de 590 € HT est fait pour ça.",
   },
   {
     question: "Que deviennent mes documents et les données de mes salariés ?",
@@ -430,7 +430,5 @@ export const SITUATIONS_CONTACT = [
   { valeur: "controle_annonce", label: "Un contrôle est annoncé" },
   { valeur: "observation", label: "J’ai reçu une observation ou une mise en demeure" },
   { valeur: "sous_traitance", label: "Je veux sécuriser ma sous-traitance" },
-  { valeur: "abonnement", label: "Je m’intéresse au suivi conformité" },
-  { valeur: "formation", label: "Je m’intéresse à la formation" },
   { valeur: "prescripteur", label: "Je suis avocat, expert-comptable ou prescripteur" },
 ] as const;

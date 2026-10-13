@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Abonnement et formation retirés de la vitrine le 29/09/2026, le temps d'en parler avec Sofia :
+  // les pages restent dans le code ; supprimer ces deux redirections suffit à les remettre.
+  async redirects() {
+    return [
+      { source: "/abonnement", destination: "/", permanent: false },
+      { source: "/formation", destination: "/", permanent: false },
+    ];
+  },
   // Un dossier de compilation séparé pour les tests locaux (NEXT_DIST_DIR=.next-test), afin
   // de ne pas écraser le `.next` d'un `next dev` qui tourne en parallèle.
   distDir: process.env.NEXT_DIST_DIR || ".next",

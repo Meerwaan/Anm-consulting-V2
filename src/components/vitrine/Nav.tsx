@@ -8,8 +8,6 @@ import { Bouton } from "./Bouton";
 
 const LIENS = [
   { href: "/audit", label: "Audit 360°" },
-  { href: "/formation", label: "Formation" },
-  { href: "/abonnement", label: "Abonnement" },
   { href: "/observatoire", label: "L’Observatoire" },
   { href: "/a-propos", label: "À propos" },
   { href: "/contact", label: "Contact" },

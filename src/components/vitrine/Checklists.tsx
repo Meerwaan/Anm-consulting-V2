@@ -34,7 +34,7 @@ export function Checklists() {
       <Reveal>
         <div className="space-y-5">
           <p className="etiquette !text-brume">
-            <span className="mr-3">11</span>Ressources gratuites · quatre checklists, une par contrôleur
+            <span className="mr-3">10</span>Ressources gratuites · quatre checklists, une par contrôleur
           </p>
           <div role="tablist" aria-label="Choisir une checklist" className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0">
             {CHECKLISTS.map((c) => {

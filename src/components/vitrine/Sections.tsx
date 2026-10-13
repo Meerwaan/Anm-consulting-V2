@@ -2,6 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { CRITICITE, PILIERS, POSITIONNEMENT } from "@/content/piliers";
 import { ABONNEMENTS, OFFRES } from "@/content/offres";
+
+/** Le suivi conformité (abonnement) est retiré de la vitrine le temps d’en parler avec Sofia (29/09/2026). */
+const OFFRES_VITRINE = OFFRES.filter((o) => o.id !== "suivi_conformite");
 import { METHODE_4_TEMPS, PHASES_MISSION } from "@/content/methode";
 import { LIGNE_DE_CRETE } from "@/content/vision";
 import { CONTROLES_VECUS, LIVRABLES, MANIFESTE, PHRASE_CHOC, TEMPS_MISSION } from "@/content/vitrine";
@@ -117,7 +120,7 @@ export function Tarifs({ avecLien = true }: { avecLien?: boolean }) {
     <div>
       <Filet epais />
       <ol>
-        {OFFRES.map((o, i) => {
+        {OFFRES_VITRINE.map((o, i) => {
           const phare = o.produitPhare;
           return (
             <Reveal key={o.id} delay={i * 0.04}>
