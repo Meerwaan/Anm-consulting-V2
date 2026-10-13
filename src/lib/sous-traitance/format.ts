@@ -32,3 +32,10 @@ export const fmtMois = (m: string): string =>
 /** « 2026-03-31 » → « 31/03/2026 ». */
 export const fmtDate = (d: string | null): string =>
   d ? new Date(`${d}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC" }) : "—";
+
+/** Un instant → « 31/03/2026 à 15 h 42 », à l'heure de Paris. */
+export const fmtDateHeure = (iso: string): string => {
+  const d = new Date(iso);
+  const [h, m] = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Paris" }).split(":");
+  return `${d.toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" })} à ${Number(h)}\u00a0h\u00a0${m}`;
+};

@@ -73,7 +73,7 @@ export const SOUS_TRAITANTS = [
   },
   {
     nom: "Resend",
-    role: "Envoi des emails du site depuis contact@anm-consulting.fr (accusés de réception, checklists demandées, avis de parution de l’Observatoire)",
+    role: "Envoi des emails du site depuis contact@anm-consulting.fr (accusés de réception, checklists demandées, avis de parution de l’Observatoire, devis et confirmation de leur acceptation)",
     pays: "États-Unis (envoi depuis l’Union européenne, région Irlande)",
     garantie: "Clauses contractuelles types",
   },
@@ -100,6 +100,18 @@ export const TRAITEMENTS = [
       "Intérêt légitime (prospection entre professionnels) pour les demandes de contact. Consentement pour l’envoi d’une checklist et pour les avis de parution de l’Observatoire, retirable à tout moment par le lien de désinscription présent dans chaque avis.",
     conservation:
       "3 ans à compter du dernier contact resté sans suite (durée recommandée par la CNIL en prospection).",
+  },
+  {
+    id: "devis",
+    nom: "Devis et acceptation en ligne",
+    finalite:
+      "Adresser un devis à l’entreprise qui l’a demandé, lui permettre de l’accepter en ligne et conserver la preuve de son accord.",
+    donnees:
+      "Nom et email du destinataire du devis. À l’acceptation : nom et qualité du signataire, date et heure de l’accord, adresse IP et navigateur de la connexion.",
+    baseLegale:
+      "Mesures précontractuelles prises à la demande de l’entreprise, puis exécution du contrat. Intérêt légitime pour la conservation de la preuve de l’accord.",
+    conservation:
+      "Devis accepté : durée de la relation contractuelle, puis 5 ans (prescription de droit commun). Devis resté sans suite : 3 ans.",
   },
   {
     id: "comptes",

@@ -6,7 +6,7 @@ import NouveauDevis from "@/components/facturation/NouveauDevis";
 import { boutonPrincipal, boutonSecondaire } from "@/components/facturation/styles";
 import { OFFRES } from "@/content/offres";
 import { LIBELLE_NATURE, aujourdHui } from "@/lib/facturation/donnees";
-import { LIBELLE_SITUATION, LIBELLE_STATUT_DEVIS, lireCommercial } from "@/lib/facturation/devis";
+import { LIBELLE_SITUATION, LIBELLE_STATUT_DEVIS, accordAConfirmer, lireCommercial } from "@/lib/facturation/devis";
 import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
 import { LIBELLE_SOURCE, estInscription } from "@/lib/vitrine/lead";
 import { classerDemande, creerExemple, effacerExemple, preparerDevisDepuisDemande } from "./actions";
@@ -36,7 +36,8 @@ export default async function CommercialPage() {
   const vraies = demandes.filter((d) => !estInscription(d.source));
   const aTraiter = vraies.filter((d) => d.statut === "nouvelle" || d.statut === "en_cours");
   const traitees = vraies.filter((d) => !(d.statut === "nouvelle" || d.statut === "en_cours"));
-  const devisOuverts = devis.filter((d) => d.statut === "brouillon" || d.statut === "envoye");
+  // Les devis que le client a acceptés en ligne passent devant : il reste à créer leur mission.
+  const devisOuverts = devis.filter((d) => d.statut === "brouillon" || d.statut === "envoye").sort((a, b) => Number(accordAConfirmer(b)) - Number(accordAConfirmer(a)));
   const devisClos = devis.filter((d) => d.statut === "accepte" || d.statut === "refuse");
   const annulees = new Set(factures.filter((f) => f.nature === "avoir").map((f) => f.facture_origine));
   const valables = factures.filter((f) => f.nature !== "avoir" && !annulees.has(f.id));
@@ -211,7 +212,7 @@ export default async function CommercialPage() {
 
       {/* 2. DEVIS */}
       <section id="devis" aria-labelledby="t-devis" className="flex scroll-mt-6 flex-col gap-6">
-        <Titre id="t-devis" n="2" titre="Les devis" sous="Chiffrés avec la grille du site. Accepté, un devis crée la mission et son contrat, déjà remplis." />
+        <Titre id="t-devis" n="2" titre="Les devis" sous="Chiffrés avec la grille du site, envoyés au client par email depuis l’outil. Accepté, un devis crée la mission et son contrat, déjà remplis." />
         {devisOuverts.length ? (
           <ul className="flex flex-col border-t-[1.5px] border-encre">
             {devisOuverts.map((d) => (
@@ -222,10 +223,18 @@ export default async function CommercialPage() {
                       <span className="font-mono text-meta tabular-nums text-encre">{d.numero}</span>
                       <span className="font-display text-t4 text-encre">{d.client}</span>
                       {d.exemple ? <Exemple /> : null}
+                      {accordAConfirmer(d) ? <span className="rounded-full bg-menthe px-2.5 py-0.5 text-note font-medium text-vert">Accord du client reçu</span> : null}
                     </span>
                     <span className="text-meta text-encre-2">
-                      {d.intitule} · <span className="tabular-nums">{fmtEuros(d.total_ht)} HT</span> · {LIBELLE_STATUT_DEVIS[d.statut]}
-                      {d.statut === "envoye" && d.valable_jusquau < jour ? <span className="font-medium text-critique"> · validité dépassée</span> : ` · valable jusqu’au ${fmtDate(d.valable_jusquau)}`}
+                      {d.intitule} · <span className="tabular-nums">{fmtEuros(d.total_ht)} HT</span> ·{" "}
+                      {accordAConfirmer(d) ? (
+                        <span className="font-medium text-vert">il reste à créer la mission</span>
+                      ) : (
+                        <>
+                          {LIBELLE_STATUT_DEVIS[d.statut]}
+                          {d.statut === "envoye" && d.valable_jusquau < jour ? <span className="font-medium text-critique"> · validité dépassée</span> : ` · valable jusqu’au ${fmtDate(d.valable_jusquau)}`}
+                        </>
+                      )}
                     </span>
                   </span>
                   <CaretRight size={22} className="shrink-0 text-gris" aria-hidden />

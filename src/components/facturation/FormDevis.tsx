@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { FilePdf } from "@phosphor-icons/react";
 import { OFFRES } from "@/content/offres";
 import { LIVRABLES, LIVRABLES_PAR_PRESTATION } from "@/content/contrat";
 import { calculerDevis } from "@/lib/facturation/calcul-devis";
 import type { EtatFormulaire } from "@/app/admin/missions/[id]/(outil)/contrat/actions";
 import { Message, boutonPrincipal, boutonSecondaire, champ, zone } from "./FicheClient";
+import { useModifsDevis } from "./ModifsDevis";
 
 type Action = (etat: EtatFormulaire, fd: FormData) => Promise<EtatFormulaire>;
 
@@ -57,6 +58,13 @@ const FormDevis = ({ valeurs: v, franchise, fige, pdf, enregistrer, signalContro
   const [echeance, setEcheance] = useState(v.controle_echeance ?? "");
   const [calendrier, setCalendrier] = useState(v.calendrier ?? "");
 
+  // Toute saisie rend le devis « modifié » jusqu'au prochain enregistrement réussi : l'envoi au
+  // client attend, pour ne pas faire partir l'ancienne version.
+  const { signaler } = useModifsDevis();
+  useEffect(() => {
+    if (etat.ok) signaler(false);
+  }, [etat, signaler]);
+
   /** Le contrôle précisé remplace « contrôle annoncé » dans l'intitulé et le calendrier proposés. */
   const preciserControle = (org: string, date: string) => {
     setOrganisme(org);
@@ -89,7 +97,7 @@ const FormDevis = ({ valeurs: v, franchise, fige, pdf, enregistrer, signalContro
   };
 
   return (
-    <form action={action} className="flex flex-col gap-8">
+    <form action={action} onChange={() => signaler(true)} className="flex flex-col gap-8">
       <fieldset disabled={fige} className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2">
           <span className="text-meta font-medium text-encre">Prestation</span>

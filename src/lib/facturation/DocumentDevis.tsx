@@ -1,17 +1,18 @@
 import { Document, Page, Text, View } from "@react-pdf/renderer";
 import { LogoPdf } from "@/lib/marque/LogoPdf";
-import { fmtDate, fmtEuros } from "@/lib/sous-traitance/format";
+import { fmtDate, fmtDateHeure, fmtEuros } from "@/lib/sous-traitance/format";
 import type { PartieFacture } from "./donnees";
-import type { Devis } from "./devis";
+import type { DevisDocument } from "./devis";
 import { C, Filigrane, Pied, Puces, s, typo } from "./pdf-commun";
 
 /**
  * Le devis (proposition commerciale) : le chiffrage ligne par ligne selon la grille, les
- * conditions reprises ensuite au contrat, et la case « Bon pour accord » du client.
+ * conditions reprises ensuite au contrat, et la case « Bon pour accord » du client. Quand le client
+ * a donné son accord en ligne, la case le dit : qui, quand, sur quel montant.
  */
 
 interface Props {
-  devis: Devis;
+  devis: DevisDocument;
   vendeur: PartieFacture;
   client: PartieFacture & { representant?: string | null; fonction?: string | null };
 }
@@ -141,10 +142,22 @@ export const DocumentDevis = ({ devis: d, vendeur, client }: Props) => {
 
           <View wrap={false} style={{ marginTop: 18, flexDirection: "row", gap: 24 }}>
             <View style={{ flex: 1 }} />
-            <View style={{ flex: 1, borderWidth: 0.5, borderColor: C.filet, padding: 10, minHeight: 110 }}>
-              <Text style={s.fort}>Bon pour accord</Text>
-              <Text style={{ color: C.encre2, marginTop: 2 }}>{typo("Date, nom, signature et cachet du Client :")}</Text>
-            </View>
+            {d.accord_le ? (
+              <View style={{ flex: 1, borderWidth: 0.5, borderColor: C.vert, backgroundColor: C.menthe, padding: 10 }}>
+                <Text style={s.fort}>Bon pour accord</Text>
+                <Text style={{ marginTop: 2 }}>
+                  {typo(`Donné en ligne le ${fmtDateHeure(d.accord_le)} par ${d.accord_nom ?? "le Client"}${d.accord_fonction ? `, ${d.accord_fonction}` : ""}, pour ${client.nom}.`)}
+                </Text>
+                <Text style={{ color: C.encre2, marginTop: 4 }}>
+                  {typo(`Montant accepté : ${fmtEuros(d.accord_total_ttc ?? d.total_ttc)} TTC${suivi ? " par mois" : ""}. Accord enregistré par ${vendeur.nom} avec la date, l’heure et l’adresse de connexion.`)}
+                </Text>
+              </View>
+            ) : (
+              <View style={{ flex: 1, borderWidth: 0.5, borderColor: C.filet, padding: 10, minHeight: 110 }}>
+                <Text style={s.fort}>Bon pour accord</Text>
+                <Text style={{ color: C.encre2, marginTop: 2 }}>{typo("Date, nom, signature et cachet du Client :")}</Text>
+              </View>
+            )}
           </View>
         </View>
       </Page>

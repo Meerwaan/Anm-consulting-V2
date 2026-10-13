@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["@react-pdf/renderer"],
   outputFileTracingIncludes: {
     "/admin/**": ["./src/lib/rapport/polices/**", "./src/lib/marque/logos/**", "./node_modules/pdfkit/js/standard-fonts/**", "./node_modules/pdfkit/js/data/**"],
+    // Le devis vu par le client (/devis/<jeton>) : son PDF, et celui joint à l'email de confirmation.
+    "/devis/**": ["./src/lib/rapport/polices/**", "./src/lib/marque/logos/**", "./node_modules/pdfkit/js/standard-fonts/**", "./node_modules/pdfkit/js/data/**"],
     // Images de partage de l'Observatoire (next/og) : mêmes polices et même logo, lus sur disque.
     "/observatoire/**": ["./src/lib/rapport/polices/**", "./src/lib/marque/logos/**"],
   },

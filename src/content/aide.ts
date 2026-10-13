@@ -2,7 +2,7 @@
  * La page Aide de l’espace de travail (/admin/aide), écrite pour Sofia.
  *
  * Chaque instruction correspond à un écran, un bouton ou un libellé qui existe réellement dans
- * l’outil au 29/09/2026 : les libellés entre « » sont ceux de l’interface. Quand un écran change,
+ * l’outil au 13/10/2026 : les libellés entre « » sont ceux de l’interface. Quand un écran change,
  * c’est ce fichier qu’on met à jour.
  *
  * Petite syntaxe dans les textes (rendue par <Inline>, typographie française appliquée à l’affichage) :
@@ -249,10 +249,37 @@ export const SECTIONS_AIDE: SectionAide[] = [
             items: [
               "Touchez « Préparer le devis ». L’outil crée le client et le devis, chiffré avec la grille du site, et ouvre sa page. Le devis reçoit tout de suite son numéro (D2026-0001, D2026-0002…).",
               "Vérifiez « Le client ». Avec le SIREN, « Compléter depuis le SIREN » va chercher la forme juridique, le siège et le dirigeant dans l’annuaire des entreprises. Si vous corrigez quelque chose, touchez « Enregistrer la fiche ».",
-              "Relisez « Le devis » : prix, conditions, contrôle en cours, calendrier, livrables. Touchez « Enregistrer le devis ».",
-              "« Ouvrir le devis (PDF) », puis envoyez-le vous-même au client, par email : l’outil n’envoie rien.",
-              "De retour sur le devis, touchez « Marquer comme envoyé », même s’il a été remis en main propre : c’est seulement ensuite qu’il peut être accepté.",
+              "Relisez « Le devis » : prix, conditions, contrôle en cours, calendrier, livrables. Touchez « Enregistrer le devis », puis « Ouvrir le devis (PDF) » pour le voir tel qu’il partira.",
+              "En haut de la page, vérifiez « Adresse email du client » et « À l’attention de » (repris de la demande du site), ajoutez si vous le voulez « Un mot d’accompagnement », puis touchez « Envoyer le devis au client ».",
+              "Le message « Devis envoyé à …, PDF joint. » confirme le départ. Le cadre indique alors la date, l’heure et l’adresse de l’envoi, et le devis passe en « Envoyé, en attente ».",
             ],
+          },
+          {
+            type: "tableau",
+            legende: "Ce que reçoit le client",
+            colonnes: ["Quoi", "Détail"],
+            lignes: [
+              ["Un email d’ANM Consulting", "Envoyé depuis contact@anm-consulting.fr, avec votre mot d’accompagnement. S’il répond, sa réponse arrive sur cette boîte"],
+              ["Le devis en PDF", "En pièce jointe, identique à celui que vous ouvrez dans l’outil"],
+              ["Le bouton « Lire et accepter le devis »", "Il ouvre sa page personnelle : le devis, le PDF à télécharger et le cadre « Bon pour accord »"],
+            ],
+          },
+          {
+            type: "liste",
+            items: [
+              "« Le lien du client » : le même lien que dans l’email. « Copier le lien » pour le transmettre par SMS ou par messagerie, « Voir sa page » pour voir ce qu’il voit.",
+              "« Renvoyer le devis par email » : à la même adresse ou à une autre. L’email repart avec le PDF à jour et le même lien.",
+              "Si vous enregistrez le devis après l’avoir envoyé, le cadre vous le signale : le lien montre la nouvelle version, mais le PDF déjà reçu est l’ancien. Renvoyez-le.",
+              "Tant que des modifications ne sont pas enregistrées, « Envoyer le devis au client » reste grisé : l’outil n’envoie jamais une version qui n’est pas à l’écran.",
+              "Devis remis en main propre, par courrier ou depuis votre messagerie : dépliez « Devis remis autrement », puis « Marquer comme envoyé, sans email ».",
+            ],
+          },
+          {
+            type: "encadre",
+            ton: "attention",
+            titre: "Si l’email ne part pas",
+            texte:
+              "L’outil le dit en rouge (« L’email n’est pas parti… ») et le devis reste en brouillon : rien n’est annoncé qui ne soit pas arrivé. Réessayez ; si cela persiste, ouvrez le PDF, envoyez-le depuis votre messagerie et prévenez Merwan.",
           },
           {
             type: "p",
@@ -266,11 +293,26 @@ export const SECTIONS_AIDE: SectionAide[] = [
         titre: "3. Le devis est accepté : la mission et le contrat se créent",
         blocs: [
           {
+            type: "p",
+            texte:
+              "Le client accepte en ligne, depuis sa page : il indique son nom et sa qualité, coche « J’ai lu le devis… et je l’accepte », puis touche « J’accepte ce devis ». Rien à imprimer.",
+          },
+          {
             type: "etapes",
             items: [
-              "Quand le client vous renvoie le devis signé « Bon pour accord », ouvrez-le et touchez « Accepté : créer la mission et le contrat ». Ce bouton n’apparaît qu’une fois le devis marqué comme envoyé.",
-              "Un cadre dit ce qui va se passer. Touchez « Confirmer : créer la mission et le contrat », ou « Annuler ».",
+              "Vous recevez un email sur contact@anm-consulting.fr (« Devis … accepté ») ; le client reçoit, lui, une confirmation avec le devis qui porte la mention de son accord.",
+              "Dans l’outil, un bandeau « 1 devis accepté en ligne » apparaît sur la page [Missions](/admin), et le devis porte « Accord du client reçu » dans [Commercial](/admin/commercial#devis).",
+              "Ouvrez le devis : le cadre indique qui a donné l’accord, quand, et pour quel montant. Touchez « Créer la mission et le contrat », puis « Confirmer : créer la mission et le contrat ».",
               "L’outil crée la mission (référence 2026-01, 2026-02…) et prépare son contrat avec tout ce que contient le devis. Vous arrivez directement sur [Contrat et factures](mission:contrat).",
+            ],
+          },
+          {
+            type: "liste",
+            items: [
+              "L’accord est enregistré avec le nom, la qualité, la date, l’heure et l’adresse de connexion du signataire, et il apparaît sur le PDF du devis, dans la case « Bon pour accord ».",
+              "Dès l’accord, le devis ne se modifie plus : l’accord porte sur la version que le client a lue. Les ajustements se font ensuite dans le contrat.",
+              "Le client ne peut accepter ni un devis dont la validité est dépassée, ni une version que vous venez de modifier sans qu’il l’ait relue : sa page le lui dit.",
+              "Le client préfère le papier : quand il vous renvoie le devis signé « Bon pour accord », touchez « Accepté : créer la mission et le contrat ». Ce bouton n’apparaît qu’une fois le devis envoyé (ou marqué comme envoyé).",
             ],
           },
           {
@@ -278,7 +320,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             ton: "attention",
             titre: "Une confirmation, puis plus de retour",
             texte:
-              "L’acceptation ne se défait pas depuis l’outil. Ne la confirmez qu’avec le devis signé en main. Si la validité du devis est dépassée, le cadre le signale : vérifiez que le client l’a signé à temps. En cas d’erreur, contactez Merwan.",
+              "La création de la mission ne se défait pas depuis l’outil. Sans accord en ligne, ne la confirmez qu’avec le devis signé en main. Si la validité du devis est dépassée, le cadre le signale : vérifiez que le client l’a signé à temps. En cas d’erreur, contactez Merwan.",
           },
           {
             type: "p",
@@ -363,7 +405,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
           {
             type: "p",
             texte:
-              "Le client ne voit jamais l’outil, vos grilles ni vos notes. Le devis, le contrat, le plan d’actions (fichier Excel) et les factures, c’est toujours vous qui les lui envoyez.",
+              "Le client ne voit jamais l’outil, vos grilles ni vos notes. Le devis part de l’outil, par email ; le contrat, le plan d’actions (fichier Excel) et les factures, c’est toujours vous qui les lui envoyez.",
           },
         ],
       },
@@ -677,7 +719,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             legende: "Jusqu’où chaque document se modifie",
             colonnes: ["Document", "Modifiable", "Figé", "Pour corriger ensuite"],
             lignes: [
-              ["Devis", "Tant qu’il n’est pas accepté", "Dès « Accepté : créer la mission et le contrat »", "Corrigez le contrat de la mission"],
+              ["Devis", "Tant que le client n’a pas donné son accord", "Dès l’accord en ligne du client, ou dès « Accepté : créer la mission et le contrat »", "Corrigez le contrat de la mission"],
               ["Contrat", "Jusqu’à « Marquer comme signé »", "Une fois signé ; son PDF est archivé", "« Rouvrir pour le modifier », puis « Confirmer : rouvrir le contrat »"],
               ["Facture", "Jamais", "Dès l’émission ; seul « Marquer payée » (ou « Payée · annuler ») reste possible", "« Annuler par un avoir », puis émettre une facture corrigée"],
             ],
@@ -686,7 +728,8 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "liste",
             items: [
               "Un devis ne se supprime pas : s’il ne se fait pas, marquez-le « Refusé ».",
-              "Un devis ne peut être accepté qu’après « Marquer comme envoyé ».",
+              "Un devis ne peut être accepté qu’une fois envoyé : par email depuis l’outil, ou avec « Marquer comme envoyé, sans email ».",
+              "Un devis refusé ou remis en brouillon n’est plus visible du client : son lien affiche « Ce devis n’est plus disponible en ligne ». Renvoyé, il redevient visible au même lien.",
               "Une facture émise ne se supprime jamais. L’avoir porte son propre numéro et ne se supprime pas non plus.",
               "Un acompte déjà déduit d’une facture de solde ne s’annule qu’après le solde.",
               "Une facture garde pour toujours les informations d’ANM et du client du jour de son émission.",
@@ -749,7 +792,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
             type: "etapes",
             items: [
               "Dans [Commercial](/admin/commercial), touchez « Créer un exemple ». Une demande d’« Exemple — Garde Sécurité Services » arrive, comme si elle venait du site.",
-              "Déroulez tout : « Préparer le devis », « Accepté : créer la mission et le contrat », signature, factures.",
+              "Déroulez tout : « Préparer le devis », « Envoyer le devis au client » (à votre propre adresse, proposée d’office : vous verrez l’email et la page du client, et pourrez y donner l’accord vous-même), « Créer la mission et le contrat », signature, factures.",
               "Les documents portent « EXEMPLE » et une mention en filigrane : ils n’entament pas la vraie numérotation.",
               "Quand vous avez fini, « Effacer l’exemple » supprime tout : demande, devis, mission, contrat, factures et PDF. « Recommencer l’exemple » repart de zéro.",
             ],
@@ -1046,7 +1089,9 @@ export const SECTIONS_AIDE: SectionAide[] = [
               ["Prévenir les inscrits de l’Observatoire", "Oui, à la première publication d’un article ; le résultat s’affiche", "—"],
               ["Désinscrire un lecteur", "Oui, en un clic depuis chaque email", "—"],
               ["Faire partir ces emails", "Seulement une fois le domaine anm-consulting.fr vérifié chez Resend et la clé configurée ; sinon le message affiché le dit", "—"],
-              ["Envoyer devis, contrat, rapport et factures au client", "Non", "Les envoyer depuis votre messagerie (ou rendre le rapport visible dans son espace)"],
+              ["Envoyer le devis au client", "Oui, par email, avec le PDF et le lien pour l’accepter en ligne ; le message affiché dit si l’email est parti", "Vérifier l’adresse, toucher « Envoyer le devis au client »"],
+              ["Recueillir l’accord du client sur le devis", "Oui : il l’accepte en ligne, l’accord est daté et conservé, un email vous prévient", "Toucher « Créer la mission et le contrat »"],
+              ["Envoyer contrat, rapport et factures au client", "Non", "Les envoyer depuis votre messagerie (ou rendre le rapport visible dans son espace)"],
               ["Inviter un client dans son espace", "Non : l’outil crée le compte et un lien d’activation", "Envoyer le lien (copie, e-mail ou SMS) ; en créer un nouveau s’il a expiré"],
               ["Faire avancer l’étape vue par le client", "Non", "Toucher l’étape dans Espace client"],
               ["Ranger les dépôts du client", "Oui : le fichier arrive dans Pièces et la pièce passe en reçue", "—"],
@@ -1240,7 +1285,42 @@ export const SECTIONS_AIDE: SectionAide[] = [
         blocs: [
           {
             type: "p",
-            texte: "Le devis est encore en brouillon. Touchez d’abord « Marquer comme envoyé » (même s’il a été remis en main propre) : « Accepté : créer la mission et le contrat » apparaît ensuite.",
+            texte: "Le devis est encore en brouillon. Envoyez-le d’abord avec « Envoyer le devis au client » ; s’il a été remis autrement, dépliez « Devis remis autrement » et touchez « Marquer comme envoyé, sans email ». « Accepté : créer la mission et le contrat » apparaît ensuite.",
+          },
+        ],
+      },
+      {
+        id: "faq-devis-email",
+        titre: "« L’email n’est pas parti… » à l’envoi du devis",
+        blocs: [
+          {
+            type: "p",
+            texte: "Rien n’a été envoyé et le devis n’a pas changé d’état. Vérifiez l’adresse, puis réessayez dans un instant. Si le message revient, ouvrez le PDF, envoyez-le depuis votre messagerie, touchez « Marquer comme envoyé, sans email » et prévenez Merwan.",
+          },
+        ],
+      },
+      {
+        id: "faq-devis-lien",
+        titre: "Le client dit que le lien du devis ne fonctionne pas",
+        blocs: [
+          {
+            type: "liste",
+            items: [
+              "« Ce lien n’ouvre aucun devis » : le lien a été tronqué en le copiant. Ouvrez le devis, « Copier le lien », et renvoyez-le.",
+              "« Ce devis n’est plus disponible en ligne » : le devis est refusé ou revenu en brouillon. Renvoyez-le.",
+              "« La validité de ce devis est dépassée » : repoussez « Valable jusqu’au », touchez « Enregistrer le devis », puis « Renvoyer le devis ».",
+              "« Ce devis vient d’être mis à jour… » : vous l’avez modifié pendant qu’il le lisait. Il lui suffit de relire, puis d’accepter.",
+            ],
+          },
+        ],
+      },
+      {
+        id: "faq-devis-apres-accord",
+        titre: "« Le client a donné son accord sur ce devis : il ne se modifie plus »",
+        blocs: [
+          {
+            type: "p",
+            texte: "L’accord porte sur la version que le client a lue. Créez la mission, puis ajustez le contrat. S’il faut vraiment refaire le devis : « Refusé », « Remettre en brouillon » (l’accord est alors effacé), corrigez, puis renvoyez-le pour un nouvel accord.",
           },
         ],
       },
@@ -1304,7 +1384,7 @@ export const SECTIONS_AIDE: SectionAide[] = [
         blocs: [
           {
             type: "p",
-            texte: "L’outil n’envoie aucun email à vos clients de mission. Ouvrez le PDF (ou copiez la liste) et envoyez-le depuis votre messagerie. Le rapport, lui, peut aussi être rendu visible dans son espace.",
+            texte: "Seul le devis part de l’outil. S’il ne l’a pas reçu : vérifiez l’adresse affichée dans le cadre du devis (« Envoyé par email le … à … »), demandez-lui de regarder ses courriers indésirables, puis « Renvoyer le devis par email » ou « Copier le lien ». Le contrat, les factures et la liste des pièces, eux, s’envoient depuis votre messagerie : ouvrez le PDF (ou copiez la liste). Le rapport peut aussi être rendu visible dans son espace.",
           },
         ],
       },

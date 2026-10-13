@@ -29,23 +29,44 @@ export default async function AdminPage() {
   // Seules les vraies demandes comptent : les inscriptions (checklists, Observatoire) n'appellent pas de devis.
   const { data: leadsNouveaux } = await supabase.from("leads").select("source").eq("statut", "nouvelle");
   const nouvelles = ((leadsNouveaux ?? []) as { source: string | null }[]).filter((l) => !estInscription(l.source)).length;
+  // Les devis acceptés en ligne par le client, dont la mission reste à créer.
+  const { data: accords } = await supabase.from("devis").select("id").eq("statut", "envoye").not("accord_le", "is", null);
+  const accordsRecus = accords?.length ?? 0;
   const annee = new Date().getFullYear();
   const numeros = missions.map((m) => Number(m.reference.match(new RegExp(`^${annee}-(\\d+)$`))?.[1] ?? 0));
   const referenceProposee = `${annee}-${String(Math.max(0, ...numeros) + 1).padStart(2, "0")}`;
 
   return (
     <div className="flex flex-col gap-14">
-      {nouvelles ? (
-        <Link
-          href="/admin/commercial#demandes"
-          className="flex min-h-14 items-center justify-between gap-4 rounded-[5px] border border-vert bg-menthe px-5 py-3 text-corps text-vert transition-colors hover:bg-papier"
-        >
-          <span>
-            <span className="font-medium">{nouvelles} nouvelle{nouvelles > 1 ? "s" : ""} demande{nouvelles > 1 ? "s" : ""}</span> reçue{nouvelles > 1 ? "s" : ""} du site :
-            préparez le devis en un geste.
-          </span>
-          <CaretRight size={20} aria-hidden />
-        </Link>
+      {accordsRecus || nouvelles ? (
+        <div className="flex flex-col gap-3">
+          {accordsRecus ? (
+            <Link
+              href={accordsRecus === 1 ? `/admin/commercial/devis/${accords![0].id}` : "/admin/commercial#devis"}
+              className="flex min-h-14 items-center justify-between gap-4 rounded-[5px] border border-vert bg-menthe px-5 py-3 text-corps text-vert transition-colors hover:bg-papier"
+            >
+              <span>
+                <span className="font-medium">
+                  {accordsRecus} devis accepté{accordsRecus > 1 ? "s" : ""} en ligne
+                </span>{" "}
+                par {accordsRecus > 1 ? "vos clients" : "le client"} : il reste à créer {accordsRecus > 1 ? "les missions" : "la mission"}.
+              </span>
+              <CaretRight size={20} aria-hidden />
+            </Link>
+          ) : null}
+          {nouvelles ? (
+            <Link
+              href="/admin/commercial#demandes"
+              className="flex min-h-14 items-center justify-between gap-4 rounded-[5px] border border-vert bg-menthe px-5 py-3 text-corps text-vert transition-colors hover:bg-papier"
+            >
+              <span>
+                <span className="font-medium">{nouvelles} nouvelle{nouvelles > 1 ? "s" : ""} demande{nouvelles > 1 ? "s" : ""}</span> reçue{nouvelles > 1 ? "s" : ""} du site :
+                préparez le devis en un geste.
+              </span>
+              <CaretRight size={20} aria-hidden />
+            </Link>
+          ) : null}
+        </div>
       ) : null}
       <section className="flex flex-col gap-6">
         <div>

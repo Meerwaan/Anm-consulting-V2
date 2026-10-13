@@ -11,7 +11,8 @@ import { OBSERVATOIRE, territoireParId } from "@/content/observatoire";
 import { CHECKLISTS, SITUATIONS_CONTACT, type ChecklistId } from "@/content/vitrine";
 import { typographie } from "@/lib/observatoire/typographie";
 import type { Article } from "@/lib/observatoire/article";
-import { ADRESSE_CONTACT, type Email } from "./envoi";
+import { fmtDate, fmtDateHeure, fmtEuros } from "@/lib/sous-traitance/format";
+import { ADRESSE_CONTACT, type Email, type PieceJointe } from "./envoi";
 import { composer } from "./gabarit";
 
 const NB = " ";
@@ -203,4 +204,158 @@ export const parutionObservatoire = (
     desinscription: urlDesinscription(jeton),
   });
   return { to: email, subject: `${nature}${NB}: ${titre}`, html, text, headers: enTetesDesinscription(jeton) };
+};
+
+/* ------------------------------------------------------------------ */
+/* Devis                                                               */
+/* ------------------------------------------------------------------ */
+
+/** Ce que les trois emails d’un devis ont en commun. */
+export interface DevisEmail {
+  numero: string;
+  client: string;
+  intitule: string;
+  totalHT: number;
+  totalTTC: number;
+  /** TVA non applicable (franchise en base) : le montant s’annonce hors taxe seulement. */
+  franchise: boolean;
+  /** Suivi de conformité : le montant est mensuel. */
+  mensuel: boolean;
+  acomptePct: number;
+  /** Client d’exemple : l’email le dit, pour que personne ne le prenne pour un vrai devis. */
+  exemple: boolean;
+}
+
+const montantDevis = (d: DevisEmail) =>
+  `${fmtEuros(d.totalHT)} HT${d.franchise ? ", TVA non applicable" : ` · ${fmtEuros(d.totalTTC)} TTC`}${d.mensuel ? " par mois" : ""}`;
+
+const conditionsDevis = (d: DevisEmail): string | null =>
+  d.mensuel ? "Facturation mensuelle" : d.acomptePct > 0 && d.acomptePct < 100 ? typographie(`Acompte de ${d.acomptePct} % à la commande, solde à la remise des livrables`) : null;
+
+const objetDevis = (d: DevisEmail, objet: string) => `${d.exemple ? "[Exemple] " : ""}${objet}`;
+const MENTION_EXEMPLE = "Ceci est un exemple, sans valeur : il sert à découvrir l’outil, aucun client réel n’est concerné.";
+
+/** Le devis part chez le client : le PDF en pièce jointe, et le lien pour l’accepter en ligne. */
+export const emailDevis = (
+  d: DevisEmail & { email: string; nom: string | null; valableJusquau: string; url: string; mot: string | null; pdf: PieceJointe },
+): Email => {
+  const { html, text } = composer({
+    apercu: typographie(`Devis n° ${d.numero} : ${montantDevis(d)}, valable jusqu’au ${fmtDate(d.valableJusquau)}.`),
+    surtitre: typographie(`Devis n° ${d.numero}`),
+    titre: "Voici notre devis.",
+    blocs: [
+      { type: "paragraphe", texte: d.nom ? `Bonjour ${d.nom},` : "Bonjour," },
+      ...(d.mot ? [{ type: "paragraphe" as const, texte: typographie(d.mot) }] : []),
+      {
+        type: "paragraphe",
+        texte: typographie(`Vous trouverez en pièce jointe notre devis pour ${d.client} : la prestation, son prix, le calendrier et les livrables.`),
+      },
+      {
+        type: "champs",
+        lignes: [
+          ["Prestation", d.intitule],
+          ["Montant", montantDevis(d)],
+          ["Conditions", conditionsDevis(d)],
+          ["Valable jusqu’au", fmtDate(d.valableJusquau)],
+        ],
+      },
+      { type: "paragraphe", texte: typographie("Pour l’accepter, rien à imprimer : relisez-le en ligne et donnez votre accord en un clic.") },
+      { type: "bouton", libelle: "Lire et accepter le devis", url: d.url },
+      { type: "paragraphe", texte: typographie("Une question, un point à ajuster ? Répondez simplement à cet email.") },
+    ],
+    mentions: [
+      ...(d.exemple ? [typographie(MENTION_EXEMPLE)] : []),
+      typographie(
+        `Vous recevez cet email parce qu’ANM Consulting a établi ce devis pour ${d.client}. Le lien est personnel : il permet d’accepter le devis au nom de ${d.client}. Ne le transférez qu’à une personne habilitée à l’engager.`,
+      ),
+      `Politique de confidentialité${NB}: ${urlSite("/confidentialite")}`,
+    ],
+  });
+  return { to: d.email, subject: objetDevis(d, `Votre devis ${d.numero} · ANM Consulting`), html, text, attachments: [d.pdf] };
+};
+
+export interface AccordDevis {
+  nom: string;
+  fonction: string | null;
+  /** Instant de l’accord (ISO). */
+  le: string;
+}
+
+const signataire = (a: AccordDevis) => `${a.nom}${a.fonction ? `, ${a.fonction}` : ""}`;
+
+/** Notification interne à contact@anm-consulting.fr : un client vient d’accepter un devis en ligne. */
+export const notificationAccordDevis = (d: DevisEmail & { id: string; accord: AccordDevis; emailClient: string | null }): Email => {
+  const { html, text } = composer({
+    apercu: typographie(`${signataire(d.accord)} a donné son accord en ligne. Il reste à créer la mission.`),
+    surtitre: "Accord du client",
+    titre: typographie(`${d.client} accepte le devis ${d.numero}.`),
+    blocs: [
+      {
+        type: "champs",
+        lignes: [
+          ["Signataire", signataire(d.accord)],
+          ["Date", fmtDateHeure(d.accord.le)],
+          ["Prestation", d.intitule],
+          ["Montant accepté", montantDevis(d)],
+          ["Email du client", d.emailClient],
+        ],
+      },
+      { type: "bouton", libelle: "Créer la mission et le contrat", url: urlSite(`/admin/commercial/devis/${d.id}`) },
+      {
+        type: "paragraphe",
+        texte: "L’accord est enregistré avec le devis, qui ne se modifie plus. Rien n’est créé tant que vous ne l’avez pas confirmé dans l’outil.",
+        discret: true,
+      },
+    ],
+    mentions: [
+      ...(d.exemple ? [typographie(MENTION_EXEMPLE)] : []),
+      "Notification interne envoyée par le site quand un client accepte un devis en ligne.",
+    ],
+  });
+  return {
+    to: ADRESSE_CONTACT,
+    ...(d.emailClient ? { replyTo: d.emailClient } : {}),
+    subject: objetDevis(d, `Devis ${d.numero} accepté${NB}: ${d.client}`),
+    html,
+    text,
+  };
+};
+
+/** Confirmation au client : son accord est enregistré, le devis qui le mentionne est joint. */
+export const confirmationAccordDevis = (d: DevisEmail & { email: string; accord: AccordDevis; pdf: PieceJointe }): Email => {
+  const { html, text } = composer({
+    apercu: typographie(`Votre accord sur le devis n° ${d.numero} est enregistré. Le devis qui le mentionne est en pièce jointe.`),
+    surtitre: typographie(`Devis n° ${d.numero}`),
+    titre: "Votre accord est enregistré.",
+    blocs: [
+      { type: "paragraphe", texte: `Bonjour ${d.accord.nom},` },
+      {
+        type: "paragraphe",
+        texte: typographie(
+          `Nous avons bien reçu votre accord sur le devis n° ${d.numero}, donné le ${fmtDateHeure(d.accord.le)} pour ${d.client}. Vous trouverez en pièce jointe le devis, qui porte la mention de cet accord.`,
+        ),
+      },
+      {
+        type: "champs",
+        lignes: [
+          ["Prestation", d.intitule],
+          ["Montant", montantDevis(d)],
+          ["Conditions", conditionsDevis(d)],
+        ],
+      },
+      {
+        type: "paragraphe",
+        texte: typographie("La suite : nous vous adressons le contrat de prestation de services, qui reprend ces conditions, puis nous arrêtons ensemble le calendrier de la mission."),
+      },
+      { type: "paragraphe", texte: typographie("Une question ? Répondez simplement à cet email.") },
+    ],
+    mentions: [
+      ...(d.exemple ? [typographie(MENTION_EXEMPLE)] : []),
+      typographie(
+        "Vous recevez cet email parce qu’un devis d’ANM Consulting vient d’être accepté en ligne à votre nom. Si vous n’êtes pas à l’origine de cet accord, répondez à cet email sans attendre.",
+      ),
+      `Politique de confidentialité${NB}: ${urlSite("/confidentialite")}`,
+    ],
+  });
+  return { to: d.email, subject: objetDevis(d, `Votre accord est enregistré · devis ${d.numero}`), html, text, attachments: [d.pdf] };
 };

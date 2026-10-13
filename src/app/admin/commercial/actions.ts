@@ -6,8 +6,12 @@ import { exigerRole } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 import { LIVRABLES } from "@/content/contrat";
 import { OFFRES, chiffrer } from "@/content/offres";
-import { aujourdHui, lireCabinet } from "@/lib/facturation/donnees";
-import { calculerDevis, devisPropose, normaliserDevis, type Demande, type Devis } from "@/lib/facturation/devis";
+import { envoyerEmail } from "@/lib/email/envoi";
+import { emailDevis } from "@/lib/email/messages";
+import { aujourdHui, lireCabinet, type ClientFiche } from "@/lib/facturation/donnees";
+import { ADRESSE_FICTIVE, calculerDevis, devisPropose, normaliserDevis, type Demande, type Devis } from "@/lib/facturation/devis";
+import { urlDevisPublic } from "@/lib/facturation/devis-public";
+import { nomPdfDevis, produirePdfDevis } from "@/lib/facturation/pdf-devis";
 import { estInscription } from "@/lib/vitrine/lead";
 import { completerDepuisAnnuaire, type EtatFormulaire } from "@/app/admin/missions/[id]/(outil)/contrat/actions";
 
@@ -107,8 +111,10 @@ export const classerDemande = async (demandeId: string, statut: Demande["statut"
 export const enregistrerDevis = async (devisId: string, _e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
   await exigerRole("consultant");
   const supabase = await createClient();
-  const { data: actuel } = await supabase.from("devis").select("statut").eq("id", devisId).single();
+  const { data: actuel } = await supabase.from("devis").select("*").eq("id", devisId).single();
   if (actuel?.statut === "accepte") return { ok: false, message: "Ce devis est accepté : il ne se modifie plus. Le contrat se modifie depuis la mission." };
+  // L'accord porte sur ce que le client a lu : le devis ne bouge plus.
+  if (actuel?.accord_le) return { ok: false, message: "Le client a donné son accord sur ce devis : il ne se modifie plus. Créez la mission, puis ajustez le contrat." };
   const prestation = texte(fd, "prestation") ?? "audit_360";
   if (!OFFRES.some((o) => o.id === prestation)) return { ok: false, message: "Prestation inconnue." };
   const intitule = texte(fd, "intitule");
@@ -154,6 +160,86 @@ export const enregistrerDevis = async (devisId: string, _e: EtatFormulaire, fd: 
   return { ok: true, message: "Devis enregistré. Le PDF est à jour." };
 };
 
+/** Format d'une adresse email, sans prétendre vérifier qu'elle existe. */
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/**
+ * Le devis part chez le client : un email d'ANM, le PDF en pièce jointe, et le lien où il le relit
+ * et l'accepte en ligne. Le devis ne passe « envoyé » que si l'email est réellement parti. Un devis
+ * déjà envoyé peut repartir (autre adresse, version corrigée).
+ */
+export const envoyerDevis = async (devisId: string, _e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
+  await exigerRole("consultant");
+  const email = (texte(fd, "email") ?? "").toLowerCase();
+  if (!EMAIL.test(email)) return { ok: false, message: "Indiquez l’adresse email du client." };
+  if (ADRESSE_FICTIVE.test(email)) return { ok: false, message: "Cette adresse est fictive : aucun email ne peut y arriver. Indiquez une vraie adresse (la vôtre, pour essayer)." };
+  const supabase = await createClient();
+  const { data } = await supabase.from("devis").select("*, organisation:organizations (*)").eq("id", devisId).maybeSingle();
+  if (!data) return { ok: false, message: "Devis introuvable." };
+  const d = normaliserDevis(data as Devis);
+  const org = data.organisation as ClientFiche;
+  if (d.statut === "accepte") return { ok: false, message: "Ce devis est accepté : il n’y a plus rien à envoyer. Le contrat s’envoie depuis la mission." };
+  if (d.statut === "refuse") return { ok: false, message: "Ce devis est refusé : remettez-le en brouillon avant de l’envoyer." };
+  if (d.accord_le) return { ok: false, message: "Le client a déjà donné son accord sur ce devis : créez la mission." };
+  if (!d.jeton) return { ok: false, message: "L’envoi par email n’est pas encore activé sur la base (migration 0047). Prévenez Merwan." };
+  if (d.total_ht <= 0) return { ok: false, message: "Ce devis est à 0 € : saisissez son prix et enregistrez-le avant de l’envoyer." };
+  if (d.valable_jusquau < aujourdHui()) return { ok: false, message: "La validité de ce devis est dépassée : repoussez « Valable jusqu’au », enregistrez, puis envoyez." };
+
+  const cabinet = await lireCabinet();
+  let pdf: Buffer;
+  try {
+    pdf = await produirePdfDevis(d, cabinet, org);
+  } catch (e) {
+    console.error("[devis] PDF", (e as Error).stack);
+    return { ok: false, message: "Le PDF du devis n’a pas pu être produit : rien n’est parti. Réessayez ; si l’erreur persiste, prévenez Merwan." };
+  }
+
+  // Le devis passe « envoyé » avant le départ de l'email : le lien doit répondre dès qu'il arrive.
+  // Si l'email ne part pas, tout revient à l'état d'avant.
+  const avant = { statut: d.statut, envoye_le: d.envoye_le, destinataire_email: d.destinataire_email, destinataire_nom: d.destinataire_nom, email_envoye_le: d.email_envoye_le };
+  const nom = texte(fd, "nom");
+  const { data: marque } = await supabase
+    .from("devis")
+    .update({ statut: "envoye", envoye_le: aujourdHui(), destinataire_email: email, destinataire_nom: nom, email_envoye_le: new Date().toISOString() })
+    .eq("id", devisId)
+    .in("statut", ["brouillon", "envoye"])
+    .is("accord_le", null)
+    .select("id");
+  if (!marque?.length) return { ok: false, message: "Le devis n’a pas pu être marqué comme envoyé : rien n’est parti. Rechargez la page et réessayez." };
+
+  const { ok } = await envoyerEmail(
+    emailDevis({
+      email,
+      nom,
+      numero: d.numero,
+      client: org.name,
+      intitule: d.intitule,
+      totalHT: d.total_ht,
+      totalTTC: d.total_ttc,
+      franchise: d.taux_tva === 0,
+      mensuel: d.prestation === "suivi_conformite",
+      acomptePct: d.acompte_pct,
+      exemple: Boolean(org.exemple),
+      valableJusquau: d.valable_jusquau,
+      url: urlDevisPublic(d.jeton),
+      mot: texte(fd, "mot"),
+      pdf: { filename: nomPdfDevis(d.numero, org.name), content: pdf },
+    }),
+    `devis ${d.numero}`,
+  );
+  if (!ok) {
+    await supabase.from("devis").update(avant).eq("id", devisId);
+    revalidatePath(pageDevis(devisId));
+    return {
+      ok: false,
+      message: `L’email n’est pas parti : le devis reste ${avant.statut === "envoye" ? "tel qu’il était" : "en brouillon"}. Réessayez dans un instant ; si cela persiste, prévenez Merwan. En attendant, vous pouvez ouvrir le PDF et l’envoyer depuis votre messagerie.`,
+    };
+  }
+  revalidatePath(pageDevis(devisId));
+  revalidatePath(COMMERCIAL);
+  return { ok: true, message: `Devis envoyé à ${email}, PDF joint.` };
+};
+
 export const changerStatutDevis = async (devisId: string, statut: "brouillon" | "envoye" | "refuse"): Promise<void> => {
   await exigerRole("consultant");
   const supabase = await createClient();
@@ -165,6 +251,15 @@ export const changerStatutDevis = async (devisId: string, statut: "brouillon" | 
     .select("lead_id")
     .single();
   if (statut === "refuse" && data?.lead_id) await supabase.from("leads").update({ statut: "sans_suite" }).eq("id", data.lead_id);
+  // Un devis repris en brouillon sera modifié : l'accord donné sur l'ancienne version ne vaut plus.
+  // (Requête à part : sans la migration 0047, ces colonnes n'existent pas et le statut doit changer quand même.)
+  if (statut === "brouillon") {
+    await supabase
+      .from("devis")
+      .update({ accord_le: null, accord_nom: null, accord_fonction: null, accord_ip: null, accord_agent: null, accord_total_ttc: null })
+      .eq("id", devisId)
+      .eq("statut", "brouillon");
+  }
   revalidatePath(pageDevis(devisId));
   revalidatePath(COMMERCIAL);
 };
@@ -179,8 +274,9 @@ const referenceSuivante = async () => {
 };
 
 /**
- * Le client a signé le devis : la mission est créée, son contrat pré-rempli avec tout ce que le
- * devis contient (prestation, prix, acompte, calendrier, livrables). Sofia arrive sur le contrat.
+ * Le client a accepté le devis (en ligne, ou signé sur papier) : la mission est créée, son contrat
+ * pré-rempli avec tout ce que le devis contient (prestation, prix, acompte, calendrier, livrables).
+ * Sofia arrive sur le contrat.
  */
 export const accepterDevis = async (devisId: string): Promise<void> => {
   await exigerRole("consultant");
@@ -191,11 +287,13 @@ export const accepterDevis = async (devisId: string): Promise<void> => {
   // Seul un devis envoyé s'accepte : un brouillon n'a jamais été remis au client, il n'a donc pas pu
   // revenir signé « Bon pour accord » ; un devis refusé repasse d'abord en brouillon.
   if (d.statut !== "envoye") redirect(pageDevis(devisId));
+  // La date d'acceptation est celle de l'accord du client, s'il l'a donné en ligne.
+  const accepteLe = d.accord_le ? new Date(d.accord_le).toLocaleDateString("sv-SE", { timeZone: "Europe/Paris" }) : aujourdHui();
   // Le devis est réservé avant de créer quoi que ce soit : un second envoi (double toucher, deux
   // onglets) ne trouve plus de devis « envoyé » et ne crée pas une seconde mission.
   const { data: reserve } = await supabase
     .from("devis")
-    .update({ statut: "accepte", accepte_le: aujourdHui() })
+    .update({ statut: "accepte", accepte_le: accepteLe })
     .eq("id", devisId)
     .eq("statut", "envoye")
     .is("mission_id", null)

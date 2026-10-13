@@ -42,8 +42,8 @@ Points à y traiter :
 ## 3. Registre des traitements
 
 Le registre est tenu dans `src/content/legal.ts` (constante `TRAITEMENTS`) et affiché sur la page
-de confidentialité. Quatre traitements : prospects, comptes du portail, dossiers de mission,
-suivi de formation.
+de confidentialité. Cinq traitements : prospects, devis et acceptation en ligne, comptes du
+portail, dossiers de mission, suivi de formation.
 
 Attention à deux durées de conservation :
 

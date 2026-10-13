@@ -221,7 +221,9 @@ export const contratPropose = (d: DonneesFacturation): Omit<Contrat, "id" | "mis
 
 const euros = (n: number) => fmtEuros(n).replace(",00", "");
 
-export const partieCabinet = (c: Cabinet): PartieFacture => ({
+export const partieCabinet = (
+  c: Pick<Cabinet, "raison_sociale" | "forme_juridique" | "capital" | "adresse" | "code_postal" | "ville" | "siren" | "rcs_ville" | "franchise_tva">,
+): PartieFacture => ({
   nom: c.raison_sociale,
   lignes: [c.adresse, [c.code_postal, c.ville].filter(Boolean).join(" ")].filter(Boolean) as string[],
   siren: c.siren,
@@ -234,7 +236,7 @@ export const partieCabinet = (c: Cabinet): PartieFacture => ({
     .join(" · "),
 });
 
-export const partieClient = (o: ClientFiche): PartieFacture => ({
+export const partieClient = (o: Pick<ClientFiche, "name" | "adresse" | "code_postal" | "ville" | "siren">): PartieFacture => ({
   nom: o.name,
   lignes: [o.adresse, [o.code_postal, o.ville].filter(Boolean).join(" ")].filter(Boolean) as string[],
   siren: o.siren,

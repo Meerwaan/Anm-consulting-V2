@@ -18,6 +18,11 @@ const TAILLE_LOT = 100;
 export const EXPEDITEUR = "ANM Consulting <contact@anm-consulting.fr>";
 export const ADRESSE_CONTACT = "contact@anm-consulting.fr";
 
+export interface PieceJointe {
+  filename: string;
+  content: Buffer;
+}
+
 export interface Email {
   to: string | string[];
   subject: string;
@@ -26,6 +31,8 @@ export interface Email {
   /** Par défaut contact@anm-consulting.fr : une réponse arrive dans la boîte d’ANM. */
   replyTo?: string;
   headers?: Record<string, string>;
+  /** Pièces jointes (un devis en PDF) : Resend les attend en base 64. */
+  attachments?: PieceJointe[];
 }
 
 export interface ResultatEnvoi {
@@ -48,6 +55,7 @@ const corps = (e: Email) => ({
   text: e.text,
   reply_to: e.replyTo ?? ADRESSE_CONTACT,
   ...(e.headers ? { headers: e.headers } : {}),
+  ...(e.attachments?.length ? { attachments: e.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64") })) } : {}),
 });
 
 const appeler = async (chemin: string, charge: unknown, contexte: string): Promise<boolean> => {

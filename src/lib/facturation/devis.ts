@@ -63,7 +63,45 @@ export interface Devis {
   livrables: string[];
   controle_organisme: string | null;
   controle_echeance: string | null;
+  maj_le: string;
+  /** Secret du lien /devis/<jeton> que reçoit le client (migration 0047). */
+  jeton: string | null;
+  destinataire_email: string | null;
+  destinataire_nom: string | null;
+  /** Dernier envoi par email depuis l'outil ; null si le devis a été remis autrement. */
+  email_envoye_le: string | null;
+  /** « Bon pour accord » donné en ligne par le client : qui, quand, d'où, sur quel montant. */
+  accord_le: string | null;
+  accord_nom: string | null;
+  accord_fonction: string | null;
+  accord_ip: string | null;
+  accord_total_ttc: number | null;
 }
+
+/** Ce que le PDF et la page du client montrent d'un devis. */
+export type DevisDocument = Pick<
+  Devis,
+  | "numero"
+  | "cree_le"
+  | "valable_jusquau"
+  | "prestation"
+  | "intitule"
+  | "description"
+  | "lignes"
+  | "total_ht"
+  | "taux_tva"
+  | "total_ttc"
+  | "acompte_pct"
+  | "calendrier"
+  | "livrables"
+  | "accord_le"
+  | "accord_nom"
+  | "accord_fonction"
+  | "accord_total_ttc"
+>;
+
+/** Adresses réservées aux exemples (RFC 2606) : aucun email n'y arrive, et un rejet abîme la réputation d'envoi. */
+export const ADRESSE_FICTIVE = /(\.(invalid|test|example|localhost)|@example\.(com|org|net))$/;
 
 export const LIBELLE_SITUATION = Object.fromEntries(SITUATIONS_CONTACT.map((s) => [s.valeur, s.label])) as Record<string, string>;
 
@@ -74,6 +112,11 @@ export const LIBELLE_STATUT_DEVIS: Record<Devis["statut"], string> = {
   refuse: "Refusé",
 };
 
+/** Le client a donné son accord en ligne, et Sofia n'a pas encore créé la mission. */
+export const accordAConfirmer = (d: Pick<Devis, "statut" | "accord_le">) => d.statut === "envoye" && Boolean(d.accord_le);
+
+export const libelleStatutDevis = (d: Pick<Devis, "statut" | "accord_le">) => (accordAConfirmer(d) ? "Accord du client reçu" : LIBELLE_STATUT_DEVIS[d.statut]);
+
 export const normaliserDevis = (d: Devis): Devis => ({
   ...d,
   base_ht: Number(d.base_ht),
@@ -83,6 +126,16 @@ export const normaliserDevis = (d: Devis): Devis => ({
   total_ht: Number(d.total_ht),
   taux_tva: Number(d.taux_tva),
   total_ttc: Number(d.total_ttc),
+  // Colonnes de la migration 0047 : absentes tant qu'elle n'est pas appliquée, donc ramenées à null.
+  jeton: d.jeton ?? null,
+  destinataire_email: d.destinataire_email ?? null,
+  destinataire_nom: d.destinataire_nom ?? null,
+  email_envoye_le: d.email_envoye_le ?? null,
+  accord_le: d.accord_le ?? null,
+  accord_nom: d.accord_nom ?? null,
+  accord_fonction: d.accord_fonction ?? null,
+  accord_ip: d.accord_ip ?? null,
+  accord_total_ttc: d.accord_total_ttc == null ? null : Number(d.accord_total_ttc),
 });
 
 export { calculerDevis, type ParametresDevis } from "./calcul-devis";
