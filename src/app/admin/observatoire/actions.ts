@@ -27,7 +27,7 @@ const revaliderSite = (slugs: (string | null | undefined)[], territoires: (strin
  */
 export const enregistrerArticle = async (_e: EtatFormulaire, fd: FormData): Promise<EtatFormulaire> => {
   await exigerRole("consultant");
-  const id = texte(fd, "id");
+  const id = texte(fd, "article_id");
   const intention = String(fd.get("intention") ?? "enregistrer");
 
   const type = texte(fd, "type") === "dossier" ? "dossier" : "fiche";
@@ -100,6 +100,9 @@ export const enregistrerArticle = async (_e: EtatFormulaire, fd: FormData): Prom
     ? await supabase.from("observatoire_articles").update(ligne).eq("id", id).select("id").single()
     : await supabase.from("observatoire_articles").insert(ligne).select("id").single();
   if (error) {
+    // La cause exacte n'est jamais montrée à l'écran, mais elle est tracée : sans elle, un échec
+    // de publication est indébogable (c'est ce qui a manqué en octobre 2026).
+    console.error("[observatoire] enregistrement refusé", { intention, statut, nouveau: !id, code: error.code, message: error.message, details: error.details, hint: error.hint });
     if (error.code === "23505") return { ok: false, message: "Cette adresse est déjà prise par une autre publication : modifiez-la." };
     if (error.code === "23514") return { ok: false, message: "La base a refusé l’enregistrement : une information obligatoire manque ou n’est pas au bon format." };
     return { ok: false, message: "L’article n’a pas pu être enregistré. Réessayez." };

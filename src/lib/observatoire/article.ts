@@ -43,6 +43,44 @@ export interface Article {
   updated_at: string;
 }
 
+/** Ce que le formulaire édite : l’article sans ses dates techniques. */
+export type Brouillon = Omit<Article, "id" | "created_at" | "updated_at" | "publie_le" | "mis_a_jour_le"> & { id: string | null };
+
+/**
+ * Le formulaire vide d’une nouvelle publication. Ici et non dans le formulaire : la page serveur
+ * l’appelle, et un module « use client » ne peut pas être appelé depuis le serveur.
+ */
+export const brouillonVide = (type: TypeArticle): Brouillon => ({
+  id: null,
+  slug: "",
+  statut: "brouillon",
+  type,
+  territoire: "cnaps",
+  titre: "",
+  titre_seo: null,
+  meta_description: null,
+  accroche: null,
+  faits: null,
+  reproches: null,
+  defense: null,
+  decision: null,
+  point_anm: null,
+  question: null,
+  juridiction: null,
+  decision_date: null,
+  decision_numero: null,
+  decision_url: null,
+  stade_procedure: null,
+  stade_precision: null,
+  corps: null,
+  sources: null,
+  q_concerne_dirigeant: false,
+  q_source_verifiable: false,
+  q_analyse: false,
+  q_sans_methode: false,
+  q_utilite_anm: false,
+});
+
 export const COLONNES_ARTICLE =
   "id, slug, statut, type, territoire, titre, titre_seo, meta_description, accroche, faits, reproches, defense, decision, point_anm, question, juridiction, decision_date, decision_numero, decision_url, stade_procedure, stade_precision, corps, sources, q_concerne_dirigeant, q_source_verifiable, q_analyse, q_sans_methode, q_utilite_anm, publie_le, mis_a_jour_le, created_at, updated_at";
 

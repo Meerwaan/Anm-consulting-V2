@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { exigerRole } from "@/lib/supabase/session";
-import FormArticle, { brouillonVide } from "@/components/observatoire/FormArticle";
+import FormArticle from "@/components/observatoire/FormArticle";
+import { brouillonVide } from "@/lib/observatoire/article";
 
 export const metadata: Metadata = { title: "Nouvelle publication — Observatoire", robots: { index: false } };
 

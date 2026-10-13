@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { startTransition, useActionState, useMemo, useState } from "react";
 import Link from "next/link";
 import { enregistrerArticle } from "@/app/admin/observatoire/actions";
 import { Message } from "@/components/facturation/FicheClient";
@@ -14,44 +14,9 @@ import {
   slugifier,
   slugValide,
   titreSeo,
-  type Article,
-  type TypeArticle,
+  type Brouillon,
 } from "@/lib/observatoire/article";
 import { typographie } from "@/lib/observatoire/typographie";
-
-/** Ce que le formulaire édite : l’article sans ses dates techniques. */
-export type Brouillon = Omit<Article, "id" | "created_at" | "updated_at" | "publie_le" | "mis_a_jour_le"> & { id: string | null };
-
-export const brouillonVide = (type: TypeArticle): Brouillon => ({
-  id: null,
-  slug: "",
-  statut: "brouillon",
-  type,
-  territoire: "cnaps",
-  titre: "",
-  titre_seo: null,
-  meta_description: null,
-  accroche: null,
-  faits: null,
-  reproches: null,
-  defense: null,
-  decision: null,
-  point_anm: null,
-  question: null,
-  juridiction: null,
-  decision_date: null,
-  decision_numero: null,
-  decision_url: null,
-  stade_procedure: null,
-  stade_precision: null,
-  corps: null,
-  sources: null,
-  q_concerne_dirigeant: false,
-  q_source_verifiable: false,
-  q_analyse: false,
-  q_sans_methode: false,
-  q_utilite_anm: false,
-});
 
 const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://anm-consulting.fr").replace(/^https?:\/\//, "").replace(/\/$/, "");
 
@@ -134,14 +99,43 @@ export default function FormArticle({ initial, enLigne }: { initial: Brouillon; 
   const surTexte = (cle: CleTexte) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     maj(cle, (e.target.value || null) as never);
 
+  // « Mise à jour de fond » ne vaut que pour un enregistrement : la case se décoche dès qu’il a réussi,
+  // sinon la correction d’une coquille, juste après, serait signalée aux lecteurs à son tour.
+  const [signalerMaj, setSignalerMaj] = useState(false);
+  const [etatTraite, setEtatTraite] = useState(etat);
+  if (etat !== etatTraite) {
+    setEtatTraite(etat);
+    if (etat.ok) setSignalerMaj(false);
+  }
+
+  // L’envoi passe par `onSubmit` : laissé à `action` seul, React remet le formulaire à zéro après
+  // chaque réponse du serveur, et les cases cochées ou les listes revenaient à l’écran à leur valeur
+  // d’origine alors que l’encadré disait « Tout est en place ». Le bouton cliqué est ajouté ici, à
+  // la main. `action` reste sur le <form> pour un clic qui arriverait avant le chargement du script.
+  const soumettre = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const bouton = (e.nativeEvent as SubmitEvent).submitter;
+    if (bouton instanceof HTMLButtonElement && bouton.name) fd.set(bouton.name, bouton.value);
+    startTransition(() => action(fd));
+  };
+
+  // La touche Entrée dans un champ d’une ligne enverrait le formulaire par son premier bouton,
+  // « Publier » : on ne publie jamais au clavier, seulement en touchant le bouton.
+  const sansEnvoiAuClavier = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === "Enter" && e.target instanceof HTMLInputElement) e.preventDefault();
+  };
+
   const manques = useMemo(() => bloquantsPublication({ ...a, titre: a.titre ?? "" }), [a]);
   const titreGoogle = titreSeo({ titre: a.titre || "Titre de la publication", titre_seo: a.titre_seo });
   const descriptionGoogle = descriptionSeo(a) || "L’accroche apparaîtra ici.";
   const longueurDescription = (a.meta_description?.trim() || a.accroche?.trim() || "").replace(/\s+/g, " ").length;
 
   return (
-    <form action={action} className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-14">
-      <input type="hidden" name="id" value={a.id ?? ""} />
+    <form action={action} onSubmit={soumettre} onKeyDown={sansEnvoiAuClavier} className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-14">
+      {/* Surtout pas `name="id"` : dans le navigateur, `form.id` désignerait alors ce champ, et React
+          perdrait le bouton cliqué (« Publier » et « Retirer du site » passaient pour « Enregistrer »). */}
+      <input type="hidden" name="article_id" value={a.id ?? ""} />
       <input type="hidden" name="type" value={a.type} />
 
       <div className="flex min-w-0 flex-col gap-12">
@@ -390,7 +384,14 @@ export default function FormArticle({ initial, enLigne }: { initial: Brouillon; 
           )}
           {enLigne ? (
             <label className="flex items-start gap-3 text-meta text-encre-2">
-              <input type="checkbox" name="signaler_maj" value="oui" className="mt-0.5 size-5 shrink-0 accent-vert" />
+              <input
+                type="checkbox"
+                name="signaler_maj"
+                value="oui"
+                checked={signalerMaj}
+                onChange={(e) => setSignalerMaj(e.target.checked)}
+                className="mt-0.5 size-5 shrink-0 accent-vert"
+              />
               <span>{typographie("Mise à jour de fond : afficher « Mis à jour le » aux lecteurs (pas pour une coquille).")}</span>
             </label>
           ) : null}
